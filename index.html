@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WHY3K</title>
+<meta name="description" content="WHY3K — official links. Music, plugins, and everything else.">
+<link rel="canonical" href="https://why3k.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WHY3K">
+<meta property="og:title" content="WHY3K">
+<meta property="og:description" content="Official links — music, plugins, and everything else.">
+<meta property="og:url" content="https://why3k.github.io/">
+<meta property="og:image" content="https://why3k.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #111114;
+    --ink-soft: #8a8a95;
+    --line: #e9e9ee;
+    --mono: "SFMono-Regular", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :focus { outline:none; }
+  :focus-visible { outline:2px solid rgba(17,17,20,.4); outline-offset:3px; border-radius:10px; }
+
+  html, body { height:100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+                 "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 460px;
+    padding: 0 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 52px;
+  }
+
+  /* ---- ワードマーク ---- */
+  .mark { text-align: center; user-select: none; }
+  .wordmark {
+    position: relative;
+    display: inline-block;
+    font-size: clamp(44px, 12vw, 64px);
+    font-weight: 800;
+    letter-spacing: .32em;
+    margin-right: -.32em; /* 字間ぶんの右余白を相殺して中央に */
+    line-height: 1;
+  }
+  /* グリッチ（モノクロ・時々だけ、ほんの一瞬） */
+  .wordmark::before,
+  .wordmark::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wordmark::before { animation: glitchA 7s infinite steps(1); }
+    .wordmark::after  { animation: glitchB 7s infinite steps(1); }
+  }
+  @keyframes glitchA {
+    0%, 91.9%, 94.1%, 100% { opacity: 0; }
+    92%   { opacity:.55; transform: translate(3px, 0);  clip-path: inset(12% 0 62% 0); }
+    92.7% { opacity:.55; transform: translate(-2px, 0); clip-path: inset(55% 0 18% 0); }
+    93.4% { opacity:.55; transform: translate(2px, 0);  clip-path: inset(30% 0 44% 0); }
+  }
+  @keyframes glitchB {
+    0%, 91.9%, 94.1%, 100% { opacity: 0; }
+    92.3% { opacity:.4; transform: translate(-3px, 0); clip-path: inset(66% 0 8% 0); }
+    93%   { opacity:.4; transform: translate(2px, 0);  clip-path: inset(4% 0 78% 0); }
+    93.7% { opacity:.4; transform: translate(-2px, 0); clip-path: inset(40% 0 36% 0); }
+  }
+  .mark .dots {
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .6em;
+    color: var(--ink-soft);
+  }
+
+  /* ---- リンク ---- */
+  .links { display: flex; flex-direction: column; gap: 12px; }
+  .link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 56px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    transition: transform .14s ease, border-color .15s, box-shadow .15s, background .15s;
+    background: var(--bg);
+  }
+  .link:hover {
+    transform: translateY(-2px);
+    border-color: #d2d2da;
+    box-shadow: 0 14px 30px -18px rgba(0,0,0,.22);
+  }
+  .link:active { transform: translateY(0) scale(.985); }
+
+  /* PLUGINS＝主役リンク */
+  .link.primary {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .link.primary:hover { box-shadow: 0 16px 34px -16px rgba(0,0,0,.4); }
+  .link.primary .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: #33d15e;
+  }
+
+  /* URL未設定（準備中）リンク */
+  .link.soon {
+    pointer-events: none;
+    color: #c3c3cc;
+    border-color: #f0f0f4;
+  }
+  .link.soon .soon-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .18em;
+    color: #d3d3db;
+  }
+
+  footer {
+    padding: 28px 0 34px;
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="mark">
+    <h1 class="wordmark" data-text="WHY3K">WHY3K</h1>
+    <div class="dots" aria-hidden="true">・・・</div>
+  </div>
+
+  <nav class="links" aria-label="WHY3K links">
+    <!-- ↓ URLが決まったら href="#" を差し替えて class="link soon" → class="link" にする -->
+
+    <!-- TODO: X のURL -->
+    <a class="link soon" href="#" aria-disabled="true">X <span class="soon-tag">SOON</span></a>
+
+    <!-- TODO: Instagram のURL -->
+    <a class="link soon" href="#" aria-disabled="true">Instagram <span class="soon-tag">SOON</span></a>
+
+    <!-- TODO: TikTok のURL -->
+    <a class="link soon" href="#" aria-disabled="true">TikTok <span class="soon-tag">SOON</span></a>
+
+    <!-- TODO: Spotify（アーティストページ）のURL -->
+    <a class="link soon" href="#" aria-disabled="true">Spotify <span class="soon-tag">SOON</span></a>
+
+    <!-- TODO: YouTube のURL -->
+    <a class="link soon" href="#" aria-disabled="true">YouTube <span class="soon-tag">SOON</span></a>
+
+    <!-- TODO: SoundCloud のURL -->
+    <a class="link soon" href="#" aria-disabled="true">SoundCloud <span class="soon-tag">SOON</span></a>
+
+    <!-- PLUGINS（稼働中） -->
+    <a class="link primary" href="https://why3k.github.io/why3k-plugins/">
+      WHY3K PLUGINS <span class="tag">FREE</span>
+    </a>
+  </nav>
+</main>
+
+<footer>© <span id="yr"></span> WHY3K</footer>
+
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
