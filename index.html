@@ -16,7 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tourney:wght@700;800;900&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --paper: #fbfbfa;
@@ -27,7 +27,7 @@
     --red: #d21f12;
     --blue: rgba(132,162,214,.14);
     --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
-    --disp: "Unbounded", sans-serif;
+    --disp: "Tourney", sans-serif;
     --tech: "Chakra Petch", -apple-system, sans-serif;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -109,6 +109,26 @@
   .cross { position:absolute; width:9px; height:9px; }
   .cross::before { content:""; position:absolute; left:4px; top:0; width:1px; height:9px; background:#b3b3bb; }
   .cross::after  { content:""; position:absolute; left:0; top:4px; width:9px; height:1px; background:#b3b3bb; }
+  .sq { position:absolute; width:5px; height:5px; background:var(--ink); }
+  .sq.s2 { width:8px; height:8px; }
+  .sq.hollow { background:transparent; border:1px solid var(--ink); }
+  .num { position:absolute; font-family:var(--mono); font-size:9px; color:#b3b3bb; letter-spacing:.1em; }
+  .coord.rot { transform: rotate(90deg); transform-origin: left top; }
+
+  /* ページ全体を横切る細線（刃） */
+  .blades { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .blades svg { width:100%; height:100%; }
+
+  /* 左端の定規 */
+  .ruler {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 26px; z-index: 1;
+    border-right: 1px solid #dcdce2;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 19px, #c9c9d0 19px 20px) right/6px 100% no-repeat,
+      repeating-linear-gradient(to bottom, transparent 0 99px, #9a9aa3 99px 100px) right/12px 100% no-repeat;
+    pointer-events: none;
+  }
+  .ruler b { position:absolute; right:2px; font-family:var(--mono); font-size:7px; font-weight:400; color:#b3b3bb; transform:rotate(90deg); transform-origin:right top; }
 
   @media (prefers-reduced-motion: no-preference) {
     .flicker { animation: flick 7s infinite steps(1); }
@@ -154,8 +174,8 @@
     display: inline-block;
     font-family: var(--disp);
     font-weight: 900;
-    font-size: clamp(30px, 8.6vw, 52px);
-    letter-spacing: .02em;
+    font-size: clamp(38px, 10.5vw, 66px);
+    letter-spacing: .05em;
     line-height: 1.15;
     color: var(--ink);
     background: var(--paper);
@@ -272,6 +292,27 @@
 <body>
 
 <span class="reg tl"></span><span class="reg tr"></span><span class="reg bl"></span><span class="reg br"></span>
+
+<!-- ===== 全面を横切る細線（刃） ===== -->
+<div class="blades" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
+    <path d="M -60 880 C 380 520, 620 700, 760 380 S 1080 -40, 1500 -80" stroke="#131316" stroke-width="1"  opacity=".10"/>
+    <path d="M -80 620 C 420 640, 700 300, 860 260 S 1240 140, 1520 240" stroke="#131316" stroke-width=".8" opacity=".08"/>
+    <path d="M 200 940 C 480 560, 520 420, 700 300 S 900 60, 980 -60"    stroke="#131316" stroke-width="1.4" opacity=".12"/>
+    <path d="M -40 200 C 300 260, 640 520, 900 560 S 1320 700, 1500 660" stroke="#131316" stroke-width=".7" opacity=".07"/>
+    <path d="M 480 -60 C 560 240, 700 520, 640 940"                      stroke="#131316" stroke-width=".9" opacity=".09"/>
+    <path d="M -60 420 C 360 400, 900 180, 1500 420"                     stroke="#d21f12" stroke-width=".9" opacity=".14" stroke-dasharray="3 8"/>
+    <path d="M 1500 780 C 1000 760, 760 560, 300 780"                    stroke="#d21f12" stroke-width=".8" opacity=".10" stroke-dasharray="2 7"/>
+  </svg>
+</div>
+
+<!-- ===== 左端の定規 ===== -->
+<div class="ruler hide-m" aria-hidden="true">
+  <b style="top:104px;">100</b>
+  <b style="top:304px;">300</b>
+  <b style="top:504px;">500</b>
+  <b style="top:704px;">700</b>
+</div>
 <div class="doc-head"><span class="bar"></span> index — 01</div>
 <div class="head-bar2 hide-m" aria-hidden="true"></div>
 <div class="side-cap">WHY3K — official index</div>
@@ -320,6 +361,51 @@ noise ....... floor</div>
   <div class="datablock hide-m" style="bottom:28%; left:8%;">rev 1.1
 axis  y
 mode  idx</div>
+
+  <!-- ── 増量ぶん ── -->
+  <span class="coord" style="top:6%; left:32%;">0031 : 990</span>
+  <span class="coord hide-m" style="top:33%; right:16%;">L 2210 y:434</span>
+  <span class="coord hide-m rot" style="top:22%; left:15%;">4451 : 108</span>
+  <span class="coord hide-m" style="top:74%; left:13%;">0900 : 1424</span>
+  <span class="coord hide-m rot" style="bottom:36%; right:3%;">2231 : 550</span>
+  <span class="coord" style="top:47%; right:11%;">L 118 y:3448</span>
+  <span class="coord hide-m" style="bottom:42%; left:2%;">6613 : 070</span>
+  <span class="coord hide-m" style="top:3%; right:32%;">3141 : 5926</span>
+
+  <span class="sq" style="top:17%; left:22%;"></span>
+  <span class="sq s2" style="top:57%; right:13%;"></span>
+  <span class="sq hollow" style="top:36%; left:19%;"></span>
+  <span class="sq hide-m" style="bottom:16%; right:24%;"></span>
+  <span class="sq hollow hide-m" style="bottom:38%; left:26%;"></span>
+  <span class="sq s2 hide-m" style="top:8%; left:48%;"></span>
+
+  <span class="num" style="top:29%; right:8%;">+0.4</span>
+  <span class="num hide-m" style="top:52%; left:11%;">03</span>
+  <span class="num hide-m" style="bottom:31%; right:12%;">v1.1</span>
+  <span class="num" style="bottom:14%; left:30%;">Δ 12</span>
+  <span class="num hide-m" style="top:12%; left:12%;">.000</span>
+
+  <span class="brk" style="top:63%; right:28%;"></span>
+  <span class="brk hide-m" style="top:9%; left:38%;"></span>
+  <span class="cross" style="top:44%; right:20%;"></span>
+  <span class="cross hide-m" style="bottom:45%; right:36%;"></span>
+  <span class="cross hide-m" style="top:59%; left:20%;"></span>
+
+  <div class="rule gray hide-m" style="top:31%; right:22%; width:120px;">idx 03 — hold</div>
+  <div class="rule hide-m" style="bottom:9%; right:26%; width:140px;">field — stable</div>
+  <div class="rule gray hide-m" style="top:68%; left:14%; width:110px;">sig. path b</div>
+
+  <div class="datablock hide-m" style="top:56%; right:2%;">ch 01 ....... on
+ch 02 ....... on
+ch 03 ....... mute
+lim   ....... -0.1</div>
+  <div class="datablock hide-m" style="top:8%; left:20%;">x 3000
+y 0117
+z ----</div>
+
+  <div class="patch p2 hide-m" style="top:58%; left:-2%; width:17%; height:72px;"></div>
+  <div class="patch p3 hide-m" style="top:2%;  left:56%; width:12%; height:46px;"></div>
+  <div class="patch hide-m"    style="bottom:40%; right:18%; width:10%; height:120px;"></div>
 </div>
 
 <main>
