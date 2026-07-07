@@ -156,6 +156,16 @@
   /* ---- マテリアル層（ガラス・クローム・分光・塵） ---- */
   .cosmos { position: fixed; inset: -6%; z-index: 0; pointer-events: none; will-change: transform; }
 
+  /* iOSのアドレスバー伸縮でfixedレイヤーの高さが変わり、
+     %配置の要素が一斉にジャンプするのを防ぐ（lvh=最大ビューポート基準で固定） */
+  @supports (height: 100lvh) {
+    body::before { bottom: auto; height: 100lvh; }
+    .scatter, .blades { bottom: auto; height: 100lvh; }
+    .cosmos { bottom: auto; height: 112lvh; }
+    .ruler { bottom: auto; height: 100lvh; }
+    .side-cap { top: 50lvh; }
+  }
+
   /* Blenderレンダーのガラスリング（透過PNG） */
   .glassring { position: absolute; will-change: transform; }
   @media (prefers-reduced-motion: no-preference) {
@@ -371,9 +381,9 @@
 <!-- ===== マテリアル層 ===== -->
 <div class="cosmos" aria-hidden="true">
   <!-- ガラスのリング（Blenderレンダー） -->
-  <img class="glassring"    src="assets/glass_ring_double.png" alt="" style="top:-9%; left:-10%; width:min(36vw, 420px); --r:-8deg;">
-  <img class="glassring g2" src="assets/glass_ring_fat.png"    alt="" style="top:30%; right:-8%; width:min(30vw, 360px); --r:12deg;">
-  <img class="glassring g3 hide-m" src="assets/glass_ring_thin.png" alt="" style="bottom:-6%; left:12%; width:min(24vw, 280px); --r:24deg;">
+  <img class="glassring"    src="assets/glass_ring_double.png" alt="" style="top:2%; left:1%; width:min(30vw, 350px); --r:-8deg;">
+  <img class="glassring g2" src="assets/glass_ring_fat.png"    alt="" style="top:30%; right:2%; width:min(25vw, 300px); --r:12deg;">
+  <img class="glassring g3 hide-m" src="assets/glass_ring_thin.png" alt="" style="bottom:3%; left:12%; width:min(21vw, 250px); --r:24deg;">
   <img class="glassring g2 hide-m" src="assets/glass_ring_thin.png" alt="" style="top:6%; left:58%; width:min(13vw, 150px); --r:-30deg; opacity:.75;">
 
   <!-- 追加マテリアル（Blenderレンダー第2弾） -->
