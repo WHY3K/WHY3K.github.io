@@ -152,6 +152,58 @@
     z-index: 1;
   }
 
+  /* ---- マテリアル層（ガラス・クローム・分光・塵） ---- */
+  .cosmos { position: fixed; inset: -6%; z-index: 0; pointer-events: none; will-change: transform; }
+
+  .ring-w { position: absolute; }
+  .ring {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: conic-gradient(from 20deg,
+      rgba(255,255,255,0) 0deg, rgba(19,19,22,.30) 42deg, rgba(255,255,255,.95) 88deg,
+      rgba(19,19,22,.16) 150deg, rgba(255,255,255,.06) 210deg, rgba(19,19,22,.34) 296deg,
+      rgba(255,255,255,0) 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.10));
+  }
+  .ring.thin {
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ring { animation: ringspin 26s linear infinite; }
+    .ring.slow { animation-duration: 44s; animation-direction: reverse; }
+  }
+  @keyframes ringspin { to { transform: rotate(360deg); } }
+
+  .shard {
+    position: absolute;
+    background: linear-gradient(105deg,#ececf0 0%,#8f8f98 16%,#ffffff 36%,#6d6d76 54%,#e0e0e6 70%,#9c9ca4 100%);
+    box-shadow: 0 6px 16px rgba(0,0,0,.16);
+  }
+  .cube {
+    position: absolute; width: 11px; height: 11px;
+    background: linear-gradient(135deg,#f7f7f9,#b9b9c2);
+    border: 1px solid #9a9aa3;
+    box-shadow: 0 4px 10px rgba(0,0,0,.14);
+  }
+  .pt { position: absolute; border-radius: 50%; background: #131316; }
+  .disp {
+    position: absolute; border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff4bd8, #4bd8ff, #d8ff4b, #ff4bd8);
+    filter: blur(16px) saturate(1.3);
+    opacity: .18;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .float   { animation: floaty 11s ease-in-out infinite alternate; }
+    .float.f2 { animation-duration: 15s; animation-delay: -6s; }
+    .float.f3 { animation-duration: 19s; animation-delay: -11s; }
+  }
+  @keyframes floaty {
+    from { transform: translate(0,0)      rotate(var(--r, 0deg)); }
+    to   { transform: translate(10px,-16px) rotate(calc(var(--r, 0deg) + 7deg)); }
+  }
+
   /* ---- カーソル追従の十字線＋座標 ---- */
   .cursor-x, .cursor-y { position: fixed; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .3s; }
   .cursor-x { top: 0; bottom: 0; width: 1px; background: rgba(19,19,22,.18); }
@@ -318,6 +370,38 @@
   </svg>
 </div>
 
+<!-- ===== マテリアル層 ===== -->
+<div class="cosmos" aria-hidden="true">
+  <!-- ガラスのリング -->
+  <div class="ring-w" style="top:-6%; left:-8%; width:34vw; height:34vw; transform:rotateX(58deg) rotateY(-12deg);"><div class="ring"></div></div>
+  <div class="ring-w" style="top:26%; right:-6%; width:27vw; height:27vw; transform:rotateX(64deg) rotateY(18deg);"><div class="ring slow"></div></div>
+  <div class="ring-w hide-m" style="bottom:-4%; left:14%; width:22vw; height:22vw; transform:rotateX(70deg) rotateY(-24deg);"><div class="ring thin"></div></div>
+  <div class="ring-w hide-m" style="top:52%; left:36%; width:46vw; height:46vw; transform:rotateX(74deg) rotateY(6deg); opacity:.4;"><div class="ring thin slow"></div></div>
+
+  <!-- クロームの破片 -->
+  <div class="shard float"    style="top:18%; left:10%; width:98px; height:9px;  --r:-24deg; transform:rotate(-24deg);"></div>
+  <div class="shard float f2" style="top:64%; right:8%; width:74px; height:7px;  --r:14deg;  transform:rotate(14deg);"></div>
+  <div class="shard float f3 hide-m" style="top:9%;  right:26%; width:56px; height:6px; --r:-52deg; transform:rotate(-52deg);"></div>
+  <div class="shard float f2 hide-m" style="bottom:12%; left:28%; width:120px; height:10px; --r:8deg; transform:rotate(8deg);"></div>
+  <div class="shard float hide-m"    style="top:42%; left:5%;  width:44px; height:5px; --r:66deg; transform:rotate(66deg);"></div>
+  <div class="shard float f3 hide-m" style="bottom:30%; right:20%; width:64px; height:6px; --r:-10deg; transform:rotate(-10deg);"></div>
+
+  <!-- キューブ・塵 -->
+  <div class="cube float"    style="top:24%; right:14%; --r:18deg;  transform:rotate(18deg);"></div>
+  <div class="cube float f2 hide-m" style="bottom:22%; left:12%; --r:-30deg; transform:rotate(-30deg); width:8px; height:8px;"></div>
+  <div class="cube float f3 hide-m" style="top:70%; left:44%; --r:45deg; transform:rotate(45deg); width:14px; height:14px;"></div>
+  <span class="pt float"    style="top:15%; left:44%; width:5px; height:5px; opacity:.55;"></span>
+  <span class="pt float f2" style="top:37%; right:30%; width:3px; height:3px; opacity:.4;"></span>
+  <span class="pt float f3" style="top:58%; left:24%; width:4px; height:4px; opacity:.5;"></span>
+  <span class="pt float f2 hide-m" style="bottom:18%; right:36%; width:6px; height:6px; opacity:.35;"></span>
+  <span class="pt float hide-m"    style="bottom:8%;  left:52%; width:3px; height:3px; opacity:.45;"></span>
+  <span class="pt float f3 hide-m" style="top:8%; left:64%; width:4px; height:4px; opacity:.4;"></span>
+
+  <!-- 分光のにじみ -->
+  <div class="disp"        style="top:20%; right:18%; width:120px; height:120px;"></div>
+  <div class="disp hide-m" style="bottom:16%; left:18%; width:90px; height:90px; opacity:.14;"></div>
+</div>
+
 <!-- ===== 左端の定規 ===== -->
 <div class="ruler hide-m" aria-hidden="true">
   <b style="top:104px;">100</b>
@@ -446,6 +530,10 @@ z ----</div>
       <circle cx="300" cy="258" r="196" stroke="#d9d9df" stroke-width=".7" stroke-dasharray="2 5"/>
       <circle cx="300" cy="258" r="118" stroke="#e2e2e7" stroke-width=".6"/>
 
+      <!-- ビーズの軌道（点の玉が円を描く） -->
+      <circle cx="300" cy="258" r="168" stroke="#131316" stroke-width="3.4" stroke-dasharray="0.1 11" stroke-linecap="round" opacity=".5" transform="rotate(-20 300 258)"/>
+      <circle cx="300" cy="258" r="228" stroke="#131316" stroke-width="2.6" stroke-dasharray="0.1 14" stroke-linecap="round" opacity=".35" transform="rotate(30 300 258)"/>
+
       <!-- 軌道群A -->
       <g class="orbitA">
         <ellipse cx="300" cy="258" rx="244" ry="66" stroke="#1a1a1f" stroke-width="1"  opacity=".75" transform="rotate(-14 300 258)"/>
@@ -562,6 +650,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   var fig     = document.getElementById('fig');
   var scatter = document.querySelector('.scatter');
   var blades  = document.querySelector('.blades svg');
+  var cosmos  = document.querySelector('.cosmos');
   var cx = document.querySelector('.cursor-x');
   var cy = document.querySelector('.cursor-y');
   var tag = document.querySelector('.cursor-tag');
@@ -601,6 +690,8 @@ document.getElementById('yr').textContent = new Date().getFullYear();
       'translate(' + (vX * -26) + 'px,' + (vY * -20) + 'px)';
     if (blades) blades.style.transform =
       'translate(' + (vX * -48) + 'px,' + (vY * -36) + 'px) scale(1.08)';
+    if (cosmos) cosmos.style.transform =
+      'translate(' + (vX * -60) + 'px,' + (vY * -44) + 'px)';
 
     requestAnimationFrame(loop);
   }
