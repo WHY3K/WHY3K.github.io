@@ -14,39 +14,103 @@
 <meta property="og:image" content="https://why3k.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #ffffff;
-    --ink: #111114;
+    --paper: #fafafc;
+    --ink: #0d0d11;
     --ink-soft: #8a8a95;
-    --line: #e9e9ee;
-    --mono: "SFMono-Regular", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --line: #c9c9d2;
+    --cyan: #00e0ff;
+    --mag: #ff2bd6;
+    --grn: #33d15e;
+    --cut: 14px;
+    --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   :focus { outline:none; }
-  :focus-visible { outline:2px solid rgba(17,17,20,.4); outline-offset:3px; border-radius:10px; }
+  :focus-visible { outline:2px solid rgba(13,13,17,.5); outline-offset:3px; }
 
   html, body { height:100%; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-                 "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
-    background: var(--bg);
+    font-family: "Space Grotesk", -apple-system, "Helvetica Neue", sans-serif;
+    background: var(--paper);
     color: var(--ink);
     display: flex;
     flex-direction: column;
     align-items: center;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ---- 背景レイヤー1：グリッド＋スキャンライン ---- */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    z-index: -1;
+    background:
+      repeating-linear-gradient(0deg,  rgba(13,13,17,.045) 0 1px, transparent 1px 44px),
+      repeating-linear-gradient(90deg, rgba(13,13,17,.045) 0 1px, transparent 1px 44px),
+      repeating-linear-gradient(0deg,  rgba(13,13,17,.012) 0 1px, transparent 1px 4px);
+    pointer-events: none;
+  }
+  /* ---- 背景レイヤー2：漂うホログラム光 ---- */
+  body::after {
+    content: "";
+    position: fixed; inset: -20%;
+    z-index: -2;
+    background:
+      radial-gradient(620px 420px at 18% 28%, rgba(0,224,255,.14), transparent 62%),
+      radial-gradient(700px 520px at 84% 72%, rgba(255,43,214,.11), transparent 62%),
+      radial-gradient(520px 420px at 62% 6%,  rgba(51,209,94,.10),  transparent 62%);
+    filter: blur(46px);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    body::after { animation: drift 16s ease-in-out infinite alternate; }
+  }
+  @keyframes drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-3%, 2.5%) scale(1.06); }
+  }
+
+  /* ---- 画面を横切るグリッチバー ---- */
+  .glitch-bar {
+    position: fixed;
+    left: 0; right: 0;
+    height: 26px;
+    z-index: 3;
+    background: rgba(13,13,17,.05);
+    box-shadow: 0 0 0 1px rgba(0,224,255,.08);
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .glitch-bar { animation: bar 9s infinite steps(1); }
+    .glitch-bar.b2 { animation-delay: 4.7s; height: 8px; }
+  }
+  @keyframes bar {
+    0%, 87.9%, 90.1%, 100% { opacity: 0; }
+    88%   { opacity: 1; top: 22%; transform: translateX(-8px); }
+    88.7% { opacity: 1; top: 61%; transform: translateX(10px); }
+    89.4% { opacity: 1; top: 43%; transform: translateX(-4px); }
   }
 
   main {
     flex: 1;
     width: 100%;
-    max-width: 460px;
+    max-width: 480px;
     padding: 0 28px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 52px;
+    gap: 56px;
+    position: relative;
+    z-index: 1;
   }
 
   /* ---- ワードマーク ---- */
@@ -54,13 +118,14 @@
   .wordmark {
     position: relative;
     display: inline-block;
-    font-size: clamp(44px, 12vw, 64px);
-    font-weight: 800;
-    letter-spacing: .32em;
-    margin-right: -.32em; /* 字間ぶんの右余白を相殺して中央に */
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    font-size: clamp(42px, 12vw, 76px);
+    letter-spacing: .12em;
+    margin-right: -.12em;
     line-height: 1;
+    color: var(--ink);
   }
-  /* グリッチ（モノクロ・時々だけ、ほんの一瞬） */
   .wordmark::before,
   .wordmark::after {
     content: attr(data-text);
@@ -70,123 +135,180 @@
     opacity: 0;
     pointer-events: none;
   }
+  .wordmark::before { color: var(--mag); z-index: -1; }
+  .wordmark::after  { color: var(--cyan); z-index: -1; }
   @media (prefers-reduced-motion: no-preference) {
-    .wordmark::before { animation: glitchA 7s infinite steps(1); }
-    .wordmark::after  { animation: glitchB 7s infinite steps(1); }
+    .wordmark          { animation: jolt 3.4s infinite steps(1); }
+    .wordmark::before  { animation: ghostM 3.4s infinite steps(1); }
+    .wordmark::after   { animation: ghostC 3.4s infinite steps(1); }
   }
-  @keyframes glitchA {
-    0%, 91.9%, 94.1%, 100% { opacity: 0; }
-    92%   { opacity:.55; transform: translate(3px, 0);  clip-path: inset(12% 0 62% 0); }
-    92.7% { opacity:.55; transform: translate(-2px, 0); clip-path: inset(55% 0 18% 0); }
-    93.4% { opacity:.55; transform: translate(2px, 0);  clip-path: inset(30% 0 44% 0); }
+  /* 本体がときどき歪む */
+  @keyframes jolt {
+    0%, 88.9%, 93.1%, 100% { transform: none; }
+    89%   { transform: skewX(-6deg) translateX(2px); }
+    89.6% { transform: skewX(4deg); }
+    90.2% { transform: none; }
+    91.5% { transform: translateX(-2px); }
+    92.1% { transform: none; }
   }
-  @keyframes glitchB {
-    0%, 91.9%, 94.1%, 100% { opacity: 0; }
-    92.3% { opacity:.4; transform: translate(-3px, 0); clip-path: inset(66% 0 8% 0); }
-    93%   { opacity:.4; transform: translate(2px, 0);  clip-path: inset(4% 0 78% 0); }
-    93.7% { opacity:.4; transform: translate(-2px, 0); clip-path: inset(40% 0 36% 0); }
+  /* マゼンタのゴースト */
+  @keyframes ghostM {
+    0%, 88.9%, 93.6%, 100% { opacity: 0; }
+    89%   { opacity:.85; transform: translate(4px, 0);   clip-path: inset(8% 0 64% 0); }
+    89.8% { opacity:.85; transform: translate(-3px, 1px); clip-path: inset(52% 0 22% 0); }
+    90.6% { opacity:.6;  transform: translate(2px, -1px); clip-path: inset(28% 0 48% 0); }
+    91.6% { opacity:.85; transform: translate(-4px, 0);  clip-path: inset(70% 0 6% 0); }
+    92.4% { opacity:.5;  transform: translate(3px, 0);   clip-path: inset(14% 0 70% 0); }
   }
-  .mark .dots {
-    margin-top: 18px;
+  /* シアンのゴースト */
+  @keyframes ghostC {
+    0%, 88.9%, 93.6%, 100% { opacity: 0; }
+    89.3% { opacity:.85; transform: translate(-4px, 0);  clip-path: inset(60% 0 14% 0); }
+    90.1% { opacity:.85; transform: translate(3px, -1px); clip-path: inset(4% 0 76% 0); }
+    90.9% { opacity:.6;  transform: translate(-2px, 1px); clip-path: inset(38% 0 40% 0); }
+    91.9% { opacity:.85; transform: translate(4px, 0);   clip-path: inset(22% 0 58% 0); }
+    92.7% { opacity:.5;  transform: translate(-3px, 0);  clip-path: inset(80% 0 2% 0); }
+  }
+
+  .status {
+    margin-top: 20px;
     font-family: var(--mono);
-    font-size: 13px;
-    letter-spacing: .6em;
+    font-size: 12px;
+    letter-spacing: .5em;
     color: var(--ink-soft);
+    text-transform: uppercase;
   }
+  .status::after {
+    content: "▮";
+    letter-spacing: 0;
+    margin-left: .2em;
+    color: var(--grn);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .status::after { animation: blink 1.1s steps(2) infinite; }
+  }
+  @keyframes blink { 50% { opacity: 0; } }
 
   /* ---- リンク ---- */
   .links { display: flex; flex-direction: column; gap: 12px; }
   .link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    height: 56px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
+    display: block;
+    padding: 1px;
+    background: var(--line);
+    clip-path: polygon(
+      var(--cut) 0, 100% 0,
+      100% calc(100% - var(--cut)),
+      calc(100% - var(--cut)) 100%,
+      0 100%, 0 var(--cut)
+    );
     text-decoration: none;
     color: var(--ink);
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: .12em;
-    transition: transform .14s ease, border-color .15s, box-shadow .15s, background .15s;
-    background: var(--bg);
+    transition: transform .13s ease, background .15s;
   }
-  .link:hover {
-    transform: translateY(-2px);
-    border-color: #d2d2da;
-    box-shadow: 0 14px 30px -18px rgba(0,0,0,.22);
+  .link .in {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 58px;
+    padding: 0 24px;
+    background: rgba(255,255,255,.92);
+    clip-path: polygon(
+      var(--cut) 0, 100% 0,
+      100% calc(100% - var(--cut)),
+      calc(100% - var(--cut)) 100%,
+      0 100%, 0 var(--cut)
+    );
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    transition: background .15s, color .15s;
   }
-  .link:active { transform: translateY(0) scale(.985); }
+  .link .idx {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .15em;
+    color: var(--ink-soft);
+  }
+  .link .arrow { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
 
-  /* PLUGINS＝主役リンク */
-  .link.primary {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
-  }
-  .link.primary:hover { box-shadow: 0 16px 34px -16px rgba(0,0,0,.4); }
+  .link:hover { transform: translateY(-2px); background: var(--ink); }
+  .link:hover .in { background: var(--ink); color: #fff; text-shadow: 2px 0 var(--cyan), -2px 0 var(--mag); }
+  .link:hover .idx, .link:hover .arrow { color: rgba(255,255,255,.6); }
+  .link:active { transform: translateY(0) scale(.99); }
+
+  /* PLUGINS＝主役 */
+  .link.primary { background: var(--ink); }
+  .link.primary .in { background: var(--ink); color: #fff; }
+  .link.primary .idx { color: rgba(255,255,255,.5); }
   .link.primary .tag {
+    margin-left: auto;
     font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: .2em;
-    color: #33d15e;
+    letter-spacing: .25em;
+    color: var(--grn);
   }
+  .link.primary:hover .in { background: #fff; color: var(--ink); text-shadow: 2px 0 var(--mag), -2px 0 var(--cyan); }
+  .link.primary:hover .tag { color: #1f8f42; }
 
-  /* URL未設定（準備中）リンク */
-  .link.soon {
-    pointer-events: none;
-    color: #c3c3cc;
-    border-color: #f0f0f4;
-  }
+  /* URL未設定（準備中） */
+  .link.soon { pointer-events: none; background: #e8e8ee; }
+  .link.soon .in { background: rgba(252,252,254,.9); color: #c3c3cc; }
+  .link.soon .idx { color: #d3d3db; }
   .link.soon .soon-tag {
+    margin-left: auto;
     font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: .18em;
+    letter-spacing: .22em;
     color: #d3d3db;
   }
 
   footer {
     padding: 28px 0 34px;
-    font-size: 12px;
-    letter-spacing: .18em;
+    font-size: 11px;
+    letter-spacing: .3em;
     color: var(--ink-soft);
     font-family: var(--mono);
+    position: relative;
+    z-index: 1;
   }
 </style>
 </head>
 <body>
 
+<div class="glitch-bar" aria-hidden="true"></div>
+<div class="glitch-bar b2" aria-hidden="true"></div>
+
 <main>
   <div class="mark">
     <h1 class="wordmark" data-text="WHY3K">WHY3K</h1>
-    <div class="dots" aria-hidden="true">・・・</div>
+    <div class="status">Online</div>
   </div>
 
   <nav class="links" aria-label="WHY3K links">
-    <!-- ↓ URLが決まったら href="#" を差し替えて class="link soon" → class="link" にする -->
+    <!-- ↓ URLが決まったら href="#" を差し替えて class="link soon" → class="link" にし、SOONタグを arrow に変える -->
 
     <!-- TODO: X のURL -->
-    <a class="link soon" href="#" aria-disabled="true">X <span class="soon-tag">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">01</span> X <span class="soon-tag">SOON</span></span></a>
 
     <!-- TODO: Instagram のURL -->
-    <a class="link soon" href="#" aria-disabled="true">Instagram <span class="soon-tag">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">02</span> Instagram <span class="soon-tag">SOON</span></span></a>
 
     <!-- TODO: TikTok のURL -->
-    <a class="link soon" href="#" aria-disabled="true">TikTok <span class="soon-tag">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">03</span> TikTok <span class="soon-tag">SOON</span></span></a>
 
     <!-- TODO: Spotify（アーティストページ）のURL -->
-    <a class="link soon" href="#" aria-disabled="true">Spotify <span class="soon-tag">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">04</span> Spotify <span class="soon-tag">SOON</span></span></a>
 
     <!-- TODO: YouTube のURL -->
-    <a class="link soon" href="#" aria-disabled="true">YouTube <span class="soon-tag">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">05</span> YouTube <span class="soon-tag">SOON</span></span></a>
 
     <!-- TODO: SoundCloud のURL -->
-    <a class="link soon" href="#" aria-disabled="true">SoundCloud <span class="soon-tag">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">06</span> SoundCloud <span class="soon-tag">SOON</span></span></a>
 
     <!-- PLUGINS（稼働中） -->
     <a class="link primary" href="https://why3k.github.io/why3k-plugins/">
-      WHY3K PLUGINS <span class="tag">FREE</span>
+      <span class="in"><span class="idx">07</span> WHY3K PLUGINS <span class="tag">FREE</span></span>
     </a>
   </nav>
 </main>
