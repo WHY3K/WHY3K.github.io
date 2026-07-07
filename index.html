@@ -160,7 +160,7 @@
      %配置の要素が一斉にジャンプするのを防ぐ（lvh=最大ビューポート基準で固定） */
   @supports (height: 100lvh) {
     body::before { bottom: auto; height: 100lvh; }
-    .scatter, .blades { bottom: auto; height: 100lvh; }
+    .scatter, .blades, .ink { bottom: auto; height: 100lvh; }
     .cosmos { top: -6lvh; bottom: auto; height: 112lvh; } /* top:-6%はバー伸縮でズレるのでlvhに */
     .ruler { bottom: auto; height: 100lvh; }
     .side-cap { top: 50lvh; }
@@ -184,6 +184,23 @@
     box-shadow: 0 6px 16px rgba(0,0,0,.16);
   }
   .pt { position: absolute; border-radius: 50%; background: #131316; }
+
+  /* ---- インクの爆発層 ---- */
+  .ink { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .09; }
+  .ink svg { width: 100%; height: 100%; }
+
+  /* ---- 記号系（三角・＋・ドット・ストライプ・端末風） ---- */
+  .tri { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .5em; color: var(--ink); opacity: .7; }
+  .plusfield { position: absolute; font-family: var(--mono); font-size: 11px; line-height: 2.1; letter-spacing: .9em; color: var(--ink); opacity: .3; white-space: pre; }
+  .dotmat { position: absolute; background-image: radial-gradient(circle, rgba(19,19,22,.55) 1px, transparent 1.3px); background-size: 11px 10px; }
+  .stripeblk { position: absolute; background: repeating-linear-gradient(45deg, var(--ink) 0 5px, transparent 5px 12px); }
+  .term { letter-spacing: .12em; }
+  .term b { font-weight: 400; color: var(--ink); }
+
+  /* ---- QR（本物：PLUGINSに飛ぶ） ---- */
+  .qr { position: fixed; bottom: 84px; left: 40px; z-index: 2; width: 52px; opacity: .92; }
+  .qr img { width: 100%; display: block; }
+  .qr small { display: block; margin-top: 5px; font-family: var(--mono); font-size: 7px; letter-spacing: .18em; color: var(--ink-soft); text-align: center; }
   .disp {
     position: absolute; border-radius: 50%;
     background:
@@ -378,6 +395,31 @@
   </svg>
 </div>
 
+<!-- ===== インクの爆発（斜めに走る墨） ===== -->
+<div class="ink" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
+    <defs>
+      <filter id="rough" x="-30%" y="-30%" width="160%" height="160%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="4" seed="9" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="80"/>
+      </filter>
+    </defs>
+    <g filter="url(#rough)" stroke="#131316">
+      <path d="M -80 -60 C 160 130, 320 210, 540 340 S 840 540, 1010 660" stroke-width="52"/>
+      <path d="M 30 -80 C 220 140, 430 260, 660 410" stroke-width="15" opacity=".85"/>
+      <path d="M 1500 830 C 1300 760, 1180 700, 1040 660" stroke-width="26" opacity=".7"/>
+    </g>
+    <g filter="url(#rough)" fill="#131316" stroke="none">
+      <ellipse cx="720" cy="480" rx="28" ry="10"/>
+      <ellipse cx="810" cy="545" rx="13" ry="6"/>
+      <ellipse cx="890" cy="590" rx="8" ry="4"/>
+      <ellipse cx="960" cy="625" rx="5" ry="3"/>
+      <ellipse cx="250" cy="130" rx="17" ry="7"/>
+      <ellipse cx="350" cy="205" rx="9" ry="4"/>
+    </g>
+  </svg>
+</div>
+
 <!-- ===== マテリアル層 ===== -->
 <div class="cosmos" aria-hidden="true">
   <!-- 巨大な多層リング（背景の主役・超薄く） -->
@@ -396,6 +438,10 @@
   <img class="glassring g3 hide-m" src="assets/glass_debris.png" alt="" style="top:8%; right:30%; width:min(10vw, 110px); --r:-70deg; opacity:.7;">
   <img class="glassring"    src="assets/glass_sphere.png" alt="" style="bottom:10%; right:27%; width:min(6.5vw, 78px);  --r:0deg;">
   <img class="glassring g2 hide-m" src="assets/glass_sphere.png" alt="" style="top:36%; left:17%; width:min(4.5vw, 52px); --r:0deg; opacity:.8;">
+
+  <!-- 絡まったブレードの塊 -->
+  <img class="glassring g2" src="assets/blade_cluster.png" alt="" style="top:62%; left:5%; width:min(23vw, 270px); --r:-10deg;">
+  <img class="glassring g3 hide-m" src="assets/blade_cluster.png" alt="" style="top:1%; right:17%; width:min(14vw, 160px); --r:85deg; opacity:.85;">
 
   <!-- 塵 -->
   <span class="pt float"    style="top:15%; left:44%; width:5px; height:5px; opacity:.55;"></span>
@@ -508,7 +554,41 @@ z ----</div>
 
   <div class="patch p2 hide-m" style="top:58%; left:-2%; width:17%; height:72px;"></div>
   <div class="patch p3 hide-m" style="top:2%;  left:56%; width:12%; height:46px;"></div>
+
+  <!-- ── ARS/CUBE風の記号系 ── -->
+  <span class="tri" style="top:44%; left:2%;">▶ ▶ ▶</span>
+  <span class="tri hide-m" style="bottom:20%; right:3%;">▲ ▲ ▲</span>
+  <span class="tri hide-m" style="top:6%; right:22%;">▼ ▼</span>
+
+  <div class="plusfield hide-m" style="top:9%; left:33%;">+ + + +
++ + + +
++ + + +</div>
+  <div class="plusfield hide-m" style="bottom:24%; right:29%; font-size:9px; opacity:.25;">+ + +
++ + +</div>
+
+  <div class="dotmat" style="top:16%; right:6%; width:121px; height:32px;"></div>
+  <div class="dotmat hide-m" style="bottom:13%; left:23%; width:88px; height:28px;"></div>
+
+  <div class="stripeblk hide-m" style="bottom:7%; right:3%; width:54px; height:54px;"></div>
+  <div class="stripeblk hide-m" style="top:3%; left:44%; width:26px; height:26px; opacity:.8;"></div>
+
+  <!-- ターミナル風ブロック -->
+  <div class="datablock term hide-m" style="top:25%; left:1.5%;"><b>| terminal_</b>
+system ..... WHY3K.v3
+route ...... white
+status ..... authorized
+signal ..... locked</div>
+  <div class="datablock term hide-m" style="bottom:7%; right:19%;"><b>| navigation_</b>
+vector ..... 3K-01
+drift ...... 0.02
+phase ...... hold</div>
 </div>
+
+<!-- ===== QR（読み取るとPLUGINSへ） ===== -->
+<a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/" aria-label="WHY3K PLUGINS">
+  <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
+  <small>SCAN</small>
+</a>
 
 <div class="cursor-x" aria-hidden="true"></div>
 <div class="cursor-y" aria-hidden="true"></div>
@@ -532,6 +612,10 @@ z ----</div>
       <circle cx="300" cy="258" r="6"   fill="#131316"/>
       <circle cx="300" cy="436" r="4.5" fill="#131316"/>
 
+      <!-- レーダー同心円 -->
+      <circle cx="300" cy="258" r="70"  stroke="#131316" stroke-width=".45" opacity=".12"/>
+      <circle cx="300" cy="258" r="150" stroke="#131316" stroke-width=".45" opacity=".10"/>
+      <circle cx="300" cy="258" r="235" stroke="#131316" stroke-width=".5"  opacity=".10" stroke-dasharray="5 9"/>
       <!-- 補助円（作図線） -->
       <circle cx="300" cy="258" r="196" stroke="#d9d9df" stroke-width=".7" stroke-dasharray="2 5"/>
       <circle cx="300" cy="258" r="118" stroke="#e2e2e7" stroke-width=".6"/>
@@ -570,6 +654,19 @@ z ----</div>
         <path d="M 404 82 l -12 -2 m 12 2 l -8 9"   stroke="#d21f12" stroke-width="1.3"/>
         <path d="M 206 442 l 12 2 m -12 -2 l 8 -9"  stroke="#d21f12" stroke-width="1.3"/>
         <circle cx="132" cy="136" r="2.2" fill="#d21f12"/>
+      </g>
+
+      <!-- 4点スターバースト（中心） -->
+      <g fill="#131316">
+        <path d="M 300 108 C 306 224 313 244 402 258 C 313 272 306 292 300 408 C 294 292 287 272 198 258 C 287 244 294 224 300 108 Z" opacity=".92"/>
+        <path d="M 300 196 C 303 240 306 250 350 258 C 306 266 303 276 300 320 C 297 276 294 266 250 258 C 294 250 297 240 300 196 Z" transform="rotate(45 300 258)" opacity=".8"/>
+      </g>
+      <circle cx="300" cy="258" r="2.6" fill="#d21f12"/>
+      <!-- 小さなスパークル -->
+      <g fill="#131316" opacity=".8">
+        <path d="M 0 -20 C 1.4 -5 2.8 -2.6 13 0 C 2.8 2.6 1.4 5 0 20 C -1.4 5 -2.8 2.6 -13 0 C -2.8 -2.6 -1.4 -5 0 -20 Z" transform="translate(148 116) scale(.9)"/>
+        <path d="M 0 -20 C 1.4 -5 2.8 -2.6 13 0 C 2.8 2.6 1.4 5 0 20 C -1.4 5 -2.8 2.6 -13 0 C -2.8 -2.6 -1.4 -5 0 -20 Z" transform="translate(478 428) scale(.7) rotate(20)"/>
+        <path d="M 0 -20 C 1.4 -5 2.8 -2.6 13 0 C 2.8 2.6 1.4 5 0 20 C -1.4 5 -2.8 2.6 -13 0 C -2.8 -2.6 -1.4 -5 0 -20 Z" transform="translate(520 140) scale(.55) rotate(-15)"/>
       </g>
 
       <!-- 引き出し線ラベル -->
@@ -642,6 +739,7 @@ z ----</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
+  <div class="copyright" style="letter-spacing:.35em;">07.07.2026</div>
   <div class="pageno">01</div>
 </footer>
 
