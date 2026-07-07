@@ -647,6 +647,9 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 (function () {
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) return;
+  // タッチ端末はJS駆動の動きを一切しない（CSSアニメのみ）。
+  // 指スクロールとパララックスが連動して「離した瞬間に動く」のを防ぐ。
+  if (window.matchMedia('(pointer: coarse)').matches) return;
 
   var fig     = document.getElementById('fig');
   var scatter = document.querySelector('.scatter');
@@ -660,7 +663,6 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   var vX = 0, vY = 0;          // 現在値（lerp）
   var lastMove = 0;
   var lastScroll = -9999;
-  var coarse = window.matchMedia('(pointer: coarse)').matches;
 
   // スクロール中はパララックスの書き込みを止める（カクつき対策）
   window.addEventListener('scroll', function () { lastScroll = performance.now(); }, { passive: true });
@@ -698,15 +700,12 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
       fig.style.transform =
         'perspective(900px) rotateY(' + (vX * 20) + 'deg) rotateX(' + (-vY * 16) + 'deg)';
-      // スマホはレイヤー数を絞る（figのみ）
-      if (!coarse) {
-        if (scatter) scatter.style.transform =
-          'translate(' + (vX * -26) + 'px,' + (vY * -20) + 'px)';
-        if (blades) blades.style.transform =
-          'translate(' + (vX * -48) + 'px,' + (vY * -36) + 'px) scale(1.08)';
-        if (cosmos) cosmos.style.transform =
-          'translate(' + (vX * -60) + 'px,' + (vY * -44) + 'px)';
-      }
+      if (scatter) scatter.style.transform =
+        'translate(' + (vX * -26) + 'px,' + (vY * -20) + 'px)';
+      if (blades) blades.style.transform =
+        'translate(' + (vX * -48) + 'px,' + (vY * -36) + 'px) scale(1.08)';
+      if (cosmos) cosmos.style.transform =
+        'translate(' + (vX * -60) + 'px,' + (vY * -44) + 'px)';
     }
     requestAnimationFrame(loop);
   }
