@@ -156,25 +156,17 @@
   /* ---- マテリアル層（ガラス・クローム・分光・塵） ---- */
   .cosmos { position: fixed; inset: -6%; z-index: 0; pointer-events: none; will-change: transform; }
 
-  .ring-w { position: absolute; }
-  .ring {
-    width: 100%; height: 100%; border-radius: 50%;
-    background: conic-gradient(from 20deg,
-      rgba(255,255,255,0) 0deg, rgba(19,19,22,.30) 42deg, rgba(255,255,255,.95) 88deg,
-      rgba(19,19,22,.16) 150deg, rgba(255,255,255,.06) 210deg, rgba(19,19,22,.34) 296deg,
-      rgba(255,255,255,0) 360deg);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
-            mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
-  }
-  .ring.thin {
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-  }
+  /* Blenderレンダーのガラスリング（透過PNG） */
+  .glassring { position: absolute; will-change: transform; }
   @media (prefers-reduced-motion: no-preference) {
-    .ring { animation: ringspin 26s linear infinite; }
-    .ring.slow { animation-duration: 44s; animation-direction: reverse; }
+    .glassring { animation: gfloat 13s ease-in-out infinite alternate; }
+    .glassring.g2 { animation-duration: 17s; animation-delay: -7s; }
+    .glassring.g3 { animation-duration: 23s; animation-delay: -13s; }
   }
-  @keyframes ringspin { to { transform: rotate(360deg); } }
+  @keyframes gfloat {
+    from { transform: translate(0,0)        rotate(var(--r, 0deg)); }
+    to   { transform: translate(14px,-20px) rotate(calc(var(--r, 0deg) + 10deg)); }
+  }
 
   .shard {
     position: absolute;
@@ -367,11 +359,11 @@
 
 <!-- ===== マテリアル層 ===== -->
 <div class="cosmos" aria-hidden="true">
-  <!-- ガラスのリング -->
-  <div class="ring-w" style="top:-6%; left:-8%; width:34vw; height:34vw; transform:rotateX(58deg) rotateY(-12deg);"><div class="ring"></div></div>
-  <div class="ring-w" style="top:26%; right:-6%; width:27vw; height:27vw; transform:rotateX(64deg) rotateY(18deg);"><div class="ring slow"></div></div>
-  <div class="ring-w hide-m" style="bottom:-4%; left:14%; width:22vw; height:22vw; transform:rotateX(70deg) rotateY(-24deg);"><div class="ring thin"></div></div>
-  <div class="ring-w hide-m" style="top:52%; left:36%; width:46vw; height:46vw; transform:rotateX(74deg) rotateY(6deg); opacity:.4;"><div class="ring thin slow"></div></div>
+  <!-- ガラスのリング（Blenderレンダー） -->
+  <img class="glassring"    src="assets/glass_ring_double.png" alt="" style="top:-9%; left:-10%; width:min(36vw, 420px); --r:-8deg;">
+  <img class="glassring g2" src="assets/glass_ring_fat.png"    alt="" style="top:30%; right:-8%; width:min(30vw, 360px); --r:12deg;">
+  <img class="glassring g3 hide-m" src="assets/glass_ring_thin.png" alt="" style="bottom:-6%; left:12%; width:min(24vw, 280px); --r:24deg;">
+  <img class="glassring g2 hide-m" src="assets/glass_ring_thin.png" alt="" style="top:6%; left:58%; width:min(13vw, 150px); --r:-30deg; opacity:.75;">
 
   <!-- クロームの破片 -->
   <div class="shard float"    style="top:18%; left:10%; width:98px; height:9px;  --r:-24deg; transform:rotate(-24deg);"></div>
