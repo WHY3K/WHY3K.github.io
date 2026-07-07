@@ -14,28 +14,24 @@
 <meta property="og:image" content="https://why3k.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #fafafc;
-    --ink: #0d0d11;
-    --ink-soft: #8a8a95;
-    --line: #c9c9d2;
-    --cyan: #00e0ff;
-    --mag: #ff2bd6;
-    --grn: #33d15e;
-    --cut: 14px;
+    --paper: #fbfbfa;
+    --ink: #131316;
+    --ink-soft: #9a9aa3;
+    --faint: #c9c9d0;
+    --line: #e2e2e7;
+    --red: #d21f12;
     --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   :focus { outline:none; }
-  :focus-visible { outline:2px solid rgba(13,13,17,.5); outline-offset:3px; }
+  :focus-visible { outline:2px solid rgba(19,19,22,.5); outline-offset:3px; }
 
-  html, body { height:100%; }
+  html, body { min-height:100%; }
   body {
-    font-family: "Space Grotesk", -apple-system, "Helvetica Neue", sans-serif;
+    font-family: var(--sans);
     background: var(--paper);
     color: var(--ink);
     display: flex;
@@ -45,275 +41,304 @@
     overflow-x: hidden;
     position: relative;
   }
-
-  /* ---- 背景レイヤー1：グリッド＋スキャンライン ---- */
+  /* 微細な十字ドットグリッド（計測紙） */
   body::before {
     content: "";
-    position: fixed; inset: 0;
-    z-index: -1;
-    background:
-      repeating-linear-gradient(0deg,  rgba(13,13,17,.045) 0 1px, transparent 1px 44px),
-      repeating-linear-gradient(90deg, rgba(13,13,17,.045) 0 1px, transparent 1px 44px),
-      repeating-linear-gradient(0deg,  rgba(13,13,17,.012) 0 1px, transparent 1px 4px);
+    position: fixed; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle, rgba(19,19,22,.13) .7px, transparent .8px);
+    background-size: 56px 56px;
+    background-position: 28px 28px;
     pointer-events: none;
-  }
-  /* ---- 背景レイヤー2：漂うホログラム光 ---- */
-  body::after {
-    content: "";
-    position: fixed; inset: -20%;
-    z-index: -2;
-    background:
-      radial-gradient(620px 420px at 18% 28%, rgba(0,224,255,.14), transparent 62%),
-      radial-gradient(700px 520px at 84% 72%, rgba(255,43,214,.11), transparent 62%),
-      radial-gradient(520px 420px at 62% 6%,  rgba(51,209,94,.10),  transparent 62%);
-    filter: blur(46px);
-    pointer-events: none;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    body::after { animation: drift 16s ease-in-out infinite alternate; }
-  }
-  @keyframes drift {
-    0%   { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(-3%, 2.5%) scale(1.06); }
   }
 
-  /* ---- 画面を横切るグリッチバー ---- */
-  .glitch-bar {
-    position: fixed;
-    left: 0; right: 0;
-    height: 26px;
-    z-index: 3;
-    background: rgba(13,13,17,.05);
-    box-shadow: 0 0 0 1px rgba(0,224,255,.08);
-    opacity: 0;
-    pointer-events: none;
-    mix-blend-mode: multiply;
+  /* ---- 四隅のトンボ（registration marks） ---- */
+  .reg { position: fixed; width: 16px; height: 16px; z-index: 2; pointer-events:none; }
+  .reg.tl { top:14px; left:14px;  border-top:2px solid var(--ink); border-left:2px solid var(--ink); }
+  .reg.tr { top:14px; right:14px; border-top:2px solid var(--ink); border-right:2px solid var(--ink); }
+  .reg.bl { bottom:14px; left:14px;  border-bottom:2px solid var(--ink); border-left:2px solid var(--ink); }
+  .reg.br { bottom:14px; right:14px; border-bottom:2px solid var(--ink); border-right:2px solid var(--ink); }
+
+  /* ---- ドキュメントの見出し（左上） ---- */
+  .doc-head {
+    position: fixed; top: 22px; left: 40px; z-index: 2;
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+    color: var(--ink); text-transform: uppercase;
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .glitch-bar { animation: bar 9s infinite steps(1); }
-    .glitch-bar.b2 { animation-delay: 4.7s; height: 8px; }
+  .doc-head .bar { width: 46px; height: 10px; background: var(--ink); }
+
+  /* ---- 右端の縦書きキャプション ---- */
+  .side-cap {
+    position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+    writing-mode: vertical-rl; z-index: 2;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .5em;
+    color: var(--ink-soft); text-transform: uppercase; pointer-events:none;
   }
-  @keyframes bar {
-    0%, 87.9%, 90.1%, 100% { opacity: 0; }
-    88%   { opacity: 1; top: 22%; transform: translateX(-8px); }
-    88.7% { opacity: 1; top: 61%; transform: translateX(10px); }
-    89.4% { opacity: 1; top: 43%; transform: translateX(-4px); }
+
+  /* ---- 散らばる座標ラベル ---- */
+  .coord {
+    position: fixed; z-index: 1;
+    font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+    color: #bdbdc5; pointer-events: none; white-space: nowrap;
   }
+  .coord::before { content: "⌐ "; color: #a9a9b2; }
 
   main {
     flex: 1;
     width: 100%;
-    max-width: 480px;
-    padding: 0 28px;
+    max-width: 560px;
+    padding: 72px 30px 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 56px;
+    align-items: center;
+    gap: 8px;
     position: relative;
     z-index: 1;
   }
 
-  /* ---- ワードマーク ---- */
-  .mark { text-align: center; user-select: none; }
+  /* ---- 図版（軌道図＋ワードマーク） ---- */
+  .figure { position: relative; width: min(92vw, 540px); aspect-ratio: 1 / .82; }
+  .figure svg { position:absolute; inset:0; width:100%; height:100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .orbitA { animation: spin 90s linear infinite; transform-origin: 300px 246px; }
+    .orbitB { animation: spinR 130s linear infinite; transform-origin: 300px 246px; }
+    .redarc { animation: spinR 60s linear infinite; transform-origin: 300px 246px; }
+  }
+  @keyframes spin  { to { transform: rotate(360deg); } }
+  @keyframes spinR { to { transform: rotate(-360deg); } }
+
+  .wordwrap {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
   .wordmark {
     position: relative;
     display: inline-block;
-    font-family: "Orbitron", sans-serif;
-    font-weight: 900;
-    font-size: clamp(42px, 12vw, 76px);
-    letter-spacing: .12em;
-    margin-right: -.12em;
-    line-height: 1;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: clamp(40px, 11vw, 62px);
+    letter-spacing: .06em;
+    line-height: 1.05;
     color: var(--ink);
+    background: var(--paper);           /* 背後の軸線を切る＝図面の抜き */
+    padding: 2px 18px 6px;
+    border-bottom: 4px solid var(--ink); /* 下線＝見出しの扱い */
   }
   .wordmark::before,
   .wordmark::after {
     content: attr(data-text);
-    position: absolute;
-    left: 0; top: 0;
-    width: 100%;
-    opacity: 0;
-    pointer-events: none;
+    position: absolute; left: 0; top: 2px;
+    width: 100%; padding: 0 18px;
+    opacity: 0; pointer-events: none;
   }
-  .wordmark::before { color: var(--mag); z-index: -1; }
-  .wordmark::after  { color: var(--cyan); z-index: -1; }
+  .wordmark::before { color: var(--red); }
+  .wordmark::after  { color: #b0b0b8; }
   @media (prefers-reduced-motion: no-preference) {
-    .wordmark          { animation: jolt 3.4s infinite steps(1); }
-    .wordmark::before  { animation: ghostM 3.4s infinite steps(1); }
-    .wordmark::after   { animation: ghostC 3.4s infinite steps(1); }
+    .wordmark          { animation: jolt 5.8s infinite steps(1); }
+    .wordmark::before  { animation: ghostR 5.8s infinite steps(1); }
+    .wordmark::after   { animation: ghostG 5.8s infinite steps(1); }
   }
-  /* 本体がときどき歪む */
   @keyframes jolt {
-    0%, 88.9%, 93.1%, 100% { transform: none; }
-    89%   { transform: skewX(-6deg) translateX(2px); }
-    89.6% { transform: skewX(4deg); }
-    90.2% { transform: none; }
-    91.5% { transform: translateX(-2px); }
-    92.1% { transform: none; }
+    0%, 91.9%, 95.1%, 100% { transform: none; }
+    92%   { transform: translateX(2px) skewX(-3deg); }
+    92.8% { transform: translateX(-1px); }
+    93.6% { transform: none; }
+    94.2% { transform: translateX(1px); }
   }
-  /* マゼンタのゴースト */
-  @keyframes ghostM {
-    0%, 88.9%, 93.6%, 100% { opacity: 0; }
-    89%   { opacity:.85; transform: translate(4px, 0);   clip-path: inset(8% 0 64% 0); }
-    89.8% { opacity:.85; transform: translate(-3px, 1px); clip-path: inset(52% 0 22% 0); }
-    90.6% { opacity:.6;  transform: translate(2px, -1px); clip-path: inset(28% 0 48% 0); }
-    91.6% { opacity:.85; transform: translate(-4px, 0);  clip-path: inset(70% 0 6% 0); }
-    92.4% { opacity:.5;  transform: translate(3px, 0);   clip-path: inset(14% 0 70% 0); }
+  @keyframes ghostR {
+    0%, 91.9%, 95.4%, 100% { opacity: 0; }
+    92%   { opacity:.7; transform: translate(3px,0);  clip-path: inset(10% 0 58% 0); }
+    93%   { opacity:.7; transform: translate(-3px,0); clip-path: inset(56% 0 16% 0); }
+    94%   { opacity:.45; transform: translate(2px,0); clip-path: inset(30% 0 42% 0); }
   }
-  /* シアンのゴースト */
-  @keyframes ghostC {
-    0%, 88.9%, 93.6%, 100% { opacity: 0; }
-    89.3% { opacity:.85; transform: translate(-4px, 0);  clip-path: inset(60% 0 14% 0); }
-    90.1% { opacity:.85; transform: translate(3px, -1px); clip-path: inset(4% 0 76% 0); }
-    90.9% { opacity:.6;  transform: translate(-2px, 1px); clip-path: inset(38% 0 40% 0); }
-    91.9% { opacity:.85; transform: translate(4px, 0);   clip-path: inset(22% 0 58% 0); }
-    92.7% { opacity:.5;  transform: translate(-3px, 0);  clip-path: inset(80% 0 2% 0); }
+  @keyframes ghostG {
+    0%, 91.9%, 95.4%, 100% { opacity: 0; }
+    92.4% { opacity:.6; transform: translate(-3px,0); clip-path: inset(64% 0 8% 0); }
+    93.4% { opacity:.6; transform: translate(3px,0);  clip-path: inset(2% 0 74% 0); }
+    94.4% { opacity:.4; transform: translate(-2px,0); clip-path: inset(40% 0 34% 0); }
   }
-
-  .status {
-    margin-top: 20px;
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: .5em;
-    color: var(--ink-soft);
-    text-transform: uppercase;
+  .fig-cap {
+    margin-top: 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
+    color: var(--ink-soft); text-transform: uppercase;
   }
-  .status::after {
-    content: "▮";
-    letter-spacing: 0;
-    margin-left: .2em;
-    color: var(--grn);
-  }
+  .fig-cap::after { content: "▮"; margin-left: .3em; color: var(--red); }
   @media (prefers-reduced-motion: no-preference) {
-    .status::after { animation: blink 1.1s steps(2) infinite; }
+    .fig-cap::after { animation: blink 1.2s steps(2) infinite; }
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ---- リンク ---- */
-  .links { display: flex; flex-direction: column; gap: 12px; }
+  /* ---- リンク＝図面の索引リスト ---- */
+  .links {
+    width: 100%;
+    display: flex; flex-direction: column;
+    margin-top: 26px;
+  }
   .link {
-    display: block;
-    padding: 1px;
-    background: var(--line);
-    clip-path: polygon(
-      var(--cut) 0, 100% 0,
-      100% calc(100% - var(--cut)),
-      calc(100% - var(--cut)) 100%,
-      0 100%, 0 var(--cut)
-    );
+    display: flex; align-items: center; gap: 16px;
+    height: 54px;
+    border-top: 1px solid var(--line);
     text-decoration: none;
     color: var(--ink);
-    transition: transform .13s ease, background .15s;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
+    transition: background .15s, padding-left .15s;
+    position: relative;
   }
-  .link .in {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    height: 58px;
-    padding: 0 24px;
-    background: rgba(255,255,255,.92);
-    clip-path: polygon(
-      var(--cut) 0, 100% 0,
-      100% calc(100% - var(--cut)),
-      calc(100% - var(--cut)) 100%,
-      0 100%, 0 var(--cut)
-    );
+  .link:last-of-type { border-bottom: 1px solid var(--line); }
+  .link .idx { font-family: var(--mono); font-size: 10px; font-weight: 400; color: var(--ink-soft); width: 2.2em; }
+  .link .lead { flex: 1; border-top: 1px dotted var(--faint); margin-top: 2px; }
+  .link .mk { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+  .link:hover { background: #f3f3f4; padding-left: 10px; }
+  .link:hover .idx { color: var(--red); }
+  .link:hover .mk { color: var(--red); }
+  .link:active { background: #ececee; }
+
+  /* PLUGINS＝主索引 */
+  .link.primary {
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink) !important;
+    height: 60px;
     font-size: 14px;
-    font-weight: 700;
-    letter-spacing: .22em;
-    text-transform: uppercase;
-    transition: background .15s, color .15s;
   }
-  .link .idx {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .15em;
-    color: var(--ink-soft);
-  }
-  .link .arrow { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
-
-  .link:hover { transform: translateY(-2px); background: var(--ink); }
-  .link:hover .in { background: var(--ink); color: #fff; text-shadow: 2px 0 var(--cyan), -2px 0 var(--mag); }
-  .link:hover .idx, .link:hover .arrow { color: rgba(255,255,255,.6); }
-  .link:active { transform: translateY(0) scale(.99); }
-
-  /* PLUGINS＝主役 */
-  .link.primary { background: var(--ink); }
-  .link.primary .in { background: var(--ink); color: #fff; }
-  .link.primary .idx { color: rgba(255,255,255,.5); }
-  .link.primary .tag {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .25em;
-    color: var(--grn);
-  }
-  .link.primary:hover .in { background: #fff; color: var(--ink); text-shadow: 2px 0 var(--mag), -2px 0 var(--cyan); }
-  .link.primary:hover .tag { color: #1f8f42; }
+  .link.primary .mk { color: var(--red); font-weight: 700; letter-spacing: .18em; }
+  .link.primary:hover { background: var(--ink); color: #fff; }
+  .link.primary:hover .idx { color: rgba(255,255,255,.6); }
+  .link.primary:hover .lead { border-color: rgba(255,255,255,.3); }
 
   /* URL未設定（準備中） */
-  .link.soon { pointer-events: none; background: #e8e8ee; }
-  .link.soon .in { background: rgba(252,252,254,.9); color: #c3c3cc; }
-  .link.soon .idx { color: #d3d3db; }
-  .link.soon .soon-tag {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: .22em;
-    color: #d3d3db;
-  }
+  .link.soon { pointer-events: none; color: #c6c6cd; }
+  .link.soon .idx, .link.soon .mk { color: #d4d4da; }
 
+  /* ---- フッター（スケールバー＋ページ番号） ---- */
   footer {
-    padding: 28px 0 34px;
-    font-size: 11px;
-    letter-spacing: .3em;
-    color: var(--ink-soft);
-    font-family: var(--mono);
-    position: relative;
-    z-index: 1;
+    width: 100%; max-width: 560px;
+    padding: 40px 30px 30px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+  .scale { font-family: var(--mono); font-size: 9px; color: var(--ink-soft); }
+  .scale svg { display: block; margin-bottom: 4px; }
+  .pageno { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--ink); }
+  .copyright { font-family: var(--mono); font-size: 9px; letter-spacing: .22em; color: var(--ink-soft); }
+
+  @media (max-width: 640px) {
+    .coord.hide-m, .side-cap { display: none; }
+    .doc-head { left: 24px; }
+    main { padding-top: 64px; }
   }
 </style>
 </head>
 <body>
 
-<div class="glitch-bar" aria-hidden="true"></div>
-<div class="glitch-bar b2" aria-hidden="true"></div>
+<span class="reg tl"></span><span class="reg tr"></span><span class="reg bl"></span><span class="reg br"></span>
+
+<div class="doc-head"><span class="bar"></span> index — 01</div>
+<div class="side-cap">WHY3K — official index</div>
+
+<span class="coord" style="top:16%; left:7%;">1223 : 378</span>
+<span class="coord hide-m" style="top:11%; right:12%;">2138 : 2234</span>
+<span class="coord hide-m" style="top:42%; left:4%;">3373 : 3448</span>
+<span class="coord" style="bottom:24%; right:6%;">1049 : 2448</span>
+<span class="coord hide-m" style="bottom:12%; left:9%;">7523 : 4138</span>
 
 <main>
-  <div class="mark">
-    <h1 class="wordmark" data-text="WHY3K">WHY3K</h1>
-    <div class="status">Online</div>
+  <!-- ===== 図版 ===== -->
+  <div class="figure" aria-hidden="false">
+    <svg viewBox="0 0 600 492" fill="none" aria-hidden="true">
+      <!-- 中心軸 -->
+      <line x1="300" y1="16" x2="300" y2="476" stroke="#131316" stroke-width="2"/>
+      <circle cx="300" cy="70"  r="4.5" fill="#131316"/>
+      <circle cx="300" cy="246" r="6"   fill="#131316"/>
+      <circle cx="300" cy="420" r="4.5" fill="#131316"/>
+
+      <!-- 軌道群A（ゆっくり順回転） -->
+      <g class="orbitA">
+        <ellipse cx="300" cy="246" rx="238" ry="64" stroke="#1a1a1f" stroke-width="1"  opacity=".7" transform="rotate(-14 300 246)"/>
+        <ellipse cx="300" cy="246" rx="150" ry="44" stroke="#1a1a1f" stroke-width=".8" opacity=".55" transform="rotate(26 300 246)"/>
+        <circle cx="472" cy="204" r="3" fill="#131316"/>
+        <circle cx="176" cy="292" r="2" fill="#131316"/>
+      </g>
+      <!-- 軌道群B（逆回転・淡い） -->
+      <g class="orbitB">
+        <ellipse cx="300" cy="246" rx="206" ry="110" stroke="#1a1a1f" stroke-width=".7" opacity=".35" transform="rotate(-38 300 246)"/>
+        <ellipse cx="300" cy="246" rx="120" ry="86"  stroke="#1a1a1f" stroke-width=".6" opacity=".28" stroke-dasharray="1 4" transform="rotate(52 300 246)"/>
+        <circle cx="404" cy="140" r="2.4" fill="#131316" opacity=".7"/>
+      </g>
+
+      <!-- 赤の点線アーク（差し色） -->
+      <g class="redarc">
+        <path d="M 138 128 A 210 210 0 0 1 402 78"  stroke="#d21f12" stroke-width="1.3" stroke-dasharray="2 6"/>
+        <path d="M 462 372 A 210 210 0 0 1 208 428" stroke="#d21f12" stroke-width="1.3" stroke-dasharray="2 6"/>
+        <path d="M 402 78 l -12 -2 m 12 2 l -8 9"   stroke="#d21f12" stroke-width="1.3"/>
+        <path d="M 208 428 l 12 2 m -12 -2 l 8 -9"  stroke="#d21f12" stroke-width="1.3"/>
+      </g>
+
+      <!-- 引き出し線ラベル -->
+      <g font-family="Menlo, monospace" font-size="9" fill="#9a9aa3">
+        <line x1="452" y1="150" x2="536" y2="150" stroke="#c9c9d0" stroke-width=".75"/>
+        <text x="540" y="153">arc 1</text>
+        <line x1="470" y1="300" x2="536" y2="300" stroke="#c9c9d0" stroke-width=".75"/>
+        <text x="540" y="303">arc 2</text>
+        <line x1="140" y1="360" x2="64" y2="360" stroke="#c9c9d0" stroke-width=".75"/>
+        <text x="14" y="363">node</text>
+        <line x1="300" y1="70" x2="236" y2="46" stroke="#c9c9d0" stroke-width=".75"/>
+        <text x="188" y="43">carrier</text>
+      </g>
+    </svg>
+
+    <!-- ワードマーク（軸線の上に抜きで載る） -->
+    <div class="wordwrap">
+      <h1 class="wordmark" data-text="WHY3K">WHY3K</h1>
+    </div>
   </div>
 
+  <div class="fig-cap">fig. 01 — official index</div>
+
+  <!-- ===== 索引リスト ===== -->
   <nav class="links" aria-label="WHY3K links">
-    <!-- ↓ URLが決まったら href="#" を差し替えて class="link soon" → class="link" にし、SOONタグを arrow に変える -->
+    <!-- ↓ URLが決まったら href="#" を差し替えて class="link soon" → class="link" にし、SOON を → に変える -->
 
     <!-- TODO: X のURL -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">01</span> X <span class="soon-tag">SOON</span></span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">01</span> X <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- TODO: Instagram のURL -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">02</span> Instagram <span class="soon-tag">SOON</span></span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">02</span> Instagram <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- TODO: TikTok のURL -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">03</span> TikTok <span class="soon-tag">SOON</span></span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">03</span> TikTok <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- TODO: Spotify（アーティストページ）のURL -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">04</span> Spotify <span class="soon-tag">SOON</span></span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">04</span> Spotify <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- TODO: YouTube のURL -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">05</span> YouTube <span class="soon-tag">SOON</span></span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">05</span> YouTube <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- TODO: SoundCloud のURL -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="in"><span class="idx">06</span> SoundCloud <span class="soon-tag">SOON</span></span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">06</span> SoundCloud <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- PLUGINS（稼働中） -->
     <a class="link primary" href="https://why3k.github.io/why3k-plugins/">
-      <span class="in"><span class="idx">07</span> WHY3K PLUGINS <span class="tag">FREE</span></span>
+      <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">FREE →</span>
     </a>
   </nav>
 </main>
 
-<footer>© <span id="yr"></span> WHY3K</footer>
+<footer>
+  <div class="scale">
+    <svg width="120" height="8" viewBox="0 0 120 8">
+      <line x1="0" y1="7" x2="120" y2="7" stroke="#9a9aa3" stroke-width="1"/>
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#9a9aa3" stroke-width="1"/>
+      <line x1="40" y1="3" x2="40" y2="7" stroke="#9a9aa3" stroke-width="1"/>
+      <line x1="80" y1="3" x2="80" y2="7" stroke="#9a9aa3" stroke-width="1"/>
+      <line x1="120" y1="0" x2="120" y2="7" stroke="#9a9aa3" stroke-width="1"/>
+    </svg>
+    0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;&nbsp;&nbsp;&nbsp;150
+  </div>
+  <div class="copyright">© <span id="yr"></span> WHY3K</div>
+  <div class="pageno">01</div>
+</footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 </body>
