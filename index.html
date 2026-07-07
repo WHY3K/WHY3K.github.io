@@ -152,8 +152,21 @@
     z-index: 1;
   }
 
+  /* ---- カーソル追従の十字線＋座標 ---- */
+  .cursor-x, .cursor-y { position: fixed; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .3s; }
+  .cursor-x { top: 0; bottom: 0; width: 1px; background: rgba(19,19,22,.18); }
+  .cursor-y { left: 0; right: 0; height: 1px; background: rgba(19,19,22,.18); }
+  .cursor-tag {
+    position: fixed; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .3s;
+    font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--red);
+    transform: translate(12px, 14px);
+    white-space: nowrap;
+  }
+  body.has-pointer .cursor-x, body.has-pointer .cursor-y, body.has-pointer .cursor-tag { opacity: 1; }
+  @media (pointer: coarse) { .cursor-x, .cursor-y, .cursor-tag { display: none; } }
+
   /* ---- 図版 ---- */
-  .figure { position: relative; width: min(92vw, 540px); aspect-ratio: 1 / .86; }
+  .figure { position: relative; width: min(92vw, 540px); aspect-ratio: 1 / .86; will-change: transform; }
   .figure svg { position:absolute; inset:0; width:100%; height:100%; }
   @media (prefers-reduced-motion: no-preference) {
     .orbitA { animation: spin 90s linear infinite; transform-origin: 300px 258px; }
@@ -178,15 +191,14 @@
     letter-spacing: .04em;
     line-height: 1.15;
     color: var(--ink);
-    background: var(--paper);
-    padding: 2px 16px 6px;
+    padding: 2px 6px 6px;
     border-bottom: 4px solid var(--ink);
   }
   .wordmark::before,
   .wordmark::after {
     content: attr(data-text);
     position: absolute; left: 0; top: 2px;
-    width: 100%; padding: 0 16px;
+    width: 100%; padding: 0 6px;
     opacity: 0; pointer-events: none;
   }
   .wordmark::before { color: var(--red); }
@@ -408,9 +420,13 @@ z ----</div>
   <div class="patch hide-m"    style="bottom:40%; right:18%; width:10%; height:120px;"></div>
 </div>
 
+<div class="cursor-x" aria-hidden="true"></div>
+<div class="cursor-y" aria-hidden="true"></div>
+<div class="cursor-tag" aria-hidden="true">0000 : 0000</div>
+
 <main>
   <!-- ===== 図版 ===== -->
-  <div class="figure">
+  <div class="figure" id="fig">
     <svg viewBox="0 0 600 516" fill="none" aria-hidden="true">
       <!-- 中心軸＋目盛り -->
       <line x1="300" y1="12" x2="300" y2="504" stroke="#131316" stroke-width="2"/>
@@ -535,6 +551,61 @@ z ----</div>
   <div class="pageno">01</div>
 </footer>
 
-<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ===== 生きてる感：マウス追従（3Dチルト＋パララックス＋十字線） ===== */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  var fig     = document.getElementById('fig');
+  var scatter = document.querySelector('.scatter');
+  var blades  = document.querySelector('.blades svg');
+  var cx = document.querySelector('.cursor-x');
+  var cy = document.querySelector('.cursor-y');
+  var tag = document.querySelector('.cursor-tag');
+
+  var tX = 0, tY = 0;          // 目標（-0.5〜0.5）
+  var vX = 0, vY = 0;          // 現在値（lerp）
+  var lastMove = 0;
+
+  window.addEventListener('pointermove', function (e) {
+    tX = e.clientX / window.innerWidth  - 0.5;
+    tY = e.clientY / window.innerHeight - 0.5;
+    lastMove = performance.now();
+    document.body.classList.add('has-pointer');
+    cx.style.left = e.clientX + 'px';
+    cy.style.top  = e.clientY + 'px';
+    tag.style.left = e.clientX + 'px';
+    tag.style.top  = e.clientY + 'px';
+    tag.textContent = String(e.clientX).padStart(4, '0') + ' : ' + String(e.clientY).padStart(4, '0');
+  }, { passive: true });
+
+  window.addEventListener('pointerleave', function () {
+    document.body.classList.remove('has-pointer');
+  });
+
+  function loop(now) {
+    // 3秒以上動きがなければ自律的にゆっくり漂う（スマホ含む）
+    if (now - lastMove > 3000) {
+      tX = Math.sin(now * 0.00023) * 0.14;
+      tY = Math.cos(now * 0.00017) * 0.10;
+    }
+    vX += (tX - vX) * 0.055;
+    vY += (tY - vY) * 0.055;
+
+    fig.style.transform =
+      'perspective(900px) rotateY(' + (vX * 20) + 'deg) rotateX(' + (-vY * 16) + 'deg)';
+    if (scatter) scatter.style.transform =
+      'translate(' + (vX * -26) + 'px,' + (vY * -20) + 'px)';
+    if (blades) blades.style.transform =
+      'translate(' + (vX * -48) + 'px,' + (vY * -36) + 'px) scale(1.08)';
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
 </body>
 </html>
