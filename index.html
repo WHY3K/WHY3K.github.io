@@ -161,7 +161,7 @@
   @supports (height: 100lvh) {
     body::before { bottom: auto; height: 100lvh; }
     .scatter, .blades { bottom: auto; height: 100lvh; }
-    .cosmos { bottom: auto; height: 112lvh; }
+    .cosmos { top: -6lvh; bottom: auto; height: 112lvh; } /* top:-6%はバー伸縮でズレるのでlvhに */
     .ruler { bottom: auto; height: 100lvh; }
     .side-cap { top: 50lvh; }
   }
