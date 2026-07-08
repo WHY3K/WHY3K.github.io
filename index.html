@@ -25,6 +25,7 @@
     --faint: #c9c9d0;
     --line: #e2e2e7;
     --acc: #2f9fd0;   /* 氷青 — ガラス/宇宙のアクセント（旧: 赤） */
+    --red: #d21f12;   /* 赤 — グリッチ残像とFREEだけに使う */
     --blue: rgba(132,162,214,.14);
     --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
     --disp: "Cormorant", serif;
@@ -286,7 +287,7 @@
     width: 100%; padding: 0 6px;
     opacity: 0; pointer-events: none;
   }
-  .wordmark::before { color: var(--acc); }
+  .wordmark::before { color: var(--red); }
   .wordmark::after  { color: #b0b0b8; }
   @media (prefers-reduced-motion: no-preference) {
     .wordmark          { animation: jolt 4.6s infinite steps(1); }
@@ -384,7 +385,7 @@
     text-transform: uppercase; color: var(--ink);
     border: 1px solid var(--ink); padding: 6px 12px 5px;
   }
-  .f-tag b { color: var(--acc); font-weight: 400; }
+  .f-tag b { color: var(--red); font-weight: 400; }
   .f-title {
     font-family: var(--disp); font-weight: 700;
     font-size: clamp(40px, 9vw, 58px); line-height: 1.02; letter-spacing: .02em;
@@ -528,6 +529,34 @@
     .topnav a.soon { color: #c6c6cd; pointer-events: none; }
     .topnav a.soon .no { color: #d4d4da; }
     .topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
+  }
+
+  /* ---- スマホ/タブレット用ヘッダー（中央ブランドのみ） ---- */
+  @media (max-width: 999px) {
+    .topnav {
+      display: flex;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 3;
+      height: 48px;
+      align-items: center; justify-content: center;
+      background: rgba(251,251,250,.78);
+      -webkit-backdrop-filter: blur(7px);
+      backdrop-filter: blur(7px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topnav a:not(.brand) { display: none; } /* ナビ項目はPCのみ */
+    .topnav .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--disp); font-weight: 700; font-size: 17px;
+      letter-spacing: .06em; text-transform: none;
+      color: var(--ink); text-decoration: none;
+      white-space: nowrap;
+    }
+    .topnav .brand i { display: block; }
+    .topnav .brand .ln { width: 20px; height: 1px; background: var(--faint); }
+    .topnav .brand .d2 { width: 4px; height: 4px; background: var(--acc); }
+    .doc-head { font-size: 0; z-index: 4; } /* 文字は隠して黒バーだけ柄として残す */
+    .reg.tl, .reg.tr { z-index: 4; }
+    main { padding-top: 84px; }
   }
 
   /* ===== デスクトップ（≥1000px）：見開きレイアウト =====
