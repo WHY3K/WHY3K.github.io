@@ -531,12 +531,12 @@
   html.backnav .warp { visibility: visible; opacity: 1; } /* 戻り直後は白から */
   .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .32s ease; }
 
-  /* 出発：図版以外が溶けて消える */
-  body.depart .links, body.depart .fig-cap, body.depart .feature,
-  body.depart .ticker, body.depart footer,
-  body.depart .scatter, body.depart .cosmos, body.depart .blades,
-  body.depart .ink, body.depart .ruler, body.depart .side-cap,
-  body.depart .topnav, body.depart .doc-head, body.depart .head-bar2 {
+  /* 第0幕（.summon）：図版以外が溶けて消える */
+  body.summon .links, body.summon .fig-cap, body.summon .feature,
+  body.summon .ticker, body.summon footer,
+  body.summon .scatter, body.summon .cosmos, body.summon .blades,
+  body.summon .ink, body.summon .ruler, body.summon .side-cap,
+  body.summon .topnav, body.summon .doc-head, body.summon .head-bar2 {
     opacity: 0 !important; transition: opacity .3s ease;
   }
   /* 出発：軌道が高速回転しつつ墨→ガラス淡色に */
@@ -551,9 +551,9 @@
   body.depart .figure svg [stroke]:not([stroke="none"]) { stroke: #9fc0dc; }
   body.depart .figure svg [fill="#131316"], body.depart .figure svg [fill="#1a1a1f"] { fill: #bcb3e3; }
   body.depart .wordmark { color: #8fb6d6; border-color: #8fb6d6; transition: color .35s, border-color .35s; }
-  /* スマホ：タップ時に図版が画面外にいるので、出発時は画面中央に召喚して演出を見せる */
+  /* スマホ：図版を固定化して画面中央へ（JSのFLIPで現在地からスーッと移動してくる） */
   @media (max-width: 999px) {
-    body.depart .figure {
+    body.summon .figure {
       position: fixed; top: 50%; left: 50%;
       width: min(82vw, 430px);
       margin: 0;
@@ -561,7 +561,7 @@
       z-index: 98; /* 白幕(99)のすぐ下 */
     }
     /* 図版が抜けた穴を同じ高さで埋める＝下のコンテンツが跳ね上がらない */
-    body.depart main::before {
+    body.summon main::before {
       content: ""; display: block;
       height: calc(min(92vw, 540px) * .86);
     }
@@ -1257,7 +1257,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r60</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r61</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1344,16 +1344,41 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var pt = document.querySelector('.warp');
   function departTo(href) {
-    document.body.classList.add('depart'); /* 第1幕：溶解+グリッチ+回転 */
-    setTimeout(function () { document.body.classList.add('depart2'); }, 280); /* 第2幕：加速+ダイブ */
-    if (pt) pt.classList.add('in');        /* 最後に白へ */
+    var mobile = window.matchMedia('(max-width: 999px)').matches;
+    var fig = document.querySelector('.figure');
+
+    if (mobile && fig) {
+      /* 第0幕：いまいる場所から画面中央へスーッと移動（FLIP） */
+      var r1 = fig.getBoundingClientRect();
+      document.body.classList.add('summon');
+      var r2 = fig.getBoundingClientRect();
+      var dx = (r1.left + r1.width / 2) - (r2.left + r2.width / 2);
+      var dy = (r1.top + r1.height / 2) - (r2.top + r2.height / 2);
+      var sc0 = r2.width ? (r1.width / r2.width) : 1;
+      fig.style.transition = 'none';
+      fig.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + sc0 + ')';
+      void fig.offsetWidth;
+      fig.style.transition = 'transform .45s cubic-bezier(.22, .8, .3, 1)';
+      fig.style.transform = ''; /* CSSの中央定位置へ */
+    } else {
+      document.body.classList.add('summon');
+    }
+
+    var t1 = mobile ? 460 : 0;   /* 第1幕開始（グリッチ+回転+白開始） */
+    var t2 = t1 + 280;           /* 第2幕（加速+ダイブ） */
+    var tGo = t1 + 720;          /* 遷移 */
+    setTimeout(function () {
+      document.body.classList.add('depart');
+      if (pt) pt.classList.add('in');
+    }, t1);
+    setTimeout(function () { document.body.classList.add('depart2'); }, t2);
     setTimeout(function () {
       /* 白の下でこっそり最上部へ（戻り時のスナップショットを綺麗にする） */
       var sc = document.querySelector('.scroller');
       if (sc) sc.scrollTop = 0;
       window.scrollTo(0, 0);
       window.location.href = href;
-    }, 750);
+    }, tGo);
   }
   document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
@@ -1367,6 +1392,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
   window.addEventListener('pageshow', function () {
     document.body.classList.remove('depart'); /* 出発演出の残骸を掃除 */
     document.body.classList.remove('depart2');
+    document.body.classList.remove('summon');
+    var fig = document.querySelector('.figure');
+    if (fig) { fig.style.transition = ''; fig.style.transform = ''; }
     link.classList.remove('wiping');
   });
 })();
