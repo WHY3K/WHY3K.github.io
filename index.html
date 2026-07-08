@@ -196,12 +196,27 @@
   .stripeblk { position: absolute; background: repeating-linear-gradient(45deg, var(--ink) 0 5px, transparent 5px 12px); }
   .term { letter-spacing: .12em; }
   .term b { font-weight: 400; color: var(--ink); }
+  /* バーコード柄（2種の縞を重ねて不規則に見せる） */
+  .bcode {
+    position: absolute;
+    background:
+      repeating-linear-gradient(90deg, #131316 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(90deg, #131316 0 1px, transparent 1px 7px);
+    opacity: .5;
+  }
+  .bcode::after {
+    content: attr(data-n);
+    position: absolute; left: 0; right: 0; top: 100%;
+    margin-top: 3px;
+    font-family: var(--mono); font-size: 7px; letter-spacing: .3em;
+    color: #b3b3bb; text-align: center; white-space: nowrap;
+  }
 
-  /* ---- QR（柄として置いてあるが、実は本物：PLUGINSに飛ぶ） ---- */
+  /* ---- QR（ページ最下部左の柄。実は本物：PLUGINSに飛ぶ） ---- */
   .qr {
-    position: fixed; bottom: 84px; left: 40px; z-index: 2; width: 60px;
+    width: 56px;
     text-decoration: none; color: var(--ink);
-    opacity: .92;
+    opacity: .85;
   }
   .qr img { width: 100%; display: block; }
   .qr small { display: block; margin-top: 5px; font-family: var(--mono); font-size: 7px; letter-spacing: .18em; color: var(--ink-soft); text-align: center; }
@@ -482,13 +497,7 @@
     }
     .topnav .brand i { display: block; }
     .topnav .brand .ln { width: 34px; height: 1px; background: var(--faint); }
-    .topnav .brand .d1 { width: 5px; height: 5px; border: 1px solid var(--ink); }
     .topnav .brand .d2 { width: 5px; height: 5px; background: var(--red); }
-    .topnav .brand .no3k {
-      font-family: var(--mono); font-size: 8px; font-weight: 400;
-      letter-spacing: .22em; color: var(--ink-soft);
-      align-self: flex-end; margin-bottom: 5px;
-    }
     .topnav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
       display: flex; align-items: center; justify-content: flex-end; gap: 34px;
@@ -701,7 +710,7 @@
 
 <!-- ===== 上部ナビ（PC専用） ===== -->
 <nav class="topnav" aria-label="Primary">
-  <a class="brand" href="/"><i class="d1"></i><i class="ln"></i>WHY3K<span class="no3k">3K—01</span><i class="ln"></i><i class="d2"></i></a>
+  <a class="brand" href="/"><i class="d2"></i><i class="ln"></i>WHY3K<i class="ln"></i><i class="d2"></i></a>
   <a class="active" href="/"><span class="no">01</span>Index</a>
   <a href="https://why3k.github.io/why3k-plugins/"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
@@ -814,6 +823,12 @@ z ----</div>
   <div class="stripeblk hide-m" style="bottom:7%; right:3%; width:54px; height:54px;"></div>
   <div class="stripeblk hide-m" style="top:3%; left:44%; width:26px; height:26px; opacity:.8;"></div>
 
+  <!-- バーコード柄 -->
+  <div class="bcode" data-n="3 0 0 0 1 1 7" style="top:12%; left:52%; width:84px; height:22px;"></div>
+  <div class="bcode hide-m" data-n="0 1 1 7" style="bottom:31%; left:2.5%; width:60px; height:18px; opacity:.4;"></div>
+  <div class="bcode hide-m" data-n="7 5 2 3 4 1" style="bottom:11%; right:37%; width:88px; height:24px;"></div>
+  <div class="bcode hide-m" data-n="2 2 3 1" style="top:36%; right:2%; width:56px; height:16px; opacity:.38;"></div>
+
   <!-- ターミナル風ブロック -->
   <div class="datablock term hide-m" style="top:25%; left:1.5%;"><b>| terminal_</b>
 system ..... WHY3K.v3
@@ -825,12 +840,6 @@ vector ..... 3K-01
 drift ...... 0.02
 phase ...... hold</div>
 </div>
-
-<!-- ===== QR（読み取るとPLUGINSへ） ===== -->
-<a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/" aria-label="WHY3K PLUGINS">
-  <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
-  <small>SCAN</small>
-</a>
 
 <div class="cursor-x" aria-hidden="true"></div>
 <div class="cursor-y" aria-hidden="true"></div>
@@ -990,6 +999,11 @@ phase ...... hold</div>
 </div>
 
 <footer>
+  <!-- QR（柄として。読み取るとPLUGINSへ） -->
+  <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/" aria-label="WHY3K PLUGINS">
+    <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
+    <small>SCAN</small>
+  </a>
   <div class="scale">
     <svg width="120" height="8" viewBox="0 0 120 8">
       <line x1="0" y1="7" x2="120" y2="7" stroke="#9a9aa3" stroke-width="1"/>
