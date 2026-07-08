@@ -529,16 +529,39 @@
     main { padding-top: 70px; }
   }
 
-  /* ---- 全画面ページ遷移オーバーレイ ---- */
+  /* ---- 全画面ページ遷移「日蝕ワープ」（黒い円が画面を飲み込む/開く） ---- */
   .pt {
     position: fixed; inset: 0; z-index: 99;
-    background: var(--ink);
-    transform: translateX(-103%);
+    background:
+      radial-gradient(1.5px 1.5px at 18% 22%, rgba(255,255,255,.9), transparent 60%),
+      radial-gradient(1px 1px at 72% 15%, rgba(255,255,255,.7), transparent 60%),
+      radial-gradient(1.2px 1.2px at 85% 65%, rgba(255,255,255,.8), transparent 60%),
+      radial-gradient(1px 1px at 30% 78%, rgba(255,255,255,.6), transparent 60%),
+      radial-gradient(1.4px 1.4px at 55% 40%, rgba(255,255,255,.85), transparent 60%),
+      radial-gradient(1px 1px at 8% 55%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(1.2px 1.2px at 45% 90%, rgba(255,255,255,.7), transparent 60%),
+      radial-gradient(1px 1px at 92% 35%, rgba(255,255,255,.6), transparent 60%),
+      #0b0b0d;
+    clip-path: circle(0% at 50% 50%);
+    visibility: hidden;
     pointer-events: none;
   }
-  .pt.in { transform: translateX(0); transition: transform .22s cubic-bezier(.76,0,.24,1); }
-  html.backnav .pt { transform: translateX(0); } /* 戻り直後は黒で覆った状態から始める */
-  .pt.out { transform: translateX(103%) !important; transition: transform .3s cubic-bezier(.76,0,.24,1); }
+  .pt::before { /* 白いオービットリングが広がる */
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 34vmin; height: 34vmin; margin: -17vmin 0 0 -17vmin;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.35);
+    box-shadow: inset 0 0 24px rgba(170,201,227,.25);
+    transform: scale(.2); opacity: 0;
+  }
+  .pt.in { visibility: visible; animation: ptIn .38s cubic-bezier(.76,0,.24,1) forwards; }
+  .pt.in::before { animation: ringIn .5s ease-out forwards; }
+  html.backnav .pt { visibility: visible; clip-path: circle(142% at 50% 50%); } /* 戻り直後は黒から */
+  .pt.out { visibility: visible; animation: ptOut .46s cubic-bezier(.65,0,.35,1) forwards; }
+  .pt.out::before { animation: ringIn .5s ease-out forwards; }
+  @keyframes ptIn  { from { clip-path: circle(0% at 50% 50%); }   to { clip-path: circle(142% at 50% 50%); } }
+  @keyframes ptOut { from { clip-path: circle(142% at 50% 50%); } to { clip-path: circle(0% at 50% 50%); } }
+  @keyframes ringIn { 0% { transform: scale(.2); opacity: 0; } 40% { opacity: .9; } 100% { transform: scale(2.6); opacity: 0; } }
 
   /* 戻る遷移中はスクロールを封鎖して位置ゼロで描画させる */
   html.backnav .scroller { overflow-y: clip !important; } /* clipはscrollTop書き込み自体が不能 */
@@ -1281,7 +1304,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       if (sc) sc.scrollTop = 0;
       window.scrollTo(0, 0);
       window.location.href = href;
-    }, 250);
+    }, 400);
   }
   document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
