@@ -539,11 +539,6 @@
   body.summon .topnav, body.summon .doc-head, body.summon .head-bar2 {
     opacity: 0 !important; transition: opacity .3s ease;
   }
-  /* 出発：軌道が高速回転しつつ墨→ガラス淡色に */
-  body.depart .orbitA { animation-duration: .9s !important; }
-  body.depart .orbitB { animation-duration: 1.3s !important; }
-  body.depart .orbitC { animation-duration: 1.7s !important; }
-  body.depart .redarc { animation-duration: .7s !important; }
   body.depart .figure svg { transform: scale(1.08); transition: transform .6s cubic-bezier(.4,0,.6,1); }
   /* スマホ：図版を固定化して画面中央へ（JSのFLIPで現在地からスーッと移動してくる） */
   @media (max-width: 999px) {
@@ -590,11 +585,7 @@
     62% { opacity: 0; }
     80% { opacity: .7; transform: translate(-6px, 0); clip-path: inset(30% 0 30% 0); }
   }
-  /* 第2幕：さらに加速＋軌道の中心へダイブ */
-  body.depart2 .orbitA { animation-duration: .32s !important; }
-  body.depart2 .orbitB { animation-duration: .48s !important; }
-  body.depart2 .orbitC { animation-duration: .62s !important; }
-  body.depart2 .redarc { animation-duration: .26s !important; }
+  /* 第2幕：軌道の中心へダイブ（回転はJSがなめらかに加速） */
   body.depart2 .figure svg { transform: scale(1.75); transition: transform .65s cubic-bezier(.5, 0, .8, .45); }
   /* 第3幕：着地の減速（戻ってきた直後だけ速く回っていて、静けさに戻る） */
   body.arrive .orbitA { animation-duration: 1.4s !important; }
@@ -1251,7 +1242,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r63</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r64</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1372,11 +1363,37 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       document.body.classList.add('summon');
     }
 
+    /* 軌道の加速回転：ほぼ静止から巻き上がる */
+    var groups = [
+      { el: fig && fig.querySelector('.orbitA'), dir: 1,  v: 3 },
+      { el: fig && fig.querySelector('.orbitB'), dir: -1, v: 2 },
+      { el: fig && fig.querySelector('.orbitC'), dir: 1,  v: 1.5 },
+      { el: fig && fig.querySelector('.redarc'), dir: -1, v: 4 }
+    ];
+    function startSpin() {
+      groups.forEach(function (g) { if (g.el) { g.el.style.animation = 'none'; g.a = 0; } });
+      var t0 = performance.now(), last = t0;
+      function frame(now) {
+        var dt = (now - last) / 1000; last = now;
+        var t = (now - t0) / 1000;
+        var accel = 1400 * t; /* 加速度自体が増える＝どんどん速く */
+        groups.forEach(function (g) {
+          if (!g.el) return;
+          g.v += accel * dt;
+          g.a += g.dir * g.v * dt;
+          g.el.style.transform = 'rotate(' + g.a + 'deg)';
+        });
+        window.__w3kSpin = requestAnimationFrame(frame);
+      }
+      window.__w3kSpin = requestAnimationFrame(frame);
+    }
+
     var t1 = mobile ? 460 : 0;   /* 第1幕開始（グリッチ+回転+白開始） */
     var t2 = t1 + 300;           /* 第2幕（加速+ダイブ+白開始） */
     var tGo = t1 + 960;          /* 遷移（ダイブを見せ切ってから） */
     setTimeout(function () {
       document.body.classList.add('depart');
+      startSpin(); /* ほぼ静止→巻き上がる回転 */
     }, t1);
     setTimeout(function () {
       document.body.classList.add('depart2');
@@ -1405,6 +1422,11 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     document.body.classList.remove('summon');
     var fig = document.querySelector('.figure');
     if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
+    if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
+    ['.orbitA', '.orbitB', '.orbitC', '.redarc'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (el) { el.style.animation = ''; el.style.transform = ''; }
+    });
     link.classList.remove('wiping');
   });
 })();
