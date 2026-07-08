@@ -54,6 +54,7 @@
     align-items: center;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    overflow-x: clip; /* sticky対応（hiddenはstickyを壊す） */
     position: relative;
   }
   body::before {
@@ -569,6 +570,9 @@
 
   /* ---- 戻る/進むボタン ---- */
   .topnav .hist { position: fixed; top: 15px; right: 42px; z-index: 5; display: flex; gap: 8px; }
+  @media (max-width: 999px) {
+    .topnav .hist { position: absolute; top: 8px; right: 24px; } /* stickyバーの中に同居 */
+  }
   .topnav .hb {
     display: flex; align-items: center; justify-content: center;
     font-family: var(--mono); font-size: 15px; line-height: 1;
@@ -586,18 +590,20 @@
 
   /* ---- スマホ/タブレット用ヘッダー（中央ブランドのみ） ---- */
   @media (max-width: 640px) {
-    .topnav .hist { top: 8px; right: 24px; }
     .topnav .hb { padding: 9px 11px; }
   }
   @media (max-width: 999px) {
     .topnav {
       display: flex;
-      position: fixed; top: 0; left: 0; right: 0; z-index: 3;
+      position: sticky; top: 0; z-index: 3; /* fixedはiOSでスクロール時にズレるためsticky */
+      width: 100%;
       height: 48px;
       align-items: center; justify-content: center;
       background: rgba(251,251,250,.94); /* ブラー無し（スクロール負荷対策） */
       border-bottom: 1px solid var(--line);
     }
+    /* stickyでバーが流れの中に入ったぶん、固定飾りは非表示に */
+    .doc-head, .head-bar2 { display: none; }
     .topnav a:not(.brand) { display: none; } /* ナビ項目はPCのみ */
     .topnav .brand {
       display: flex; align-items: center; gap: 10px;
@@ -609,9 +615,8 @@
     .topnav .brand i { display: block; }
     .topnav .brand .ln { width: 20px; height: 1px; background: var(--faint); }
     .topnav .brand .d2 { width: 5px; height: 5px; background: var(--ink); }
-    .doc-head { font-size: 0; z-index: 4; } /* 文字は隠して黒バーだけ柄として残す */
     .reg.tl, .reg.tr { z-index: 4; }
-    main { padding-top: 84px; }
+    main { padding-top: 30px; }
   }
 
   /* スマホ：巨大リングを図版の背後に */
