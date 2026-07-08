@@ -520,39 +520,37 @@
     main { padding-top: 70px; }
   }
 
-  /* ---- 全画面ページ遷移「日蝕ワープ」（黒い円が画面を飲み込む/開く） ---- */
-  .pt {
+  /* ---- ページ遷移「軌道ワープ」：図版以外が溶け、軌道が淡色で高速回転→白 ---- */
+  .warp {
     position: fixed; inset: 0; z-index: 99;
-    background:
-      radial-gradient(1.5px 1.5px at 18% 22%, rgba(255,255,255,.9), transparent 60%),
-      radial-gradient(1px 1px at 72% 15%, rgba(255,255,255,.7), transparent 60%),
-      radial-gradient(1.2px 1.2px at 85% 65%, rgba(255,255,255,.8), transparent 60%),
-      radial-gradient(1px 1px at 30% 78%, rgba(255,255,255,.6), transparent 60%),
-      radial-gradient(1.4px 1.4px at 55% 40%, rgba(255,255,255,.85), transparent 60%),
-      radial-gradient(1px 1px at 8% 55%, rgba(255,255,255,.5), transparent 60%),
-      radial-gradient(1.2px 1.2px at 45% 90%, rgba(255,255,255,.7), transparent 60%),
-      radial-gradient(1px 1px at 92% 35%, rgba(255,255,255,.6), transparent 60%),
-      #0b0b0d;
-    clip-path: circle(0% at 50% 50%);
-    visibility: hidden;
+    background: var(--paper);
+    opacity: 0; visibility: hidden;
     pointer-events: none;
   }
-  .pt::before { /* 白いオービットリングが広がる */
-    content: ""; position: absolute; left: 50%; top: 50%;
-    width: 34vmin; height: 34vmin; margin: -17vmin 0 0 -17vmin;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.35);
-    box-shadow: inset 0 0 24px rgba(170,201,227,.25);
-    transform: scale(.2); opacity: 0;
+  .warp.in { visibility: visible; opacity: 1; transition: opacity .3s ease .34s; }
+  html.backnav .warp { visibility: visible; opacity: 1; } /* 戻り直後は白から */
+  .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .32s ease; }
+
+  /* 出発：図版以外が溶けて消える */
+  body.depart .links, body.depart .fig-cap, body.depart .feature,
+  body.depart .ticker, body.depart footer,
+  body.depart .scatter, body.depart .cosmos, body.depart .blades,
+  body.depart .ink, body.depart .ruler, body.depart .side-cap,
+  body.depart .topnav, body.depart .doc-head, body.depart .head-bar2 {
+    opacity: 0 !important; transition: opacity .3s ease;
   }
-  .pt.in { visibility: visible; animation: ptIn .38s cubic-bezier(.76,0,.24,1) forwards; }
-  .pt.in::before { animation: ringIn .5s ease-out forwards; }
-  html.backnav .pt { visibility: visible; clip-path: circle(142% at 50% 50%); } /* 戻り直後は黒から */
-  .pt.out { visibility: visible; animation: ptOut .46s cubic-bezier(.65,0,.35,1) forwards; }
-  .pt.out::before { animation: ringIn .5s ease-out forwards; }
-  @keyframes ptIn  { from { clip-path: circle(0% at 50% 50%); }   to { clip-path: circle(142% at 50% 50%); } }
-  @keyframes ptOut { from { clip-path: circle(142% at 50% 50%); } to { clip-path: circle(0% at 50% 50%); } }
-  @keyframes ringIn { 0% { transform: scale(.2); opacity: 0; } 40% { opacity: .9; } 100% { transform: scale(2.6); opacity: 0; } }
+  /* 出発：軌道が高速回転しつつ墨→ガラス淡色に */
+  body.depart .orbitA { animation-duration: .9s !important; }
+  body.depart .orbitB { animation-duration: 1.3s !important; }
+  body.depart .orbitC { animation-duration: 1.7s !important; }
+  body.depart .redarc { animation-duration: .7s !important; }
+  body.depart .figure svg { transform: scale(1.08); transition: transform .6s cubic-bezier(.4,0,.6,1); }
+  .figure svg ellipse, .figure svg circle, .figure svg line, .figure svg path, .figure svg g {
+    transition: stroke .35s ease, fill .35s ease;
+  }
+  body.depart .figure svg [stroke]:not([stroke="none"]) { stroke: #9fc0dc; }
+  body.depart .figure svg [fill="#131316"], body.depart .figure svg [fill="#1a1a1f"] { fill: #bcb3e3; }
+  body.depart .wordmark { color: #8fb6d6; border-color: #8fb6d6; transition: color .35s, border-color .35s; }
 
   /* 戻る遷移中はスクロールを封鎖して位置ゼロで描画させる */
   html.backnav .scroller { overflow-y: clip !important; } /* clipはscrollTop書き込み自体が不能 */
@@ -769,7 +767,7 @@
 </head>
 <body>
 
-<div class="pt" aria-hidden="true"></div>
+<div class="warp" aria-hidden="true"></div>
 <span class="reg tl"></span><span class="reg tr"></span><span class="reg bl"></span><span class="reg br"></span>
 
 <!-- ===== 全面を横切る細線（刃） ===== -->
@@ -884,7 +882,7 @@
     <button class="hb" id="histFwd" aria-label="次のページへ" disabled>→</button>
   </span>
   <a class="active" href="/"><span class="no">01</span>Index</a>
-  <a href="https://why3k.github.io/why3k-plugins/?t=20260709x"><span class="no">02</span>Plugins</a>
+  <a href="https://why3k.github.io/why3k-plugins/?t=20260709y"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">04</span>Store<span class="soonmk">SOON</span></a>
 </nav>
@@ -1148,7 +1146,7 @@ phase ...... hold</div>
     <a class="link soon" href="#" aria-disabled="true"><span class="idx">06</span> SoundCloud <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- PLUGINS（稼働中） -->
-    <a class="link primary" href="https://why3k.github.io/why3k-plugins/?t=20260709x">
+    <a class="link primary" href="https://why3k.github.io/why3k-plugins/?t=20260709y">
       <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">→</span>
     </a>
   </nav>
@@ -1163,7 +1161,7 @@ phase ...... hold</div>
       <h2 class="f-title">CountUp Timer</h2>
       <div class="f-sub">max for live device — v1.1 / ableton live</div>
       <p class="f-desc"><span class="nb">再生した瞬間から数えはじめる、</span><span class="nb">Ableton Live用の</span><span class="nb">カウントアップタイマー。</span><span class="nb">ライブや舞台の経過時間を、</span><span class="nb">クリップの隣に</span><span class="nb">ただ置くだけで表示できる。</span></p>
-      <a class="f-btn" href="https://why3k.github.io/why3k-plugins/?t=20260709x">Free Download <span aria-hidden="true">→</span></a>
+      <a class="f-btn" href="https://why3k.github.io/why3k-plugins/?t=20260709y">Free Download <span aria-hidden="true">→</span></a>
     </div>
     <div class="f-display" aria-hidden="true">
       <div class="f-titlebar">
@@ -1185,7 +1183,7 @@ phase ...... hold</div>
 
 <footer>
   <!-- QR（柄として。読み取るとPLUGINSへ） -->
-  <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/?t=20260709x" aria-label="WHY3K PLUGINS">
+  <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/?t=20260709y" aria-label="WHY3K PLUGINS">
     <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
     <small>SCAN</small>
   </a>
@@ -1237,9 +1235,9 @@ window.addEventListener('pageshow', function (e) {
   setTimeout(goTop, 80);
   setTimeout(function () {
     goTop();
-    var pt = document.querySelector('.pt');
+    var pt = document.querySelector('.warp');
     if (pt && document.documentElement.classList.contains('backnav')) {
-      pt.classList.add('out'); /* 黒を右へ払ってページを見せる */
+      pt.classList.add('out'); /* 白をフェードアウトしてページを見せる */
       setTimeout(function () { pt.classList.remove('out'); pt.classList.remove('in'); }, 400);
     }
     document.documentElement.classList.remove('backnav'); /* 封鎖解除 */
@@ -1286,16 +1284,17 @@ document.addEventListener('touchstart', function () {}, { passive: true });
   if (!link) return;
   var reduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var pt = document.querySelector('.pt');
+  var pt = document.querySelector('.warp');
   function departTo(href) {
-    if (pt) pt.classList.add('in'); /* 黒が画面全体を覆う */
+    document.body.classList.add('depart'); /* 図版以外が溶けて軌道が高速回転 */
+    if (pt) pt.classList.add('in');        /* 最後に白へ */
     setTimeout(function () {
-      /* 黒の下でこっそり最上部へ（戻り時のスナップショットを綺麗にする） */
+      /* 白の下でこっそり最上部へ（戻り時のスナップショットを綺麗にする） */
       var sc = document.querySelector('.scroller');
       if (sc) sc.scrollTop = 0;
       window.scrollTo(0, 0);
       window.location.href = href;
-    }, 400);
+    }, 680);
   }
   document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
