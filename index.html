@@ -197,22 +197,14 @@
   .term { letter-spacing: .12em; }
   .term b { font-weight: 400; color: var(--ink); }
 
-  /* ---- QR（本物：PLUGINSに飛ぶ。ホバーで拡大してスキャン可能） ---- */
+  /* ---- QR（柄として置いてあるが、実は本物：PLUGINSに飛ぶ） ---- */
   .qr {
-    position: fixed; bottom: 84px; left: 40px; z-index: 5; width: 68px;
+    position: fixed; bottom: 84px; left: 40px; z-index: 2; width: 60px;
     text-decoration: none; color: var(--ink);
-    background: var(--paper);
-    padding: 6px 6px 4px;
-    border: 1px solid var(--line);
-    transform-origin: bottom left;
-    transition: transform .22s ease, box-shadow .22s ease;
+    opacity: .92;
   }
   .qr img { width: 100%; display: block; }
-  .qr small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 6.5px; letter-spacing: .14em; color: var(--ink-soft); text-align: center; white-space: nowrap; }
-  .qr:hover {
-    transform: scale(2.4);
-    box-shadow: 0 18px 44px -18px rgba(0,0,0,.35);
-  }
+  .qr small { display: block; margin-top: 5px; font-family: var(--mono); font-size: 7px; letter-spacing: .18em; color: var(--ink-soft); text-align: center; }
   .disp {
     position: absolute; border-radius: 50%;
     background:
@@ -482,9 +474,20 @@
     .topnav .brand {
       position: absolute; left: 50%; top: 50%;
       transform: translate(-50%, -50%);
-      font-family: var(--disp); font-weight: 700; font-size: 20px;
+      display: flex; align-items: center; gap: 14px;
+      font-family: var(--disp); font-weight: 700; font-size: 26px;
       letter-spacing: .06em; text-transform: none;
       color: var(--ink); text-decoration: none;
+      white-space: nowrap;
+    }
+    .topnav .brand i { display: block; }
+    .topnav .brand .ln { width: 34px; height: 1px; background: var(--faint); }
+    .topnav .brand .d1 { width: 5px; height: 5px; border: 1px solid var(--ink); }
+    .topnav .brand .d2 { width: 5px; height: 5px; background: var(--red); }
+    .topnav .brand .no3k {
+      font-family: var(--mono); font-size: 8px; font-weight: 400;
+      letter-spacing: .22em; color: var(--ink-soft);
+      align-self: flex-end; margin-bottom: 5px;
     }
     .topnav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
@@ -698,7 +701,7 @@
 
 <!-- ===== 上部ナビ（PC専用） ===== -->
 <nav class="topnav" aria-label="Primary">
-  <a class="brand" href="/">WHY3K</a>
+  <a class="brand" href="/"><i class="d1"></i><i class="ln"></i>WHY3K<span class="no3k">3K—01</span><i class="ln"></i><i class="d2"></i></a>
   <a class="active" href="/"><span class="no">01</span>Index</a>
   <a href="https://why3k.github.io/why3k-plugins/"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
@@ -826,7 +829,7 @@ phase ...... hold</div>
 <!-- ===== QR（読み取るとPLUGINSへ） ===== -->
 <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/" aria-label="WHY3K PLUGINS">
   <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
-  <small>SCAN — PLUGINS</small>
+  <small>SCAN</small>
 </a>
 
 <div class="cursor-x" aria-hidden="true"></div>
@@ -1007,6 +1010,29 @@ phase ...... hold</div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ===== fig.02 のカウントアップ（配布サイトと同じ挙動） ===== */
+(function () {
+  var el = document.querySelector('.f-display .digits');
+  if (!el) return;
+  var reduce = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return; // 動きが苦手な人には静止表示のまま
+  var pad = function (n, l) { n = String(n); while (n.length < l) n = '0' + n; return n; };
+  var start = performance.now();
+  var tick = function (now) {
+    var t = Math.floor(now - start);
+    var ms = t % 1000;
+    var totalSec = Math.floor(t / 1000);
+    var s = totalSec % 60;
+    var m = Math.floor(totalSec / 60) % 60;
+    var h = Math.floor(totalSec / 3600) % 100;
+    el.innerHTML = pad(h, 2) + ':' + pad(m, 2) + ':' + pad(s, 2) +
+      '<b>.' + pad(ms, 3) + '</b>';
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();
 
 /* ===== 生きてる感：マウス追従（3Dチルト＋パララックス＋十字線） ===== */
 (function () {
