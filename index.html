@@ -564,6 +564,13 @@
   /* スマホ：巨大リングを図版の背後に */
   @media (max-width: 640px) {
     .bigring { width: 130vw !important; margin: -65vw 0 0 -68vw !important; top: calc(90px + 47.5vw) !important; opacity: .18 !important; }
+    /* 図版の直下に白いベールを敷いて、軌道の点線のコントラストを守る */
+    .figure::before {
+      content: "";
+      position: absolute; inset: -8%;
+      background: radial-gradient(closest-side, rgba(251,251,250,.92), rgba(251,251,250,.6) 58%, transparent 80%);
+      z-index: -1;
+    }
   }
   /* ===== デスクトップ（≥1000px）：見開きレイアウト =====
      左＝軌道図・右＝索引。中央1カラムをやめて画面全体を誌面として使う */
