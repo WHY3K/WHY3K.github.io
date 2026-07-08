@@ -369,6 +369,38 @@
   /* ---- 全幅データティッカー（PC専用） ---- */
   .ticker { display: none; }
 
+  /* ---- 上部ナビ（PC専用） ---- */
+  .topnav { display: none; }
+  @media (min-width: 1000px) {
+    .head-bar2 { display: none; }
+    .topnav {
+      position: fixed; top: 16px; right: 40px; z-index: 3;
+      display: flex; align-items: center; gap: 34px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+      text-transform: uppercase;
+      padding: 9px 18px 10px;
+      background: rgba(251,251,250,.78);
+      -webkit-backdrop-filter: blur(7px);
+      backdrop-filter: blur(7px);
+      border: 1px solid var(--line);
+    }
+    .topnav a {
+      color: var(--ink); text-decoration: none;
+      position: relative; padding: 4px 0;
+      transition: color .15s;
+    }
+    .topnav a .no { color: var(--ink-soft); margin-right: .7em; font-size: 9px; }
+    .topnav a:hover { color: var(--red); }
+    .topnav a:hover .no { color: var(--red); }
+    .topnav a.active::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -3px;
+      height: 2px; background: var(--ink);
+    }
+    .topnav a.soon { color: #c6c6cd; pointer-events: none; }
+    .topnav a.soon .no { color: #d4d4da; }
+    .topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
+  }
+
   /* ===== デスクトップ（≥1000px）：見開きレイアウト =====
      左＝軌道図・右＝索引。中央1カラムをやめて画面全体を誌面として使う */
   @media (min-width: 1000px) {
@@ -546,6 +578,14 @@
 </div>
 <div class="doc-head"><span class="bar"></span> index — 01</div>
 <div class="head-bar2 hide-m" aria-hidden="true"></div>
+
+<!-- ===== 上部ナビ（PC専用） ===== -->
+<nav class="topnav" aria-label="Primary">
+  <a class="active" href="/"><span class="no">01</span>Index</a>
+  <a href="https://why3k.github.io/why3k-plugins/"><span class="no">02</span>Plugins</a>
+  <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
+  <a class="soon" href="#" aria-disabled="true"><span class="no">04</span>Store<span class="soonmk">SOON</span></a>
+</nav>
 <div class="side-cap">WHY3K — official index</div>
 
 <!-- ===== 散乱レイヤー ===== -->
