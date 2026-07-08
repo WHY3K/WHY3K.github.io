@@ -586,7 +586,7 @@
 
   /* ---- スマホ/タブレット用ヘッダー（中央ブランドのみ） ---- */
   @media (max-width: 640px) {
-    .topnav .hist { top: 4px; right: 34px; }
+    .topnav .hist { top: 8px; right: 34px; }
     .topnav .hb { padding: 9px 11px; }
   }
   @media (max-width: 999px) {
@@ -1152,6 +1152,7 @@ window.addEventListener('pageshow', function () {
   window.scrollTo(0, 0);
   requestAnimationFrame(function () { window.scrollTo(0, 0); });
   setTimeout(function () { window.scrollTo(0, 0); }, 80); /* iOSの非同期復元に勝つ */
+  setTimeout(function () { window.scrollTo(0, 1); window.scrollTo(0, 0); }, 160); /* 固定ヘッダーの半切れ対策（表示領域を再計算させる） */
 });
 
 /* iOSで:active疑似クラスを効かせる */
