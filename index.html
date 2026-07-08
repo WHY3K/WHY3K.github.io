@@ -529,6 +529,17 @@
     main { padding-top: 70px; }
   }
 
+  /* ---- 全画面ページ遷移オーバーレイ ---- */
+  .pt {
+    position: fixed; inset: 0; z-index: 99;
+    background: var(--ink);
+    transform: translateX(-103%);
+    pointer-events: none;
+  }
+  .pt.in { transform: translateX(0); transition: transform .22s cubic-bezier(.76,0,.24,1); }
+  html.backnav .pt { transform: translateX(0); } /* 戻り直後は黒で覆った状態から始める */
+  .pt.out { transform: translateX(103%) !important; transition: transform .3s cubic-bezier(.76,0,.24,1); }
+
   /* 戻る遷移中はスクロールを封鎖して位置ゼロで描画させる */
   html.backnav .scroller { overflow-y: clip !important; } /* clipはscrollTop書き込み自体が不能 */
   html.backnav { overflow: hidden; }
@@ -744,6 +755,7 @@
 </head>
 <body>
 
+<div class="pt" aria-hidden="true"></div>
 <span class="reg tl"></span><span class="reg tr"></span><span class="reg bl"></span><span class="reg br"></span>
 
 <!-- ===== 全面を横切る細線（刃） ===== -->
@@ -1211,9 +1223,14 @@ window.addEventListener('pageshow', function (e) {
   setTimeout(goTop, 80);
   setTimeout(function () {
     goTop();
+    var pt = document.querySelector('.pt');
+    if (pt && document.documentElement.classList.contains('backnav')) {
+      pt.classList.add('out'); /* 黒を右へ払ってページを見せる */
+      setTimeout(function () { pt.classList.remove('out'); pt.classList.remove('in'); }, 400);
+    }
     document.documentElement.classList.remove('backnav'); /* 封鎖解除 */
     goTop();
-  }, 140); /* iOSの非同期復元が終わった後に解除 */
+  }, 160); /* iOSの非同期復元が終わった後に解除 */
 });
 
 /* iOSで:active疑似クラスを効かせる */
@@ -1255,13 +1272,25 @@ document.addEventListener('touchstart', function () {}, { passive: true });
   if (!link) return;
   var reduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  link.addEventListener('click', function (e) {
-    if (reduce) return;                            // 動きが苦手な人は即遷移
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // 新規タブ等はそのまま
-    if (link.classList.contains('wiping')) { e.preventDefault(); return; }
-    e.preventDefault();
-    link.classList.add('wiping');
-    setTimeout(function () { window.location.href = link.href; }, 210);
+  var pt = document.querySelector('.pt');
+  function departTo(href) {
+    if (pt) pt.classList.add('in'); /* 黒が画面全体を覆う */
+    setTimeout(function () {
+      /* 黒の下でこっそり最上部へ（戻り時のスナップショットを綺麗にする） */
+      var sc = document.querySelector('.scroller');
+      if (sc) sc.scrollTop = 0;
+      window.scrollTo(0, 0);
+      window.location.href = href;
+    }, 250);
+  }
+  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (reduce) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      if (a === link) link.classList.add('wiping');
+      departTo(a.href);
+    });
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
   window.addEventListener('pageshow', function (e) {
