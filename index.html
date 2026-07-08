@@ -14,6 +14,8 @@
 <meta property="og:image" content="https://why3k.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="prefetch" href="https://why3k.github.io/why3k-plugins/" as="document">
+<script type="speculationrules">{"prerender": [{"urls": ["/why3k-plugins/"]}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&display=swap" rel="stylesheet">
@@ -330,6 +332,7 @@
   /* ---- リンク＝索引リスト ---- */
   .links { width: 100%; display: flex; flex-direction: column; margin-top: 26px; }
   .link {
+    touch-action: manipulation;
     display: flex; align-items: center; gap: 16px;
     height: 54px;
     border-top: 1px solid var(--line);
@@ -370,7 +373,7 @@
     z-index: -1;
     background: var(--ink);
     transform: translateX(-108%) skewX(-16deg); /* 斜めのエッジで払う */
-    transition: transform .35s cubic-bezier(.76, 0, .24, 1);
+    transition: transform .25s cubic-bezier(.76, 0, .24, 1);
   }
   @media (hover: hover) and (pointer: fine) {
     .link.primary:hover { color: #fff; }
@@ -422,6 +425,7 @@
     color: #55555e; max-width: 36em;
   }
   .f-btn {
+    touch-action: manipulation;
     display: inline-flex; align-items: center; gap: 14px;
     font-family: var(--tech); font-weight: 700; font-size: 15px;
     letter-spacing: .24em; text-transform: uppercase;
@@ -1124,7 +1128,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     if (link.classList.contains('wiping')) { e.preventDefault(); return; }
     e.preventDefault();
     link.classList.add('wiping');
-    setTimeout(function () { window.location.href = link.href; }, 380);
+    setTimeout(function () { window.location.href = link.href; }, 270);
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
   window.addEventListener('pageshow', function () {
