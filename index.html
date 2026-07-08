@@ -16,7 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --paper: #fbfbfa;
@@ -28,7 +28,7 @@
     --blue: rgba(132,162,214,.14);
     --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
     --disp: "Cormorant", serif;
-    --tech: "Chakra Petch", -apple-system, sans-serif;
+    --tech: "Cormorant", "Hiragino Mincho ProN", serif;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   :focus { outline:none; }
@@ -315,7 +315,7 @@
     text-decoration: none;
     color: var(--ink);
     font-family: var(--tech);
-    font-size: 14px; font-weight: 700;
+    font-size: 16.5px; font-weight: 700;
     letter-spacing: .24em; text-transform: uppercase;
     transition: background .15s, padding-left .15s;
   }
@@ -331,7 +331,7 @@
     border-top: 2px solid var(--ink);
     border-bottom: 2px solid var(--ink) !important;
     height: 62px;
-    font-size: 15px;
+    font-size: 18px;
   }
   .link.primary .mk { color: var(--red); font-weight: 700; }
   .link.primary:hover { background: var(--ink); color: #fff; }
@@ -365,6 +365,87 @@
     .doc-head { left: 24px; }
     main { padding-top: 70px; }
   }
+
+  /* ---- 全幅データティッカー（PC専用） ---- */
+  .ticker { display: none; }
+
+  /* ===== デスクトップ（≥1000px）：見開きレイアウト =====
+     左＝軌道図・右＝索引。中央1カラムをやめて画面全体を誌面として使う */
+  @media (min-width: 1000px) {
+    main {
+      max-width: 1360px;
+      padding: 96px 72px 28px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(380px, .88fr);
+      grid-template-areas:
+        "fig links"
+        "cap links";
+      align-content: center;
+      align-items: center;
+      column-gap: clamp(48px, 6vw, 104px);
+      row-gap: 0;
+    }
+    .figure {
+      grid-area: fig;
+      justify-self: center;
+      align-self: end;
+      width: min(44vw, calc((100svh - 270px) / .86), 660px);
+    }
+    .fig-cap {
+      grid-area: cap;
+      justify-self: center;
+      align-self: start;
+    }
+    .wordmark { font-size: clamp(84px, 7.2vw, 114px); }
+    .links {
+      grid-area: links;
+      margin-top: 0;
+      align-self: center;
+      padding: 24px 28px 28px;
+      background: rgba(251,251,250,.78);
+      -webkit-backdrop-filter: blur(7px);
+      backdrop-filter: blur(7px);
+      border: 1px solid var(--line);
+    }
+    .links::before {
+      content: "contents — 07 entries";
+      display: block;
+      font-family: var(--mono);
+      font-size: 10px; letter-spacing: .3em;
+      color: var(--ink-soft); text-transform: uppercase;
+      padding-bottom: 16px;
+    }
+    .link { height: 62px; font-size: 17.5px; }
+    .link.primary { height: 74px; font-size: 19px; }
+
+    .ticker {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      position: relative; z-index: 1;
+      background: rgba(251,251,250,.55);
+    }
+    .ticker-track {
+      display: inline-flex;
+      white-space: nowrap;
+      padding: 7px 0;
+      font-family: var(--mono); font-size: 9.5px; letter-spacing: .28em;
+      color: var(--ink-soft); text-transform: uppercase;
+      will-change: transform;
+    }
+    .ticker-track > span { padding-right: 3.4em; }
+    .ticker-track b { font-weight: 400; color: var(--red); }
+    @media (prefers-reduced-motion: no-preference) {
+      .ticker-track { animation: tick 52s linear infinite; }
+    }
+    footer {
+      max-width: 1360px;
+      padding: 20px 72px 36px;
+    }
+  }
+  @keyframes tick { to { transform: translateX(-50%); } }
 </style>
 </head>
 <body>
@@ -713,10 +794,18 @@ phase ...... hold</div>
 
     <!-- PLUGINS（稼働中） -->
     <a class="link primary" href="https://why3k.github.io/why3k-plugins/">
-      <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">FREE →</span>
+      <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">→</span>
     </a>
   </nav>
 </main>
+
+<!-- ===== 全幅データティッカー（PC専用） ===== -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> plugins available <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
+    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> plugins available <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
+  </div>
+</div>
 
 <footer>
   <div class="scale">
