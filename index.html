@@ -586,7 +586,7 @@
 
   /* ---- スマホ/タブレット用ヘッダー（中央ブランドのみ） ---- */
   @media (max-width: 640px) {
-    .topnav .hist { top: 8px; right: 34px; }
+    .topnav .hist { top: 8px; right: 24px; }
     .topnav .hb { padding: 9px 11px; }
   }
   @media (max-width: 999px) {
@@ -1147,12 +1147,18 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 /* ページ表示は毎回一番上から（戻る/進むでのスクロール位置復元をしない） */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-window.addEventListener('pageshow', function () {
+window.addEventListener('pageshow', function (e) {
+  /* iOSのキャッシュ復元(bfcache)は固定ヘッダーが半切れになるので、
+     戻ってきた時はページを作り直す。ワイプ演出はフラグで引き継ぐ */
+  if (e.persisted) {
+    try { sessionStorage.setItem('w3kBack', '1'); } catch (_) {}
+    location.reload();
+    return;
+  }
   if (location.hash) return;
   window.scrollTo(0, 0);
   requestAnimationFrame(function () { window.scrollTo(0, 0); });
   setTimeout(function () { window.scrollTo(0, 0); }, 80); /* iOSの非同期復元に勝つ */
-  setTimeout(function () { window.scrollTo(0, 1); window.scrollTo(0, 0); }, 160); /* 固定ヘッダーの半切れ対策（表示領域を再計算させる） */
 });
 
 /* iOSで:active疑似クラスを効かせる */
@@ -1204,8 +1210,14 @@ document.addEventListener('touchstart', function () {}, { passive: true });
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
   window.addEventListener('pageshow', function (e) {
+    if (e.persisted) return; /* この直後にリロードされるので何もしない */
+    var backFlag = false;
+    try {
+      backFlag = sessionStorage.getItem('w3kBack') === '1';
+      if (backFlag) sessionStorage.removeItem('w3kBack');
+    } catch (_) {}
     var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-    var isBack = e.persisted || (nav && nav.type === 'back_forward');
+    var isBack = backFlag || (nav && nav.type === 'back_forward');
     if (isBack && !reduce) {
       /* 黒で覆った状態から逆再生で剥がす（演出として見せる） */
       link.classList.add('no-anim');
