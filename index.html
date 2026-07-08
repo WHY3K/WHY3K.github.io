@@ -349,6 +349,11 @@
     .link:hover .idx, .link:hover .mk { color: var(--ink); }
   }
   .link:active { background: #ececee; }
+  /* 押している間は黒（タッチでも効く。離せば戻るので貼り付かない） */
+  .link.primary:active { background: var(--ink); color: #fff; transition: none; }
+  .link.primary:active .idx { color: rgba(255,255,255,.6); }
+  .link.primary:active .mk { color: #fff; }
+  .link.primary:active .lead { border-color: rgba(255,255,255,.3); }
 
   .link.primary {
     border-top: 2px solid var(--ink);
@@ -1102,6 +1107,9 @@ phase ...... hold</div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* iOSで:active疑似クラスを効かせる */
+document.addEventListener('touchstart', function () {}, { passive: true });
 
 /* ===== fig.02 のカウントアップ（配布サイトと同じ挙動） ===== */
 (function () {
