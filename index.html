@@ -530,7 +530,7 @@
   }
 
   /* 戻る遷移中はスクロールを封鎖して位置ゼロで描画させる */
-  html.backnav .scroller { overflow-y: hidden !important; }
+  html.backnav .scroller { overflow-y: clip !important; } /* clipはscrollTop書き込み自体が不能 */
   html.backnav { overflow: hidden; }
 
   /* スクロール箱（スマホで実体化。PCではただの全幅ラッパ） */
@@ -1207,11 +1207,13 @@ window.addEventListener('pageshow', function (e) {
     if (sc) sc.scrollTop = 0;
   };
   goTop();
-  requestAnimationFrame(function () {
+  requestAnimationFrame(goTop);
+  setTimeout(goTop, 80);
+  setTimeout(function () {
     goTop();
     document.documentElement.classList.remove('backnav'); /* 封鎖解除 */
-  });
-  setTimeout(goTop, 80); /* iOSの非同期復元に勝つ */
+    goTop();
+  }, 140); /* iOSの非同期復元が終わった後に解除 */
 });
 
 /* iOSで:active疑似クラスを効かせる */
