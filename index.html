@@ -539,7 +539,7 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
       display: flex; align-items: center; justify-content: flex-end; gap: 34px;
       height: 54px;
-      padding: 0 40px;
+      padding: 0 130px 0 40px; /* 右は固定配置の←→ぶん空ける */
       font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
       text-transform: uppercase;
       background: rgba(251,251,250,.78);
@@ -568,7 +568,7 @@
   }
 
   /* ---- 戻る/進むボタン ---- */
-  .topnav .hist { display: flex; gap: 8px; margin-right: 10px; }
+  .topnav .hist { position: fixed; top: 15px; right: 42px; z-index: 5; display: flex; gap: 8px; }
   .topnav .hb {
     display: flex; align-items: center; justify-content: center;
     font-family: var(--mono); font-size: 15px; line-height: 1;
@@ -595,7 +595,6 @@
       border-bottom: 1px solid var(--line);
     }
     .topnav a:not(.brand) { display: none; } /* ナビ項目はPCのみ */
-    .topnav .hist { position: absolute; right: 42px; top: 50%; transform: translateY(-50%); margin: 0; }
     .topnav .brand {
       display: flex; align-items: center; gap: 10px;
       font-family: var(--disp); font-weight: 700; font-size: 17px;
@@ -1141,6 +1140,10 @@ phase ...... hold</div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ページ表示は毎回一番上から（戻る/進むでのスクロール位置復元をしない） */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.addEventListener('pageshow', function () { if (!location.hash) window.scrollTo(0, 0); });
 
 /* iOSで:active疑似クラスを効かせる */
 document.addEventListener('touchstart', function () {}, { passive: true });
