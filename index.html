@@ -14,6 +14,15 @@
 <meta property="og:image" content="https://why3k.github.io/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<script>
+/* 戻る遷移は最初の描画からスクロール位置ゼロで出すための早期フラグ */
+(function () {
+  try {
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (nav && nav.type === 'back_forward') document.documentElement.classList.add('backnav');
+  } catch (_) {}
+})();
+</script>
 <link rel="prefetch" href="https://why3k.github.io/why3k-plugins/" as="document">
 <script type="speculationrules">{"prerender": [{"urls": ["/why3k-plugins/"], "eagerness": "moderate"}]}</script>
 <link rel="preload" href="assets/fonts/cormorant.woff2" as="font" type="font/woff2" crossorigin>
@@ -519,6 +528,10 @@
     .doc-head { left: 24px; }
     main { padding-top: 70px; }
   }
+
+  /* 戻る遷移中はスクロールを封鎖して位置ゼロで描画させる */
+  html.backnav .scroller { overflow-y: hidden !important; }
+  html.backnav { overflow: hidden; }
 
   /* スクロール箱（スマホで実体化。PCではただの全幅ラッパ） */
   .scroller { width: 100%; display: flex; flex-direction: column; align-items: center; flex: 1; }
@@ -1194,7 +1207,10 @@ window.addEventListener('pageshow', function (e) {
     if (sc) sc.scrollTop = 0;
   };
   goTop();
-  requestAnimationFrame(goTop);
+  requestAnimationFrame(function () {
+    goTop();
+    document.documentElement.classList.remove('backnav'); /* 封鎖解除 */
+  });
   setTimeout(goTop, 80); /* iOSの非同期復元に勝つ */
 });
 
