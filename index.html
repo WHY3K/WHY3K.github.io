@@ -567,6 +567,24 @@
     .topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
   }
 
+  /* ---- 戻る/進むボタン ---- */
+  .topnav .hist { display: flex; gap: 8px; margin-right: 10px; }
+  .topnav .hb {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 12px; line-height: 1;
+    color: var(--ink); background: transparent;
+    border: 1px solid var(--faint); border-radius: 0;
+    cursor: pointer; padding: 0;
+    touch-action: manipulation;
+    transition: border-color .15s, color .15s;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .topnav .hb:hover { border-color: var(--ink); }
+  }
+  .topnav .hb:active { background: var(--ink); color: #fff; }
+  .topnav .hb:disabled { color: #d4d4da; border-color: #ececee; cursor: default; pointer-events: none; }
+
   /* ---- スマホ/タブレット用ヘッダー（中央ブランドのみ） ---- */
   @media (max-width: 999px) {
     .topnav {
@@ -578,6 +596,7 @@
       border-bottom: 1px solid var(--line);
     }
     .topnav a:not(.brand) { display: none; } /* ナビ項目はPCのみ */
+    .topnav .hist { position: absolute; right: 42px; top: 50%; transform: translateY(-50%); margin: 0; }
     .topnav .brand {
       display: flex; align-items: center; gap: 10px;
       font-family: var(--disp); font-weight: 700; font-size: 17px;
@@ -795,6 +814,10 @@
 <!-- ===== 上部ナビ（PC専用） ===== -->
 <nav class="topnav" aria-label="Primary">
   <a class="brand" href="/"><i class="d2"></i><i class="ln"></i>WHY3K<i class="ln"></i><i class="d2"></i></a>
+  <span class="hist">
+    <button class="hb" id="histBack" aria-label="前のページへ" disabled>←</button>
+    <button class="hb" id="histFwd" aria-label="次のページへ" disabled>→</button>
+  </span>
   <a class="active" href="/"><span class="no">01</span>Index</a>
   <a href="https://why3k.github.io/why3k-plugins/"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
@@ -1123,6 +1146,36 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 /* iOSで:active疑似クラスを効かせる */
 document.addEventListener('touchstart', function () {}, { passive: true });
 
+/* ===== 戻る/進むボタン ===== */
+(function () {
+  var b = document.getElementById('histBack');
+  var f = document.getElementById('histFwd');
+  if (!b || !f) return;
+  function update() {
+    if (window.navigation && 'canGoBack' in window.navigation) {
+      b.disabled = !window.navigation.canGoBack;
+      f.disabled = !window.navigation.canGoForward;
+    } else {
+      b.disabled = history.length <= 1;
+      /* 進む先の有無を直接知れないブラウザでは、
+         「戻る操作でこのページに来た」時だけ進むを有効化 */
+    }
+  }
+  b.addEventListener('click', function () { history.back(); });
+  f.addEventListener('click', function () { history.forward(); });
+  update();
+  window.addEventListener('pageshow', function (e) {
+    update();
+    if (!(window.navigation && 'canGoBack' in window.navigation)) {
+      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (e.persisted || (nav && nav.type === 'back_forward')) f.disabled = false;
+    }
+  });
+  if (window.navigation && window.navigation.addEventListener) {
+    window.navigation.addEventListener('currententrychange', update);
+  }
+})();
+
 /* ===== PLUGINSリンク：ワイプを見せ切ってから遷移 ===== */
 (function () {
   var link = document.querySelector('.link.primary');
@@ -1138,12 +1191,25 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     setTimeout(function () { window.location.href = link.href; }, 270);
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
-  window.addEventListener('pageshow', function () {
-    link.classList.add('no-anim');       // 逆再生ワイプを見せない
-    link.classList.remove('wiping');
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () { link.classList.remove('no-anim'); });
-    });
+  window.addEventListener('pageshow', function (e) {
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    var isBack = e.persisted || (nav && nav.type === 'back_forward');
+    if (isBack && !reduce) {
+      /* 黒で覆った状態から逆再生で剥がす（演出として見せる） */
+      link.classList.add('no-anim');
+      link.classList.add('wiping');
+      void link.offsetWidth; /* reflow */
+      link.classList.remove('no-anim');
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { link.classList.remove('wiping'); });
+      });
+    } else {
+      link.classList.add('no-anim');
+      link.classList.remove('wiping');
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { link.classList.remove('no-anim'); });
+      });
+    }
   });
 })();
 
