@@ -349,12 +349,12 @@
     .link:hover .idx, .link:hover .mk { color: var(--ink); }
   }
   .link:active { background: #ececee; }
-  /* 押している間：黒が左から右へ払う（タッチでも効く。離せば戻るので貼り付かない） */
-  .link.primary:active { color: #fff; }
-  .link.primary:active::before { transform: translateX(0) skewX(-16deg); }
-  .link.primary:active .idx { color: rgba(255,255,255,.6); }
-  .link.primary:active .mk { color: #fff; transform: translateX(12px); }
-  .link.primary:active .lead { border-color: rgba(255,255,255,.3); }
+  /* 押している間＋クリック後の見せ切り：黒が左から右へ払う（貼り付きはpageshowで解除） */
+  .link.primary:active, .link.primary.wiping { color: #fff; }
+  .link.primary:active::before, .link.primary.wiping::before { transform: translateX(0) skewX(-16deg); }
+  .link.primary:active .idx, .link.primary.wiping .idx { color: rgba(255,255,255,.6); }
+  .link.primary:active .mk, .link.primary.wiping .mk { color: #fff; transform: translateX(12px); }
+  .link.primary:active .lead, .link.primary.wiping .lead { border-color: rgba(255,255,255,.3); }
 
   .link.primary {
     border-top: 2px solid var(--ink);
@@ -1111,6 +1111,26 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 /* iOSで:active疑似クラスを効かせる */
 document.addEventListener('touchstart', function () {}, { passive: true });
+
+/* ===== PLUGINSリンク：ワイプを見せ切ってから遷移 ===== */
+(function () {
+  var link = document.querySelector('.link.primary');
+  if (!link) return;
+  var reduce = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  link.addEventListener('click', function (e) {
+    if (reduce) return;                            // 動きが苦手な人は即遷移
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // 新規タブ等はそのまま
+    if (link.classList.contains('wiping')) { e.preventDefault(); return; }
+    e.preventDefault();
+    link.classList.add('wiping');
+    setTimeout(function () { window.location.href = link.href; }, 560);
+  });
+  /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
+  window.addEventListener('pageshow', function () {
+    link.classList.remove('wiping');
+  });
+})();
 
 /* ===== fig.02 のカウントアップ（配布サイトと同じ挙動） ===== */
 (function () {
