@@ -16,10 +16,16 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="prefetch" href="https://why3k.github.io/why3k-plugins/" as="document">
 <script type="speculationrules">{"prerender": [{"urls": ["/why3k-plugins/"], "eagerness": "moderate"}]}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/cormorant.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  /* Cormorant可変フォント（自前配信・プリロード済みなので最初から正しい字形で出る） */
+  @font-face {
+    font-family: "Cormorant";
+    src: url("assets/fonts/cormorant.woff2") format("woff2");
+    font-weight: 500 700;
+    font-style: normal;
+    font-display: block;
+  }
   :root {
     --paper: #fbfbfa;
     --ink: #131316;
