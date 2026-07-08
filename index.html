@@ -344,8 +344,10 @@
   .link .idx { font-family: var(--mono); font-size: 10px; font-weight: 400; color: var(--ink-soft); width: 2.2em; }
   .link .lead { flex: 1; border-top: 1px dotted var(--faint); margin-top: 2px; }
   .link .mk { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: .1em; }
-  .link:hover { background: #f3f3f4; padding-left: 10px; }
-  .link:hover .idx, .link:hover .mk { color: var(--ink); }
+  @media (hover: hover) and (pointer: fine) {
+    .link:hover { background: #f3f3f4; padding-left: 10px; }
+    .link:hover .idx, .link:hover .mk { color: var(--ink); }
+  }
   .link:active { background: #ececee; }
 
   .link.primary {
@@ -354,11 +356,22 @@
     height: 62px;
     font-size: 18px;
   }
-  .link.primary .mk { font-weight: 700; color: var(--ink); }
-  .link.primary:hover .mk { color: #fff; }
-  .link.primary:hover { background: var(--ink); color: #fff; }
-  .link.primary:hover .idx { color: rgba(255,255,255,.6); }
-  .link.primary:hover .lead { border-color: rgba(255,255,255,.3); }
+  .link.primary .mk { font-weight: 700; color: var(--ink); transition: transform .3s cubic-bezier(.65,0,.35,1), color .3s; }
+  /* 黒のワイプ層（左から流れ込む） */
+  .link.primary { position: relative; overflow: hidden; z-index: 0; transition: color .3s; }
+  .link.primary::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: var(--ink);
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform .38s cubic-bezier(.65,0,.35,1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .link.primary:hover { color: #fff; }
+    .link.primary:hover::before { transform: scaleX(1); }
+    .link.primary:hover .idx { color: rgba(255,255,255,.6); }
+    .link.primary:hover .lead { border-color: rgba(255,255,255,.3); }
+    .link.primary:hover .mk { color: #fff; transform: translateX(6px); }
+  }
 
   .link.soon { pointer-events: none; color: #c6c6cd; }
   .link.soon .idx, .link.soon .mk { color: #d4d4da; }
@@ -409,7 +422,9 @@
     padding: 17px 28px; margin-top: 6px;
     transition: background .15s;
   }
-  .f-btn:hover { background: var(--paper); color: var(--ink); outline: 1px solid var(--ink); }
+  @media (hover: hover) and (pointer: fine) {
+    .f-btn:hover { background: var(--paper); color: var(--ink); outline: 1px solid var(--ink); }
+  }
   /* 配布サイトの「disp」ウィンドウと同じ見た目に合わせる */
   .f-display {
     position: relative;
