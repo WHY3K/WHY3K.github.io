@@ -1242,7 +1242,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r65</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r66</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1365,10 +1365,10 @@ document.addEventListener('touchstart', function () {}, { passive: true });
 
     /* 軌道の加速回転：ほぼ静止から巻き上がる */
     var groups = [
-      { el: fig && fig.querySelector('.orbitA'), dir: 1,  v: 3 },
-      { el: fig && fig.querySelector('.orbitB'), dir: -1, v: 2 },
-      { el: fig && fig.querySelector('.orbitC'), dir: 1,  v: 1.5 },
-      { el: fig && fig.querySelector('.redarc'), dir: -1, v: 4 }
+      { el: fig && fig.querySelector('.orbitA'), dir: 1,  v: 1.2 },
+      { el: fig && fig.querySelector('.orbitB'), dir: -1, v: .8 },
+      { el: fig && fig.querySelector('.orbitC'), dir: 1,  v: .6 },
+      { el: fig && fig.querySelector('.redarc'), dir: -1, v: 1.6 }
     ];
     function startSpin() {
       groups.forEach(function (g) { if (g.el) { g.el.style.animation = 'none'; g.a = 0; } });
@@ -1376,7 +1376,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       function frame(now) {
         var dt = (now - last) / 1000; last = now;
         var t = (now - t0) / 1000;
-        var accel = 1400 * t; /* 加速度自体が増える＝どんどん速く */
+        var accel = 700 * t; /* 加速度自体が増える＝じわじわ→どんどん速く */
         groups.forEach(function (g) {
           if (!g.el) return;
           g.v += accel * dt;
@@ -1389,8 +1389,8 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     }
 
     var t1 = mobile ? 460 : 0;   /* 第1幕開始（グリッチ+回転+白開始） */
-    var t2 = t1 + 700;           /* 第2幕（加速+ダイブ+白開始）※巻き上がりをたっぷり見せる */
-    var tGo = t1 + 1400;         /* 遷移（ダイブを見せ切ってから） */
+    var t2 = t1 + 1200;          /* 第2幕（加速+ダイブ+白開始）※巻き上がりをじっくり見せる */
+    var tGo = t1 + 2000;         /* 遷移（ダイブを見せ切ってから） */
     setTimeout(function () {
       document.body.classList.add('depart');
       startSpin(); /* ほぼ静止→巻き上がる回転 */
