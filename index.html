@@ -560,6 +560,11 @@
       transform: translate(-50%, -50%);
       z-index: 98; /* 白幕(99)のすぐ下 */
     }
+    /* 図版が抜けた穴を同じ高さで埋める＝下のコンテンツが跳ね上がらない */
+    body.depart main::before {
+      content: ""; display: block;
+      height: calc(min(92vw, 540px) * .86);
+    }
   }
   /* 第1幕：グリッチバースト（朱印の赤が一瞬荒ぶる） */
   body.depart .wordmark { animation: joltFast .55s steps(1) infinite; }
@@ -1252,7 +1257,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r59</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r60</div>
   <div class="pageno">01</div>
 </footer>
 
