@@ -381,7 +381,7 @@
     z-index: -1;
     background: var(--ink);
     transform: translateX(-108%) skewX(-16deg); /* 斜めのエッジで払う */
-    transition: transform .25s cubic-bezier(.76, 0, .24, 1);
+    transition: transform .2s cubic-bezier(.76, 0, .24, 1);
   }
   @media (hover: hover) and (pointer: fine) {
     .link.primary:hover { color: #fff; }
@@ -1145,6 +1145,10 @@ phase ...... hold</div>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
+/* iOSの凍結保存(bfcache)を無効化：戻る時は常に作りたてを読み込む
+   （凍結復元が固定ヘッダーの描画を壊すため） */
+window.addEventListener('unload', function () {});
+
 /* ページ表示は毎回一番上から（戻る/進むでのスクロール位置復元をしない） */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.addEventListener('pageshow', function (e) {
@@ -1206,7 +1210,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     if (link.classList.contains('wiping')) { e.preventDefault(); return; }
     e.preventDefault();
     link.classList.add('wiping');
-    setTimeout(function () { window.location.href = link.href; }, 270);
+    setTimeout(function () { window.location.href = link.href; }, 210);
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
   window.addEventListener('pageshow', function (e) {
