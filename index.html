@@ -341,6 +341,89 @@
   .link.soon { pointer-events: none; color: #c6c6cd; }
   .link.soon .idx, .link.soon .mk { color: #d4d4da; }
 
+  /* ---- フィーチャー枠（fig. 02 — 最新デバイス） ---- */
+  .feature {
+    width: 100%;
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--line);
+    background: rgba(251,251,250,.62);
+    padding: 58px 30px 64px;
+    display: flex; justify-content: center;
+  }
+  .feature-inner {
+    width: 100%; max-width: 560px;
+    min-width: 0; /* 桁表示のnowrapで親がはみ出すのを防ぐ */
+    display: flex; flex-direction: column; gap: 30px;
+  }
+  .f-left { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+  .f-cap {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .f-tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
+    text-transform: uppercase; color: var(--ink);
+    border: 1px solid var(--ink); padding: 6px 12px 5px;
+  }
+  .f-tag b { color: var(--red); font-weight: 400; }
+  .f-title {
+    font-family: var(--disp); font-weight: 700;
+    font-size: clamp(40px, 9vw, 58px); line-height: 1.02; letter-spacing: .02em;
+    color: var(--ink);
+  }
+  .f-sub {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .24em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .f-desc {
+    font-family: var(--tech); font-size: 15px; line-height: 2;
+    color: #55555e; max-width: 36em;
+  }
+  .f-btn {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: var(--tech); font-weight: 700; font-size: 15px;
+    letter-spacing: .24em; text-transform: uppercase;
+    color: #fff; background: var(--ink); text-decoration: none;
+    padding: 17px 28px; margin-top: 6px;
+    transition: background .15s;
+  }
+  .f-btn:hover { background: var(--red); }
+  .f-display {
+    position: relative;
+    background: var(--ink);
+    padding: 40px 18px 34px;
+    max-width: 100%; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .f-display .digits {
+    font-family: var(--mono);
+    font-size: clamp(24px, 7vw, 56px);
+    letter-spacing: .05em; color: #fbfbfa; white-space: nowrap;
+  }
+  .f-display .digits b { font-weight: 400; color: var(--red); }
+  .f-display .dlabel {
+    font-family: var(--mono); font-size: 9px; letter-spacing: .34em;
+    color: #8a8a93; text-transform: uppercase;
+  }
+  /* ディスプレイ四隅の白トンボ */
+  .f-display i { position: absolute; width: 12px; height: 12px; }
+  .f-display i:nth-child(1) { top:10px; left:10px;  border-top:1px solid #6a6a73; border-left:1px solid #6a6a73; }
+  .f-display i:nth-child(2) { top:10px; right:10px; border-top:1px solid #6a6a73; border-right:1px solid #6a6a73; }
+  .f-display i:nth-child(3) { bottom:10px; left:10px;  border-bottom:1px solid #6a6a73; border-left:1px solid #6a6a73; }
+  .f-display i:nth-child(4) { bottom:10px; right:10px; border-bottom:1px solid #6a6a73; border-right:1px solid #6a6a73; }
+
+  @media (min-width: 1000px) {
+    .feature { padding: 92px 72px 96px; }
+    .feature-inner {
+      max-width: 1360px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      align-items: center;
+      column-gap: clamp(48px, 6vw, 104px);
+    }
+    .f-display { padding: 64px 40px 56px; }
+  }
+
   /* ---- フッター ---- */
   footer {
     width: 100%; max-width: 560px;
@@ -373,6 +456,18 @@
   .topnav { display: none; }
   @media (min-width: 1000px) {
     .head-bar2 { display: none; }
+    .doc-head { display: none; }
+    .topnav .brand {
+      margin-right: auto;
+      display: flex; align-items: baseline; gap: 16px;
+      font-family: var(--disp); font-weight: 700; font-size: 19px;
+      letter-spacing: .05em; text-transform: none;
+      color: var(--ink); text-decoration: none;
+    }
+    .topnav .brand .bidx {
+      font-family: var(--mono); font-size: 9px; letter-spacing: .22em;
+      color: var(--ink-soft); text-transform: uppercase;
+    }
     .topnav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
       display: flex; align-items: center; justify-content: flex-end; gap: 34px;
@@ -585,6 +680,7 @@
 
 <!-- ===== 上部ナビ（PC専用） ===== -->
 <nav class="topnav" aria-label="Primary">
+  <a class="brand" href="/">WHY3K<span class="bidx">index — 01</span></a>
   <a class="active" href="/"><span class="no">01</span>Index</a>
   <a href="https://why3k.github.io/why3k-plugins/"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
@@ -843,11 +939,30 @@ phase ...... hold</div>
   </nav>
 </main>
 
+<!-- ===== フィーチャー枠（fig. 02 — 最新デバイス） ===== -->
+<section class="feature" id="feature" aria-label="Featured device">
+  <div class="feature-inner">
+    <div class="f-left">
+      <div class="f-cap">fig. 02 — featured device</div>
+      <span class="f-tag">out now — <b>free</b></span>
+      <h2 class="f-title">CountUp Timer</h2>
+      <div class="f-sub">max for live device — v1.1 / ableton live</div>
+      <p class="f-desc">再生した瞬間から数えはじめる、Ableton Live用のカウントアップタイマー。ライブや舞台の経過時間を、クリップの隣にただ置くだけで表示できる。</p>
+      <a class="f-btn" href="https://why3k.github.io/why3k-plugins/">Free Download <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="f-display" aria-hidden="true">
+      <i></i><i></i><i></i><i></i>
+      <div class="digits">00:00:00<b>.000</b></div>
+      <div class="dlabel">countup — running</div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== 全幅データティッカー（PC専用） ===== -->
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
-    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> plugins available <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
-    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> plugins available <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
+    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> countup timer v1.1 — out now <b>▸</b> free download <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
+    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> countup timer v1.1 — out now <b>▸</b> free download <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
   </div>
 </div>
 
