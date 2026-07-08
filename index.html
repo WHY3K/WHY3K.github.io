@@ -15,7 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="prefetch" href="https://why3k.github.io/why3k-plugins/" as="document">
-<script type="speculationrules">{"prerender": [{"urls": ["/why3k-plugins/"]}]}</script>
+<script type="speculationrules">{"prerender": [{"urls": ["/why3k-plugins/"], "eagerness": "moderate"}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&display=swap" rel="stylesheet">
@@ -352,6 +352,8 @@
     .link:hover .idx, .link:hover .mk { color: var(--ink); }
   }
   .link:active { background: #ececee; }
+  /* 戻り時の解除はアニメ無しで一瞬に */
+  .link.primary.no-anim, .link.primary.no-anim::before, .link.primary.no-anim .mk { transition: none !important; }
   /* 押している間＋クリック後の見せ切り：黒が左から右へ払う（貼り付きはpageshowで解除） */
   .link.primary:active, .link.primary.wiping { color: #fff; }
   .link.primary:active::before, .link.primary.wiping::before { transform: translateX(0) skewX(-16deg); }
@@ -566,9 +568,7 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
       height: 48px;
       align-items: center; justify-content: center;
-      background: rgba(251,251,250,.78);
-      -webkit-backdrop-filter: blur(7px);
-      backdrop-filter: blur(7px);
+      background: rgba(251,251,250,.94); /* ブラー無し（スクロール負荷対策） */
       border-bottom: 1px solid var(--line);
     }
     .topnav a:not(.brand) { display: none; } /* ナビ項目はPCのみ */
@@ -590,6 +590,7 @@
   /* スマホ：巨大リングを図版の背後に */
   @media (max-width: 640px) {
     .bigring { width: 130vw !important; margin: -65vw 0 0 -68vw !important; top: calc(90px + 47.5vw) !important; opacity: .18 !important; }
+    .bigring { animation: none !important; } /* スクロール時のカクつき対策 */
     /* 図版の直下に白いベールを敷いて、軌道の点線のコントラストを守る */
     .figure::before {
       content: "";
@@ -1132,7 +1133,11 @@ document.addEventListener('touchstart', function () {}, { passive: true });
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
   window.addEventListener('pageshow', function () {
+    link.classList.add('no-anim');       // 逆再生ワイプを見せない
     link.classList.remove('wiping');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { link.classList.remove('no-anim'); });
+    });
   });
 })();
 
