@@ -25,7 +25,7 @@
     --faint: #c9c9d0;
     --line: #e2e2e7;
     --acc: #2f9fd0;   /* 氷青 — ガラス/宇宙のアクセント */
-    --iri: linear-gradient(100deg, #f293aa, #f2bd85, #e8d982, #8fd9a3, #7ec3e8, #a89ae8, #e096d4);   /* 薄い虹色 */
+    --iri: linear-gradient(100deg, #e3b3be, #e3c9a8, #d9d3a0, #b3d3bd, #aac9e3, #bcb3e3, #d9b0cc);   /* 薄い虹色（ガラスの反射） */
     --red: #d21f12;   /* 赤 — グリッチ残像とFREEだけに使う */
     --blue: rgba(132,162,214,.14);
     --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
@@ -106,9 +106,9 @@
     font-family: var(--mono); font-size: 8px; line-height: 1.7;
     color: #c3c3cb; white-space: pre; letter-spacing: .05em;
   }
-  .patch { position: absolute; background: linear-gradient(120deg, rgba(242,147,170,.13), rgba(232,217,130,.12), rgba(126,195,232,.13), rgba(168,154,232,.13)); }
-  .patch.p2 { background: linear-gradient(120deg, rgba(126,195,232,.09), rgba(143,217,163,.08), rgba(224,150,212,.09)); }
-  .patch.p3 { background: linear-gradient(120deg, rgba(168,154,232,.12), rgba(126,195,232,.11), rgba(242,189,133,.12)); }
+  .patch { position: absolute; background: linear-gradient(120deg, rgba(227,179,190,.10), rgba(217,211,160,.09), rgba(170,201,227,.10), rgba(188,179,227,.10)); }
+  .patch.p2 { background: linear-gradient(120deg, rgba(170,201,227,.07), rgba(179,211,189,.06), rgba(217,176,204,.07)); }
+  .patch.p3 { background: linear-gradient(120deg, rgba(188,179,227,.09), rgba(170,201,227,.08), rgba(227,201,168,.09)); }
   .cross { position:absolute; width:9px; height:9px; }
   .cross::before { content:""; position:absolute; left:4px; top:0; width:1px; height:9px; background:#b3b3bb; }
   .cross::after  { content:""; position:absolute; left:0; top:4px; width:9px; height:1px; background:#b3b3bb; }
@@ -499,7 +499,7 @@
     }
     .topnav .brand i { display: block; }
     .topnav .brand .ln { width: 34px; height: 1px; background: var(--faint); }
-    .topnav .brand .d2 { width: 8px; height: 8px; background: var(--iri); }
+    .topnav .brand .d2 { width: 8px; height: 8px; background: var(--iri); outline: 1px solid var(--line); }
     .topnav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
       display: flex; align-items: center; justify-content: flex-end; gap: 34px;
@@ -554,7 +554,7 @@
     }
     .topnav .brand i { display: block; }
     .topnav .brand .ln { width: 20px; height: 1px; background: var(--faint); }
-    .topnav .brand .d2 { width: 6px; height: 6px; background: var(--iri); }
+    .topnav .brand .d2 { width: 6px; height: 6px; background: var(--iri); outline: 1px solid var(--line); }
     .doc-head { font-size: 0; z-index: 4; } /* 文字は隠して黒バーだけ柄として残す */
     .reg.tl, .reg.tr { z-index: 4; }
     main { padding-top: 84px; }
@@ -648,11 +648,11 @@
   <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
     <defs>
       <linearGradient id="iriB" x1="0" y1="0" x2="1440" y2="900" gradientUnits="userSpaceOnUse">
-        <stop offset="0"   stop-color="#f293aa"/>
-        <stop offset=".25" stop-color="#e8d982"/>
-        <stop offset=".5"  stop-color="#8fd9a3"/>
-        <stop offset=".75" stop-color="#7ec3e8"/>
-        <stop offset="1"   stop-color="#e096d4"/>
+        <stop offset="0"   stop-color="#e3b3be"/>
+        <stop offset=".25" stop-color="#d9d3a0"/>
+        <stop offset=".5"  stop-color="#b3d3bd"/>
+        <stop offset=".75" stop-color="#aac9e3"/>
+        <stop offset="1"   stop-color="#d9b0cc"/>
       </linearGradient>
     </defs>
     <path d="M -60 880 C 380 520, 620 700, 760 380 S 1080 -40, 1500 -80" stroke="#131316" stroke-width="1"  opacity=".10"/>
@@ -660,8 +660,8 @@
     <path d="M 200 940 C 480 560, 520 420, 700 300 S 900 60, 980 -60"    stroke="#131316" stroke-width="1.4" opacity=".12"/>
     <path d="M -40 200 C 300 260, 640 520, 900 560 S 1320 700, 1500 660" stroke="#131316" stroke-width=".7" opacity=".07"/>
     <path d="M 480 -60 C 560 240, 700 520, 640 940"                      stroke="#131316" stroke-width=".9" opacity=".09"/>
-    <path d="M -60 420 C 360 400, 900 180, 1500 420"                     stroke="url(#iriB)" stroke-width="1.1" opacity=".5" stroke-dasharray="3 8"/>
-    <path d="M 1500 780 C 1000 760, 760 560, 300 780"                    stroke="url(#iriB)" stroke-width="1" opacity=".4" stroke-dasharray="2 7"/>
+    <path d="M -60 420 C 360 400, 900 180, 1500 420"                     stroke="url(#iriB)" stroke-width="1.1" opacity=".32" stroke-dasharray="3 8"/>
+    <path d="M 1500 780 C 1000 760, 760 560, 300 780"                    stroke="url(#iriB)" stroke-width="1" opacity=".26" stroke-dasharray="2 7"/>
     <!-- 増量ぶん -->
     <path d="M -40 60 L 1480 640"   stroke="#131316" stroke-width=".5" opacity=".07"/>
     <path d="M 120 -40 L 980 940"   stroke="#131316" stroke-width=".5" opacity=".06"/>
@@ -890,13 +890,13 @@ phase ...... hold</div>
     <svg viewBox="0 0 600 516" fill="none" aria-hidden="true">
       <defs>
         <linearGradient id="iriA" x1="60" y1="60" x2="540" y2="460" gradientUnits="userSpaceOnUse">
-          <stop offset="0"   stop-color="#f293aa"/>
-          <stop offset=".18" stop-color="#f2bd85"/>
-          <stop offset=".36" stop-color="#e8d982"/>
-          <stop offset=".54" stop-color="#8fd9a3"/>
-          <stop offset=".72" stop-color="#7ec3e8"/>
-          <stop offset=".88" stop-color="#a89ae8"/>
-          <stop offset="1"   stop-color="#e096d4"/>
+          <stop offset="0"   stop-color="#e3b3be"/>
+          <stop offset=".18" stop-color="#e3c9a8"/>
+          <stop offset=".36" stop-color="#d9d3a0"/>
+          <stop offset=".54" stop-color="#b3d3bd"/>
+          <stop offset=".72" stop-color="#aac9e3"/>
+          <stop offset=".88" stop-color="#bcb3e3"/>
+          <stop offset="1"   stop-color="#d9b0cc"/>
         </linearGradient>
       </defs>
       <!-- 中心軸＋目盛り -->
