@@ -1242,7 +1242,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r64</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r65</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1389,8 +1389,8 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     }
 
     var t1 = mobile ? 460 : 0;   /* 第1幕開始（グリッチ+回転+白開始） */
-    var t2 = t1 + 300;           /* 第2幕（加速+ダイブ+白開始） */
-    var tGo = t1 + 960;          /* 遷移（ダイブを見せ切ってから） */
+    var t2 = t1 + 700;           /* 第2幕（加速+ダイブ+白開始）※巻き上がりをたっぷり見せる */
+    var tGo = t1 + 1400;         /* 遷移（ダイブを見せ切ってから） */
     setTimeout(function () {
       document.body.classList.add('depart');
       startSpin(); /* ほぼ静止→巻き上がる回転 */
