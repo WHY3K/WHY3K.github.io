@@ -368,14 +368,7 @@
     .link:hover .idx, .link:hover .mk { color: var(--ink); }
   }
   .link:active { background: #ececee; }
-  /* 戻り時の解除はアニメ無しで一瞬に */
-  .link.primary.no-anim, .link.primary.no-anim::before, .link.primary.no-anim .mk { transition: none !important; }
-  /* 押している間＋クリック後の見せ切り：黒が左から右へ払う（貼り付きはpageshowで解除） */
-  .link.primary:active, .link.primary.wiping { color: #fff; }
-  .link.primary:active::before, .link.primary.wiping::before { transform: translateX(0) skewX(-16deg); }
-  .link.primary:active .idx, .link.primary.wiping .idx { color: rgba(255,255,255,.6); }
-  .link.primary:active .mk, .link.primary.wiping .mk { color: #fff; transform: translateX(12px); }
-  .link.primary:active .lead, .link.primary.wiping .lead { border-color: rgba(255,255,255,.3); }
+  /* タップ時は黒を出さない（出発演出は溶け→白で統一）。PCホバーのみ黒ワイプ */
 
   .link.primary {
     border-top: 2px solid var(--ink);
@@ -1311,36 +1304,13 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       if (reduce) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
-      if (a === link) link.classList.add('wiping');
       departTo(a.href);
     });
   });
   /* 戻ってきた時（bfcache含む）に黒が残らないように解除 */
-  window.addEventListener('pageshow', function (e) {
-    if (e.persisted) return; /* この直後にリロードされるので何もしない */
-    var backFlag = false;
-    try {
-      backFlag = sessionStorage.getItem('w3kBack') === '1';
-      if (backFlag) sessionStorage.removeItem('w3kBack');
-    } catch (_) {}
-    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-    var isBack = backFlag || (nav && nav.type === 'back_forward');
-    if (isBack && !reduce) {
-      /* 黒で覆った状態から逆再生で剥がす（演出として見せる） */
-      link.classList.add('no-anim');
-      link.classList.add('wiping');
-      void link.offsetWidth; /* reflow */
-      link.classList.remove('no-anim');
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { link.classList.remove('wiping'); });
-      });
-    } else {
-      link.classList.add('no-anim');
-      link.classList.remove('wiping');
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { link.classList.remove('no-anim'); });
-      });
-    }
+  window.addEventListener('pageshow', function () {
+    document.body.classList.remove('depart'); /* 出発演出の残骸を掃除 */
+    link.classList.remove('wiping');
   });
 })();
 
