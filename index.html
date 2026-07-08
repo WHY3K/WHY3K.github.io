@@ -197,10 +197,22 @@
   .term { letter-spacing: .12em; }
   .term b { font-weight: 400; color: var(--ink); }
 
-  /* ---- QR（本物：PLUGINSに飛ぶ） ---- */
-  .qr { position: fixed; bottom: 84px; left: 40px; z-index: 2; width: 52px; opacity: .92; }
+  /* ---- QR（本物：PLUGINSに飛ぶ。ホバーで拡大してスキャン可能） ---- */
+  .qr {
+    position: fixed; bottom: 84px; left: 40px; z-index: 5; width: 68px;
+    text-decoration: none; color: var(--ink);
+    background: var(--paper);
+    padding: 6px 6px 4px;
+    border: 1px solid var(--line);
+    transform-origin: bottom left;
+    transition: transform .22s ease, box-shadow .22s ease;
+  }
   .qr img { width: 100%; display: block; }
-  .qr small { display: block; margin-top: 5px; font-family: var(--mono); font-size: 7px; letter-spacing: .18em; color: var(--ink-soft); text-align: center; }
+  .qr small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 6.5px; letter-spacing: .14em; color: var(--ink-soft); text-align: center; white-space: nowrap; }
+  .qr:hover {
+    transform: scale(2.4);
+    box-shadow: 0 18px 44px -18px rgba(0,0,0,.35);
+  }
   .disp {
     position: absolute; border-radius: 50%;
     background:
@@ -388,29 +400,40 @@
     transition: background .15s;
   }
   .f-btn:hover { background: var(--red); }
+  /* 配布サイトの「disp」ウィンドウと同じ見た目に合わせる */
   .f-display {
     position: relative;
-    background: var(--ink);
-    padding: 40px 18px 34px;
+    background: #0b0b0d;
+    border: 1px solid #26262c;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px -30px rgba(0,0,0,.6);
     max-width: 100%; min-width: 0;
-    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    display: flex; flex-direction: column;
+  }
+  .f-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    height: 34px; padding: 0 12px;
+    background: #1b1b20; border-bottom: 1px solid #000;
+  }
+  .f-titlebar .dots { display: flex; gap: 6px; }
+  .f-titlebar .dots i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a42; display: block; }
+  .f-titlebar .win-title {
+    flex: 1; text-align: center;
+    color: #8a8a95; font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
+    margin-right: 39px; /* 左のドット幅ぶんを相殺して中央寄せ */
   }
   .f-display .digits {
-    font-family: var(--mono);
-    font-size: clamp(24px, 7vw, 56px);
-    letter-spacing: .05em; color: #fbfbfa; white-space: nowrap;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700; color: #33d15e;
+    font-size: clamp(24px, 7vw, 52px);
+    letter-spacing: .04em; text-align: center;
+    padding: 36px 20px;
+    text-shadow: 0 0 18px rgba(51,209,94,.45);
+    white-space: nowrap;
   }
-  .f-display .digits b { font-weight: 400; color: var(--red); }
-  .f-display .dlabel {
-    font-family: var(--mono); font-size: 9px; letter-spacing: .34em;
-    color: #8a8a93; text-transform: uppercase;
-  }
-  /* ディスプレイ四隅の白トンボ */
-  .f-display i { position: absolute; width: 12px; height: 12px; }
-  .f-display i:nth-child(1) { top:10px; left:10px;  border-top:1px solid #6a6a73; border-left:1px solid #6a6a73; }
-  .f-display i:nth-child(2) { top:10px; right:10px; border-top:1px solid #6a6a73; border-right:1px solid #6a6a73; }
-  .f-display i:nth-child(3) { bottom:10px; left:10px;  border-bottom:1px solid #6a6a73; border-left:1px solid #6a6a73; }
-  .f-display i:nth-child(4) { bottom:10px; right:10px; border-bottom:1px solid #6a6a73; border-right:1px solid #6a6a73; }
+  .f-display .digits b { font-weight: 700; color: #1f8f42; }
 
   @media (min-width: 1000px) {
     .feature { padding: 92px 72px 96px; }
@@ -421,7 +444,7 @@
       align-items: center;
       column-gap: clamp(48px, 6vw, 104px);
     }
-    .f-display { padding: 64px 40px 56px; }
+    .f-display .digits { padding: 60px 20px; }
   }
 
   /* ---- フッター ---- */
@@ -456,17 +479,12 @@
   .topnav { display: none; }
   @media (min-width: 1000px) {
     .head-bar2 { display: none; }
-    .doc-head { display: none; }
     .topnav .brand {
-      margin-right: auto;
-      display: flex; align-items: baseline; gap: 16px;
-      font-family: var(--disp); font-weight: 700; font-size: 19px;
-      letter-spacing: .05em; text-transform: none;
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--disp); font-weight: 700; font-size: 20px;
+      letter-spacing: .06em; text-transform: none;
       color: var(--ink); text-decoration: none;
-    }
-    .topnav .brand .bidx {
-      font-family: var(--mono); font-size: 9px; letter-spacing: .22em;
-      color: var(--ink-soft); text-transform: uppercase;
     }
     .topnav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 3;
@@ -680,7 +698,7 @@
 
 <!-- ===== 上部ナビ（PC専用） ===== -->
 <nav class="topnav" aria-label="Primary">
-  <a class="brand" href="/">WHY3K<span class="bidx">index — 01</span></a>
+  <a class="brand" href="/">WHY3K</a>
   <a class="active" href="/"><span class="no">01</span>Index</a>
   <a href="https://why3k.github.io/why3k-plugins/"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
@@ -808,7 +826,7 @@ phase ...... hold</div>
 <!-- ===== QR（読み取るとPLUGINSへ） ===== -->
 <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/" aria-label="WHY3K PLUGINS">
   <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
-  <small>SCAN</small>
+  <small>SCAN — PLUGINS</small>
 </a>
 
 <div class="cursor-x" aria-hidden="true"></div>
@@ -951,9 +969,11 @@ phase ...... hold</div>
       <a class="f-btn" href="https://why3k.github.io/why3k-plugins/">Free Download <span aria-hidden="true">→</span></a>
     </div>
     <div class="f-display" aria-hidden="true">
-      <i></i><i></i><i></i><i></i>
+      <div class="f-titlebar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="win-title">disp</span>
+      </div>
       <div class="digits">00:00:00<b>.000</b></div>
-      <div class="dlabel">countup — running</div>
     </div>
   </div>
 </section>
