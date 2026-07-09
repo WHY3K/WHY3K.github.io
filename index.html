@@ -531,6 +531,10 @@
   html.backnav .warp { visibility: visible; opacity: 1; } /* 戻り直後は白から */
   .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .32s ease; }
 
+  /* 時計の文字盤：ワープの間だけ召喚される */
+  .clockface { opacity: 0; transition: opacity .7s ease .25s; }
+  body.summon .clockface { opacity: .82; }
+
   /* 第0幕（.summon）：図版以外が溶けて消える */
   body.summon .links, body.summon .fig-cap, body.summon .feature,
   body.summon .ticker, body.summon footer,
@@ -1096,6 +1100,22 @@ phase ...... hold</div>
       <circle cx="300" cy="258" r="196" stroke="#d9d9df" stroke-width=".7" stroke-dasharray="2 5"/>
       <circle cx="300" cy="258" r="118" stroke="#e2e2e7" stroke-width=".6"/>
 
+      <!-- 時計の文字盤（普段は不可視。ワープ時だけ召喚される） -->
+      <g class="clockface" font-family="Cormorant, 'Hiragino Mincho ProN', serif" font-size="15" font-weight="600" fill="#131316" text-anchor="middle" letter-spacing=".04em">
+        <text x="300.0" y="15.0">XII</text>
+        <text x="424.0" y="48.2">I</text>
+        <text x="514.8" y="139.0">II</text>
+        <text x="548.0" y="263.0">III</text>
+        <text x="514.8" y="387.0">IIII</text>
+        <text x="424.0" y="477.8">V</text>
+        <text x="300.0" y="511.0">VI</text>
+        <text x="176.0" y="477.8">VII</text>
+        <text x="85.2" y="387.0">VIII</text>
+        <text x="52.0" y="263.0">IX</text>
+        <text x="85.2" y="139.0">X</text>
+        <text x="176.0" y="48.2">XI</text>
+      </g>
+
       <!-- ビーズの軌道（点の玉が円を描く） -->
       <circle cx="300" cy="258" r="168" stroke="#131316" stroke-width="3.4" stroke-dasharray="0.1 11" stroke-linecap="round" opacity=".5" transform="rotate(-20 300 258)"/>
       <circle cx="300" cy="258" r="228" stroke="#131316" stroke-width="2.6" stroke-dasharray="0.1 14" stroke-linecap="round" opacity=".35" transform="rotate(30 300 258)"/>
@@ -1243,7 +1263,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r67</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r68</div>
   <div class="pageno">01</div>
 </footer>
 
