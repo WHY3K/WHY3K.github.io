@@ -536,7 +536,7 @@
   body.summon .clockface { opacity: .82; }
   .hands { opacity: 0; transition: opacity .7s ease .25s; }
   body.summon .hands { opacity: .8; }
-  .handH, .handM { transform-origin: 300px 258px; }
+  .handH, .handM, .handS { transform-origin: 300px 258px; }
 
   /* 第0幕（.summon）：図版以外が溶けて消える */
   body.summon .links, body.summon .fig-cap, body.summon .feature,
@@ -1105,8 +1105,18 @@ phase ...... hold</div>
 
       <!-- 時計の針（普段は不可視。ワープ時だけ文字盤と一緒に召喚） -->
       <g class="hands">
-        <g class="handH"><line x1="300" y1="258" x2="300" y2="156" stroke="#131316" stroke-width="5" stroke-linecap="round" opacity=".55"/></g>
-        <g class="handM"><line x1="300" y1="258" x2="300" y2="84"  stroke="#131316" stroke-width="3" stroke-linecap="round" opacity=".5"/></g>
+        <g class="handH"><!-- 時針：雫型の膨らみ -->
+          <line x1="300" y1="258" x2="300" y2="232" stroke="#131316" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+          <path d="M300 168 C309 188 307 212 300 234 C293 212 291 188 300 168 Z" fill="#131316" opacity=".85"/>
+        </g>
+        <g class="handM"><!-- 分針：細身の槍 -->
+          <line x1="300" y1="258" x2="300" y2="206" stroke="#131316" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+          <path d="M300 92 C306 122 305 160 300 208 C295 160 294 122 300 92 Z" fill="#131316" opacity=".8"/>
+        </g>
+        <g class="handS"><!-- 秒針：尻尾と錘付きの細い針 -->
+          <line x1="300" y1="290" x2="300" y2="86" stroke="#7a7a83" stroke-width="1.4" opacity=".8"/>
+          <circle cx="300" cy="280" r="4.5" fill="#7a7a83" opacity=".8"/>
+        </g>
       </g>
 
       <!-- 時計の文字盤（普段は不可視。ワープ時だけ召喚される） -->
@@ -1272,7 +1282,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r73</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r74</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1385,8 +1395,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       { el: fig && fig.querySelector('.orbitB'), dir: -1, v: .8 },
       { el: fig && fig.querySelector('.orbitC'), dir: 1,  v: .6 },
       { el: fig && fig.querySelector('.redarc'), dir: -1, v: 1.6 },
-      { el: fig && fig.querySelector('.handM'), dir: 1, v: 5,  k: 1.2, a0: 60 },  /* 分針：速い */
-      { el: fig && fig.querySelector('.handH'), dir: 1, v: .4, k: .1,  a0: -55 }  /* 時針：分針の1/12感 */
+      { el: fig && fig.querySelector('.handM'), dir: 1, v: 5,  k: 1.6, a0: 60 },   /* 分針：速い */
+      { el: fig && fig.querySelector('.handH'), dir: 1, v: .4, k: .14, a0: -55 },  /* 時針：分針の1/12感 */
+      { el: fig && fig.querySelector('.handS'), dir: 1, v: 18, k: 2.4, a0: 150 }   /* 秒針：最速 */
     ];
     function currentAngle(el) {
       var tr = getComputedStyle(el).transform;
@@ -1407,7 +1418,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       function frame(now) {
         var dt = (now - last) / 1000; last = now;
         var t = (now - t0) / 1000;
-        var accel = 500 * t; /* 加速度自体が増える＝じわじわ→どんどん速く */
+        var accel = 380 * t + 1050 * t * t; /* 序盤じわじわ→終盤は爆発的に */
         groups.forEach(function (g) {
           if (!g.el) return;
           g.v += accel * dt * (g.k || 1);
@@ -1454,7 +1465,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     var fig = document.querySelector('.figure');
     if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
     if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
-    ['.orbitA', '.orbitB', '.orbitC', '.redarc', '.handM', '.handH'].forEach(function (sel) {
+    ['.orbitA', '.orbitB', '.orbitC', '.redarc', '.handM', '.handH', '.handS'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (el) { el.style.animation = ''; el.style.transform = ''; }
     });
