@@ -535,21 +535,6 @@
   .clockface { opacity: 0; transition: opacity .7s ease .25s; }
   body.summon .clockface { opacity: .82; }
 
-  /* グリッチ出現（実体化はスライスがバチバチ走りながら現れる） */
-  .figure.glitch-in { animation: figGlitchIn .6s steps(1) forwards; }
-  @keyframes figGlitchIn {
-    0%  { opacity: 0; }
-    6%  { opacity: 1; clip-path: inset(8% 0 74% 0); }
-    12% { opacity: 0; }
-    20% { opacity: 1; clip-path: inset(62% 0 12% 0); }
-    27% { opacity: 0; }
-    34% { opacity: 1; clip-path: inset(30% 0 40% 0); }
-    42% { opacity: 1; clip-path: inset(0 0 55% 0); }
-    50% { opacity: 1; clip-path: inset(45% 0 0 0); }
-    60% { opacity: 1; clip-path: inset(15% 0 15% 0); }
-    72%, 100% { opacity: 1; clip-path: inset(0 0 0 0); }
-  }
-
   /* 第0幕（.summon）：図版以外が溶けて消える */
   body.summon .links, body.summon .fig-cap, body.summon .feature,
   body.summon .ticker, body.summon footer,
@@ -1278,7 +1263,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r71</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r72</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1369,26 +1354,18 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     var fig = document.querySelector('.figure');
 
     if (mobile && fig) {
+      /* 第0幕：いまいる場所（画面外でも）から中央へスーッと移動（FLIP） */
       var r1 = fig.getBoundingClientRect();
-      var vh = window.innerHeight;
-      var visible = Math.max(0, Math.min(r1.bottom, vh) - Math.max(r1.top, 0));
-      var ratio = r1.height ? visible / r1.height : 0;
       document.body.classList.add('summon');
-      if (ratio > 0.35) {
-        /* 第0幕a：画面内に見えている → いまの場所から中央へスーッと移動（FLIP） */
-        var r2 = fig.getBoundingClientRect();
-        var dx = (r1.left + r1.width / 2) - (r2.left + r2.width / 2);
-        var dy = (r1.top + r1.height / 2) - (r2.top + r2.height / 2);
-        var sc0 = r2.width ? (r1.width / r2.width) : 1;
-        fig.style.transition = 'none';
-        fig.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + sc0 + ')';
-        void fig.offsetWidth;
-        fig.style.transition = 'transform .45s cubic-bezier(.22, .8, .3, 1)';
-        fig.style.transform = ''; /* CSSの中央定位置へ */
-      } else {
-        /* 第0幕b：画面外にいる → グリッチしながら実体化（ホログラム起動） */
-        fig.classList.add('glitch-in');
-      }
+      var r2 = fig.getBoundingClientRect();
+      var dx = (r1.left + r1.width / 2) - (r2.left + r2.width / 2);
+      var dy = (r1.top + r1.height / 2) - (r2.top + r2.height / 2);
+      var sc0 = r2.width ? (r1.width / r2.width) : 1;
+      fig.style.transition = 'none';
+      fig.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + sc0 + ')';
+      void fig.offsetWidth;
+      fig.style.transition = 'transform .5s cubic-bezier(.25, .8, .3, 1)';
+      fig.style.transform = ''; /* CSSの中央定位置へ */
     } else {
       document.body.classList.add('summon');
     }
@@ -1464,7 +1441,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     document.body.classList.remove('depart2');
     document.body.classList.remove('summon');
     var fig = document.querySelector('.figure');
-    if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; fig.classList.remove('glitch-in'); }
+    if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
     if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
     ['.orbitA', '.orbitB', '.orbitC', '.redarc'].forEach(function (sel) {
       var el = document.querySelector(sel);
