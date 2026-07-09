@@ -531,9 +531,12 @@
   html.backnav .warp { visibility: visible; opacity: 1; } /* 戻り直後は白から */
   .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .24s ease; }
 
-  /* 時計の文字盤：ワープの間だけ召喚される */
+  /* 時計の文字盤と針：ワープの間だけ召喚される */
   .clockface { opacity: 0; transition: opacity .7s ease .25s; }
   body.summon .clockface { opacity: .82; }
+  .hands { opacity: 0; transition: opacity .7s ease .25s; }
+  body.summon .hands { opacity: .8; }
+  .handH, .handM { transform-origin: 300px 258px; }
 
   /* 第0幕（.summon）：図版以外が溶けて消える */
   body.summon .links, body.summon .fig-cap, body.summon .feature,
@@ -1100,6 +1103,12 @@ phase ...... hold</div>
       <circle cx="300" cy="258" r="196" stroke="#d9d9df" stroke-width=".7" stroke-dasharray="2 5"/>
       <circle cx="300" cy="258" r="118" stroke="#e2e2e7" stroke-width=".6"/>
 
+      <!-- 時計の針（普段は不可視。ワープ時だけ文字盤と一緒に召喚） -->
+      <g class="hands">
+        <g class="handH"><line x1="300" y1="258" x2="300" y2="156" stroke="#131316" stroke-width="5" stroke-linecap="round" opacity=".55"/></g>
+        <g class="handM"><line x1="300" y1="258" x2="300" y2="84"  stroke="#131316" stroke-width="3" stroke-linecap="round" opacity=".5"/></g>
+      </g>
+
       <!-- 時計の文字盤（普段は不可視。ワープ時だけ召喚される） -->
       <g class="clockface" font-family="Cormorant, 'Hiragino Mincho ProN', serif" font-size="15" font-weight="600" fill="#131316" text-anchor="middle" letter-spacing=".04em">
         <text x="300.0" y="15.0">XII</text>
@@ -1263,7 +1272,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r72</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r73</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1375,7 +1384,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       { el: fig && fig.querySelector('.orbitA'), dir: 1,  v: 1.2 },
       { el: fig && fig.querySelector('.orbitB'), dir: -1, v: .8 },
       { el: fig && fig.querySelector('.orbitC'), dir: 1,  v: .6 },
-      { el: fig && fig.querySelector('.redarc'), dir: -1, v: 1.6 }
+      { el: fig && fig.querySelector('.redarc'), dir: -1, v: 1.6 },
+      { el: fig && fig.querySelector('.handM'), dir: 1, v: 5,  k: 1.2, a0: 60 },  /* 分針：速い */
+      { el: fig && fig.querySelector('.handH'), dir: 1, v: .4, k: .1,  a0: -55 }  /* 時針：分針の1/12感 */
     ];
     function currentAngle(el) {
       var tr = getComputedStyle(el).transform;
@@ -1388,7 +1399,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     function startSpin() {
       groups.forEach(function (g) {
         if (!g.el) return;
-        g.a = currentAngle(g.el);           /* いまの角度から続きを回す＝カクッしない */
+        g.a = (g.a0 !== undefined) ? g.a0 : currentAngle(g.el); /* いまの角度から続きを回す＝カクッしない */
         g.el.style.animation = 'none';
         g.el.style.transform = 'rotate(' + g.a + 'deg)';
       });
@@ -1399,7 +1410,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
         var accel = 500 * t; /* 加速度自体が増える＝じわじわ→どんどん速く */
         groups.forEach(function (g) {
           if (!g.el) return;
-          g.v += accel * dt;
+          g.v += accel * dt * (g.k || 1);
           g.a += g.dir * g.v * dt;
           g.el.style.transform = 'rotate(' + g.a + 'deg)';
         });
@@ -1443,7 +1454,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     var fig = document.querySelector('.figure');
     if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
     if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
-    ['.orbitA', '.orbitB', '.orbitC', '.redarc'].forEach(function (sel) {
+    ['.orbitA', '.orbitB', '.orbitC', '.redarc', '.handM', '.handH'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (el) { el.style.animation = ''; el.style.transform = ''; }
     });
