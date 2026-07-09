@@ -529,11 +529,26 @@
   }
   .warp.in { visibility: visible; opacity: 1; transition: opacity .3s ease .3s; }
   html.backnav .warp { visibility: visible; opacity: 1; } /* 戻り直後は白から */
-  .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .32s ease; }
+  .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .24s ease; }
 
   /* 時計の文字盤：ワープの間だけ召喚される */
   .clockface { opacity: 0; transition: opacity .7s ease .25s; }
   body.summon .clockface { opacity: .82; }
+
+  /* グリッチ出現（実体化はスライスがバチバチ走りながら現れる） */
+  .figure.glitch-in { animation: figGlitchIn .6s steps(1) forwards; }
+  @keyframes figGlitchIn {
+    0%  { opacity: 0; }
+    6%  { opacity: 1; clip-path: inset(8% 0 74% 0); }
+    12% { opacity: 0; }
+    20% { opacity: 1; clip-path: inset(62% 0 12% 0); }
+    27% { opacity: 0; }
+    34% { opacity: 1; clip-path: inset(30% 0 40% 0); }
+    42% { opacity: 1; clip-path: inset(0 0 55% 0); }
+    50% { opacity: 1; clip-path: inset(45% 0 0 0); }
+    60% { opacity: 1; clip-path: inset(15% 0 15% 0); }
+    72%, 100% { opacity: 1; clip-path: inset(0 0 0 0); }
+  }
 
   /* 第0幕（.summon）：図版以外が溶けて消える */
   body.summon .links, body.summon .fig-cap, body.summon .feature,
@@ -928,7 +943,7 @@
     <button class="hb" id="histFwd" aria-label="次のページへ" disabled>→</button>
   </span>
   <a class="active" href="/"><span class="no">01</span>Index</a>
-  <a href="https://why3k.github.io/why3k-plugins/?t=20260709y"><span class="no">02</span>Plugins</a>
+  <a href="https://why3k.github.io/why3k-plugins/?t=20260709z"><span class="no">02</span>Plugins</a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
   <a class="soon" href="#" aria-disabled="true"><span class="no">04</span>Store<span class="soonmk">SOON</span></a>
 </nav>
@@ -1208,7 +1223,7 @@ phase ...... hold</div>
     <a class="link soon" href="#" aria-disabled="true"><span class="idx">06</span> SoundCloud <span class="lead"></span><span class="mk">SOON</span></a>
 
     <!-- PLUGINS（稼働中） -->
-    <a class="link primary" href="https://why3k.github.io/why3k-plugins/?t=20260709y">
+    <a class="link primary" href="https://why3k.github.io/why3k-plugins/?t=20260709z">
       <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">→</span>
     </a>
   </nav>
@@ -1223,7 +1238,7 @@ phase ...... hold</div>
       <h2 class="f-title">CountUp Timer</h2>
       <div class="f-sub">max for live device — v1.1 / ableton live</div>
       <p class="f-desc"><span class="nb">再生した瞬間から数えはじめる、</span><span class="nb">Ableton Live用の</span><span class="nb">カウントアップタイマー。</span><span class="nb">ライブや舞台の経過時間を、</span><span class="nb">クリップの隣に</span><span class="nb">ただ置くだけで表示できる。</span></p>
-      <a class="f-btn" href="https://why3k.github.io/why3k-plugins/?t=20260709y">Free Download <span aria-hidden="true">→</span></a>
+      <a class="f-btn" href="https://why3k.github.io/why3k-plugins/?t=20260709z">Free Download <span aria-hidden="true">→</span></a>
     </div>
     <div class="f-display" aria-hidden="true">
       <div class="f-titlebar">
@@ -1245,7 +1260,7 @@ phase ...... hold</div>
 
 <footer>
   <!-- QR（柄として。読み取るとPLUGINSへ） -->
-  <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/?t=20260709y" aria-label="WHY3K PLUGINS">
+  <a class="qr hide-m" href="https://why3k.github.io/why3k-plugins/?t=20260709z" aria-label="WHY3K PLUGINS">
     <img src="assets/qr.svg" alt="QR — WHY3K PLUGINS">
     <small>SCAN</small>
   </a>
@@ -1263,7 +1278,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r70</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r71</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1371,14 +1386,8 @@ document.addEventListener('touchstart', function () {}, { passive: true });
         fig.style.transition = 'transform .45s cubic-bezier(.22, .8, .3, 1)';
         fig.style.transform = ''; /* CSSの中央定位置へ */
       } else {
-        /* 第0幕b：画面外にいる → その場にふわっと実体化 */
-        fig.style.transition = 'none';
-        fig.style.opacity = '0';
-        fig.style.transform = 'translate(-50%, -50%) scale(.92)';
-        void fig.offsetWidth;
-        fig.style.transition = 'opacity .38s ease, transform .38s cubic-bezier(.22, .8, .3, 1)';
-        fig.style.opacity = '1';
-        fig.style.transform = '';
+        /* 第0幕b：画面外にいる → グリッチしながら実体化（ホログラム起動） */
+        fig.classList.add('glitch-in');
       }
     } else {
       document.body.classList.add('summon');
@@ -1424,7 +1433,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
 
     var t1 = mobile ? 460 : 0;   /* 第1幕開始（グリッチ+回転+白開始） */
     var t2 = t1 + 1500;          /* 第2幕（加速+ダイブ+白開始）※巻き上がりをじっくり見せる */
-    var tGo = t1 + 2400;         /* 遷移（ダイブを見せ切ってから） */
+    var tGo = t1 + 2150;         /* 遷移（白になったら即） */
     setTimeout(function () {
       document.body.classList.add('depart');
       startSpin(); /* ほぼ静止→巻き上がる回転 */
@@ -1455,7 +1464,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     document.body.classList.remove('depart2');
     document.body.classList.remove('summon');
     var fig = document.querySelector('.figure');
-    if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
+    if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; fig.classList.remove('glitch-in'); }
     if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
     ['.orbitA', '.orbitB', '.orbitC', '.redarc'].forEach(function (sel) {
       var el = document.querySelector(sel);
