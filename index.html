@@ -531,9 +531,12 @@
   html.backnav .warp { visibility: visible; opacity: 1; } /* 戻り直後は白から */
   .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .24s ease; }
 
-  /* 歯車：ワープの間だけ召喚され、噛み合って加速回転する */
-  .gears { opacity: 0; transition: opacity .7s ease .25s; }
-  body.summon .gears { opacity: .9; }
+  /* 時計の文字盤と針：ワープの間だけ召喚される */
+  .clockface { opacity: 0; transition: opacity .7s ease .25s; }
+  body.summon .clockface { opacity: .82; }
+  .hands { opacity: 0; transition: opacity .7s ease .25s; }
+  body.summon .hands { opacity: .8; }
+  .handH, .handM, .handS { transform-origin: 300px 258px; }
 
   /* 第0幕（.summon）：図版以外が溶けて消える */
   body.summon .links, body.summon .fig-cap, body.summon .feature,
@@ -1100,8 +1103,37 @@ phase ...... hold</div>
       <circle cx="300" cy="258" r="196" stroke="#d9d9df" stroke-width=".7" stroke-dasharray="2 5"/>
       <circle cx="300" cy="258" r="118" stroke="#e2e2e7" stroke-width=".6"/>
 
-      <!-- 歯車（普段は不可視。ワープ時だけ召喚され、噛み合って加速回転する。中身はJSで生成） -->
-      <g class="gears"></g>
+      <!-- 時計の針（普段は不可視。ワープ時だけ文字盤と一緒に召喚） -->
+      <g class="hands">
+        <g class="handH"><!-- 時針：雫型の膨らみ -->
+          <line x1="300" y1="258" x2="300" y2="232" stroke="#131316" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+          <path d="M300 168 C309 188 307 212 300 234 C293 212 291 188 300 168 Z" fill="#131316" opacity=".85"/>
+        </g>
+        <g class="handM"><!-- 分針：細身の槍 -->
+          <line x1="300" y1="258" x2="300" y2="206" stroke="#131316" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+          <path d="M300 92 C306 122 305 160 300 208 C295 160 294 122 300 92 Z" fill="#131316" opacity=".8"/>
+        </g>
+        <g class="handS"><!-- 秒針：尻尾と錘付きの細い針 -->
+          <line x1="300" y1="290" x2="300" y2="86" stroke="#7a7a83" stroke-width="1.4" opacity=".8"/>
+          <circle cx="300" cy="280" r="4.5" fill="#7a7a83" opacity=".8"/>
+        </g>
+      </g>
+
+      <!-- 時計の文字盤（普段は不可視。ワープ時だけ召喚される） -->
+      <g class="clockface" font-family="Cormorant, 'Hiragino Mincho ProN', serif" font-size="15" font-weight="600" fill="#131316" text-anchor="middle" letter-spacing=".04em">
+        <text x="300.0" y="15.0">XII</text>
+        <text x="424.0" y="48.2">I</text>
+        <text x="514.8" y="139.0">II</text>
+        <text x="548.0" y="263.0">III</text>
+        <text x="514.8" y="387.0">IIII</text>
+        <text x="424.0" y="477.8">V</text>
+        <text x="300.0" y="511.0">VI</text>
+        <text x="176.0" y="477.8">VII</text>
+        <text x="85.2" y="387.0">VIII</text>
+        <text x="52.0" y="263.0">IX</text>
+        <text x="85.2" y="139.0">X</text>
+        <text x="176.0" y="48.2">XI</text>
+      </g>
 
       <!-- ビーズの軌道（点の玉が円を描く） -->
       <circle cx="300" cy="258" r="168" stroke="#131316" stroke-width="3.4" stroke-dasharray="0.1 11" stroke-linecap="round" opacity=".5" transform="rotate(-20 300 258)"/>
@@ -1250,7 +1282,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">10.07.2026 — r75</div>
+  <div class="copyright" style="letter-spacing:.35em;">09.07.2026 — r74</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1329,55 +1361,6 @@ document.addEventListener('touchstart', function () {}, { passive: true });
   }
 })();
 
-/* ===== 歯車の生成（ワープ中だけ召喚される三連ギア。作図と同じ墨一色） ===== */
-(function () {
-  var host = document.querySelector('.gears');
-  if (!host) return;
-  var NS = 'http://www.w3.org/2000/svg';
-  function el(name, attrs) {
-    var e = document.createElementNS(NS, name);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    return e;
-  }
-  /* 台形歯の歯車輪郭。rp=ピッチ半径 n=歯数 phase=歯先ひとつの中心角（噛み合わせ位相） */
-  function gearD(cx, cy, rp, n, phase) {
-    var ro = rp * 1.10, ri = rp * .885; /* 歯先／歯底 */
-    var s = Math.PI * 2 / n, d = '';
-    for (var i = 0; i < n; i++) {
-      var a = phase - s * .51 + i * s;
-      [[ri, a], [ri, a + s * .30], [ro, a + s * .40], [ro, a + s * .62], [ri, a + s * .72]]
-        .forEach(function (q, j) {
-          d += (i === 0 && j === 0 ? 'M' : 'L') +
-            (cx + q[0] * Math.cos(q[1])).toFixed(1) + ' ' +
-            (cy + q[0] * Math.sin(q[1])).toFixed(1);
-        });
-    }
-    return d + 'Z';
-  }
-  function makeGear(cls, cx, cy, rp, n, phase, op) {
-    var g = el('g', { 'class': cls, stroke: '#131316', fill: 'none', opacity: op });
-    g.appendChild(el('path', { d: gearD(cx, cy, rp, n, phase), 'stroke-width': '1.3', 'stroke-linejoin': 'round' }));
-    g.appendChild(el('circle', { cx: cx, cy: cy, r: rp, 'stroke-width': '.5', 'stroke-dasharray': '2 5', opacity: '.6' })); /* ピッチ円（作図線） */
-    g.appendChild(el('circle', { cx: cx, cy: cy, r: rp * .82, 'stroke-width': '.8', opacity: '.8' })); /* リム内縁 */
-    g.appendChild(el('circle', { cx: cx, cy: cy, r: rp * .16, 'stroke-width': '1.1' })); /* ハブ */
-    g.appendChild(el('circle', { cx: cx, cy: cy, r: 2.6, fill: '#131316', stroke: 'none' })); /* 軸 */
-    for (var i = 0; i < 4; i++) { /* スポーク4本 */
-      var a = phase + Math.PI / 4 + i * Math.PI / 2;
-      g.appendChild(el('line', {
-        x1: (cx + rp * .16 * Math.cos(a)).toFixed(1), y1: (cy + rp * .16 * Math.sin(a)).toFixed(1),
-        x2: (cx + rp * .82 * Math.cos(a)).toFixed(1), y2: (cy + rp * .82 * Math.sin(a)).toFixed(1),
-        'stroke-width': '1.1'
-      }));
-    }
-    host.appendChild(g);
-  }
-  /* 中心間距離から割った実寸で噛み合う配置。
-     位相＝隣へ「歯」を向けたら、向けられた側は「谷」を向ける（静止時に噛んで見える） */
-  makeGear('gear1', 300, 258, 100, 20, -0.694, '.8');  /* 大：基準 */
-  makeGear('gear2', 430, 150,  69, 14,  2.672, '.7');  /* 中：右上 */
-  makeGear('gear3', 150, 348,  75, 15, -0.540, '.62'); /* 小：左下 */
-})();
-
 /* ===== PLUGINSリンク：ワイプを見せ切ってから遷移 ===== */
 (function () {
   var link = document.querySelector('.link.primary');
@@ -1412,9 +1395,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       { el: fig && fig.querySelector('.orbitB'), dir: -1, v: .8 },
       { el: fig && fig.querySelector('.orbitC'), dir: 1,  v: .6 },
       { el: fig && fig.querySelector('.redarc'), dir: -1, v: 1.6 },
-      { el: fig && fig.querySelector('.gear1'), cx: 300, cy: 258, dir: 1,  v: 1.0,  k: 1.0 },   /* 大：基準（20歯） */
-      { el: fig && fig.querySelector('.gear2'), cx: 430, cy: 150, dir: -1, v: 1.43, k: 1.43 },  /* 中：逆回り（歯数比20:14） */
-      { el: fig && fig.querySelector('.gear3'), cx: 150, cy: 348, dir: -1, v: 1.33, k: 1.33 }   /* 小：逆回り（歯数比20:15） */
+      { el: fig && fig.querySelector('.handM'), dir: 1, v: 5,  k: 1.6, a0: 60 },   /* 分針：速い */
+      { el: fig && fig.querySelector('.handH'), dir: 1, v: .4, k: .14, a0: -55 },  /* 時針：分針の1/12感 */
+      { el: fig && fig.querySelector('.handS'), dir: 1, v: 18, k: 2.4, a0: 150 }   /* 秒針：最速 */
     ];
     function currentAngle(el) {
       var tr = getComputedStyle(el).transform;
@@ -1427,14 +1410,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     function startSpin() {
       groups.forEach(function (g) {
         if (!g.el) return;
-        if (g.cx !== undefined) {                 /* 歯車：自分の中心で回す（rotate角 cx cy） */
-          g.a = 0;
-          g.el.setAttribute('transform', 'rotate(0 ' + g.cx + ' ' + g.cy + ')');
-        } else {
-          g.a = (g.a0 !== undefined) ? g.a0 : currentAngle(g.el); /* いまの角度から続きを回す＝カクッしない */
-          g.el.style.animation = 'none';
-          g.el.style.transform = 'rotate(' + g.a + 'deg)';
-        }
+        g.a = (g.a0 !== undefined) ? g.a0 : currentAngle(g.el); /* いまの角度から続きを回す＝カクッしない */
+        g.el.style.animation = 'none';
+        g.el.style.transform = 'rotate(' + g.a + 'deg)';
       });
       var t0 = performance.now(), last = t0;
       function frame(now) {
@@ -1445,11 +1423,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
           if (!g.el) return;
           g.v += accel * dt * (g.k || 1);
           g.a += g.dir * g.v * dt;
-          if (g.cx !== undefined) {
-            g.el.setAttribute('transform', 'rotate(' + g.a + ' ' + g.cx + ' ' + g.cy + ')');
-          } else {
-            g.el.style.transform = 'rotate(' + g.a + 'deg)';
-          }
+          g.el.style.transform = 'rotate(' + g.a + 'deg)';
         });
         window.__w3kSpin = requestAnimationFrame(frame);
       }
@@ -1491,13 +1465,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     var fig = document.querySelector('.figure');
     if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
     if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
-    ['.orbitA', '.orbitB', '.orbitC', '.redarc'].forEach(function (sel) {
+    ['.orbitA', '.orbitB', '.orbitC', '.redarc', '.handM', '.handH', '.handS'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (el) { el.style.animation = ''; el.style.transform = ''; }
-    });
-    [['.gear1', '300 258'], ['.gear2', '430 150'], ['.gear3', '150 348']].forEach(function (p) {
-      var el = document.querySelector(p[0]);
-      if (el) el.setAttribute('transform', 'rotate(0 ' + p[1] + ')'); /* 歯車を初期角度へ戻す */
     });
     link.classList.remove('wiping');
   });
