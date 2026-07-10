@@ -19,7 +19,10 @@
 (function () {
   try {
     var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-    if (nav && nav.type === 'back_forward') document.documentElement.classList.add('backnav');
+    /* bfcache復元→reload経由の戻り（w3kBackフラグ）もbacknav扱いにする */
+    var backFlag = sessionStorage.getItem('w3kBack') === '1';
+    if (backFlag) sessionStorage.removeItem('w3kBack');
+    if (backFlag || (nav && nav.type === 'back_forward')) document.documentElement.classList.add('backnav');
   } catch (_) {}
 })();
 </script>
