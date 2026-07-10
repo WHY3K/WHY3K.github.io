@@ -595,11 +595,7 @@
   }
   /* 第2幕：軌道の中心へダイブ（回転はJSがなめらかに加速） */
   body.depart2 .figure svg { transform: scale(1.75); transition: transform .65s cubic-bezier(.5, 0, .8, .45); }
-  /* 第3幕：着地の減速（戻ってきた直後だけ速く回っていて、静けさに戻る） */
-  body.arrive .orbitA { animation-duration: 1.4s !important; }
-  body.arrive .orbitB { animation-duration: 2s !important; }
-  body.arrive .orbitC { animation-duration: 2.6s !important; }
-  body.arrive .redarc { animation-duration: 1.1s !important; }
+  /* 第3幕：着地の減速はJSエンジン(arriveSpin)がなめらかに繋ぐ */
 
   /* 戻る遷移中はスクロールを封鎖して位置ゼロで描画させる */
   html.backnav .scroller { overflow-y: clip !important; } /* clipはscrollTop書き込み自体が不能 */
@@ -1268,6 +1264,54 @@ window.addEventListener('unload', function () {});
 
 /* ページ表示は毎回一番上から（戻る/進むでのスクロール位置復元をしない） */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+/* 到着時の減速回転：速い回転から指数減速でベース速度まで落とし、
+   角度を負のanimation-delayに変換してCSSアニメへ引き渡す（カクッと飛ばない） */
+function arriveSpin() {
+  if (window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var specs = [
+    { sel: '.orbitA', dir: 1,  dur: 90,  v0: 257 },  /* v0 ≒ 旧arriveの周期(1.4s)相当 */
+    { sel: '.orbitB', dir: -1, dur: 130, v0: 180 },
+    { sel: '.orbitC', dir: 1,  dur: 200, v0: 138 },
+    { sel: '.redarc', dir: -1, dur: 60,  v0: 327 }
+  ];
+  var groups = [];
+  specs.forEach(function (s) {
+    var el = document.querySelector(s.sel);
+    if (!el) return;
+    var a = 0, tr = getComputedStyle(el).transform, m;
+    if (tr && tr !== 'none' && (m = tr.match(/matrix\(([^)]+)\)/))) {
+      var v = m[1].split(',');
+      a = Math.atan2(parseFloat(v[1]), parseFloat(v[0])) * 180 / Math.PI;
+    }
+    el.style.animation = 'none';
+    el.style.transform = 'rotate(' + a + 'deg)';
+    groups.push({ el: el, dir: s.dir, dur: s.dur, base: 360 / s.dur, v: s.v0, a: a });
+  });
+  if (!groups.length) return;
+  if (window.__w3kArrive) cancelAnimationFrame(window.__w3kArrive);
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 1000, .05); last = now;
+    var done = true;
+    groups.forEach(function (g) {
+      g.v = g.base + (g.v - g.base) * Math.exp(-2.2 * dt);
+      g.a += g.dir * g.v * dt;
+      g.el.style.transform = 'rotate(' + g.a + 'deg)';
+      if (g.v - g.base > .5) done = false; /* ベースとの差0.5deg/s未満で引き渡し */
+    });
+    if (!done) { window.__w3kArrive = requestAnimationFrame(frame); return; }
+    groups.forEach(function (g) {
+      var frac = ((((g.dir > 0 ? g.a : -g.a) % 360) + 360) % 360) / 360;
+      g.el.style.animation = '';
+      g.el.style.transform = '';
+      g.el.style.animationDelay = -(frac * g.dur) + 's'; /* いまの角度から続きを回す */
+    });
+    window.__w3kArrive = null;
+  }
+  window.__w3kArrive = requestAnimationFrame(frame);
+}
 window.addEventListener('pageshow', function (e) {
   /* iOSのキャッシュ復元(bfcache)は固定ヘッダーが半切れになるので、
      戻ってきた時はページを作り直す。ワイプ演出はフラグで引き継ぐ */
@@ -1290,9 +1334,8 @@ window.addEventListener('pageshow', function (e) {
     var pt = document.querySelector('.warp');
     if (pt && document.documentElement.classList.contains('backnav')) {
       pt.classList.add('out'); /* 白をフェードアウトしてページを見せる */
-      document.body.classList.add('arrive'); /* 軌道が速めに回っている状態から… */
+      arriveSpin(); /* 軌道が速めに回っている状態から静けさへなめらかに減速 */
       setTimeout(function () { pt.classList.remove('out'); pt.classList.remove('in'); }, 400);
-      setTimeout(function () { document.body.classList.remove('arrive'); }, 1100); /* …静けさへ減速 */
     }
     document.documentElement.classList.remove('backnav'); /* 封鎖解除 */
     goTop();
@@ -1428,6 +1471,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       return Math.atan2(parseFloat(v[1]), parseFloat(v[0])) * 180 / Math.PI;
     }
     function startSpin() {
+      if (window.__w3kArrive) { cancelAnimationFrame(window.__w3kArrive); window.__w3kArrive = null; }
       groups.forEach(function (g) {
         if (!g.el) return;
         if (g.cx !== undefined) {                 /* 歯車：自分の中心で回す（rotate角 cx cy） */
@@ -1494,6 +1538,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     var fig = document.querySelector('.figure');
     if (fig) { fig.style.transition = ''; fig.style.transform = ''; fig.style.opacity = ''; }
     if (window.__w3kSpin) { cancelAnimationFrame(window.__w3kSpin); window.__w3kSpin = null; }
+    if (window.__w3kArrive) { cancelAnimationFrame(window.__w3kArrive); window.__w3kArrive = null; }
     ['.orbitA', '.orbitB', '.orbitC', '.redarc'].forEach(function (sel) {
       var el = document.querySelector(sel);
       if (el) { el.style.animation = ''; el.style.transform = ''; }
