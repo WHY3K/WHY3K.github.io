@@ -1296,25 +1296,13 @@ function arriveSpin() {
     var dt = Math.min((now - last) / 1000, .05); last = now;
     var done = true;
     groups.forEach(function (g) {
-      if (!g.spring) {
-        g.v = g.base + (g.v - g.base) * Math.exp(-2.2 * dt); /* まず勢いよく減速 */
-        if (g.v - g.base > 90) {
-          g.a += g.dir * g.v * dt;
-          g.el.style.transform = 'rotate(' + g.a + 'deg)';
-          done = false;
-          return;
-        }
-        g.spring = true; g.u = 0; g.du = g.v - g.base; /* 残りはばねで揺り戻す */
-      }
-      /* 減衰振動（ω=2.4, ζ=0.42）：+21°行き過ぎ→逆回転で戻って静止 */
-      var ddu = -5.76 * g.u - 2.016 * g.du;
-      g.du += ddu * dt; g.u += g.du * dt;
-      g.a += g.dir * (g.base + g.du) * dt;
+      g.v = g.base + (g.v - g.base) * Math.exp(-2.2 * dt); /* キビキビ減速・逆回転はしない */
+      g.a += g.dir * g.v * dt;
       g.el.style.transform = 'rotate(' + g.a + 'deg)';
-      if (Math.abs(g.du) > 2 || Math.abs(g.u) > .7) done = false;
+      if (g.v - g.base > .5) done = false; /* ベースとの差0.5deg/s未満で引き渡し */
     });
-    /* rAFが間引かれても宙づりにならないよう、8秒で強制引き渡し */
-    if (!done && now - t0 < 8000) { window.__w3kArrive = requestAnimationFrame(frame); return; }
+    /* rAFが間引かれても宙づりにならないよう、6秒で強制引き渡し */
+    if (!done && now - t0 < 6000) { window.__w3kArrive = requestAnimationFrame(frame); return; }
     groups.forEach(function (g) {
       var frac = ((((g.dir > 0 ? g.a : -g.a) % 360) + 360) % 360) / 360;
       g.el.style.animation = '';
