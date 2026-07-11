@@ -423,6 +423,23 @@
     border: 1px solid var(--ink); padding: 6px 12px 5px;
   }
   .f-tag b { color: var(--red); font-weight: 400; }
+
+  /* ---- 発光（色は既存の朱と緑だけ。白×墨のルールは崩さない）---- */
+  .f-tag b { text-shadow: 0 0 2px rgba(210,31,18,.45), 0 0 10px rgba(210,31,18,.3); }
+  .wordmark::before { text-shadow: 0 0 3px rgba(210,31,18,.8), 0 0 14px rgba(210,31,18,.45); }
+  .f-display .digits { text-shadow: 0 0 5px rgba(51,209,94,.5), 0 0 16px rgba(51,209,94,.25); }
+  @media (prefers-reduced-motion: no-preference) {
+    .f-tag b { animation: freeGlow 3.8s ease-in-out infinite; }
+    .f-display .digits { animation: dispGlow 2.8s ease-in-out infinite; }
+  }
+  @keyframes freeGlow {
+    0%, 100% { text-shadow: 0 0 2px rgba(210,31,18,.35), 0 0 8px rgba(210,31,18,.2); }
+    50%      { text-shadow: 0 0 2px rgba(210,31,18,.65), 0 0 14px rgba(210,31,18,.5), 0 0 28px rgba(210,31,18,.2); }
+  }
+  @keyframes dispGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(51,209,94,.45), 0 0 14px rgba(51,209,94,.2); }
+    50%      { text-shadow: 0 0 6px rgba(51,209,94,.7), 0 0 22px rgba(51,209,94,.38); }
+  }
   .f-title {
     font-family: var(--disp); font-weight: 700;
     font-size: clamp(40px, 9vw, 58px); line-height: 1.02; letter-spacing: .02em;
