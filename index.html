@@ -314,26 +314,52 @@
     .wordmark::before  { animation: ghostR 4.6s infinite steps(1); }
     .wordmark::after   { animation: ghostG 4.6s infinite steps(1); }
   }
+  /* グリッチは細かい薄切りを高速で刻む（1コマ≒18ms・帯は8〜14%の細さ） */
   @keyframes jolt {
-    0%, 89.9%, 94.1%, 100% { transform: none; }
+    0%, 37.9%, 38.8%, 89.9%, 94.1%, 100% { transform: none; }
+    38%   { transform: translateX(1px); }
+    38.4% { transform: translateX(-1px) skewX(1deg); }
     90%   { transform: translateX(2px) skewX(-3deg); }
-    90.8% { transform: translateX(-1px); }
-    91.6% { transform: none; }
-    92.6% { transform: translateX(1px) skewX(2deg); }
-    93.2% { transform: none; }
+    90.4% { transform: translateX(-1px) skewX(1deg); }
+    90.8% { transform: translateX(1px); }
+    91.2% { transform: none; }
+    91.6% { transform: translateX(-2px) skewX(2deg); }
+    92%   { transform: translateX(1px); }
+    92.4% { transform: none; }
+    92.8% { transform: translateX(1px) skewX(-1deg); }
+    93.2% { transform: translateX(-1px); }
+    93.6% { transform: none; }
   }
   @keyframes ghostR {
-    0%, 89.9%, 94.4%, 100% { opacity: 0; }
-    90%   { opacity:.75; transform: translate(4px,0);  clip-path: inset(10% 0 58% 0); }
-    91%   { opacity:.75; transform: translate(-3px,0); clip-path: inset(56% 0 16% 0); }
-    92.2% { opacity:.5;  transform: translate(2px,0);  clip-path: inset(30% 0 42% 0); }
-    93.2% { opacity:.7;  transform: translate(-4px,0); clip-path: inset(72% 0 4% 0); }
+    0%, 37.9%, 38.9%, 89.9%, 94.4%, 100% { opacity: 0; }
+    38%   { opacity:.5;  transform: translate(2px,0);  clip-path: inset(44% 0 48% 0); }
+    38.4% { opacity: 0; }
+    38.6% { opacity:.4;  transform: translate(-2px,0); clip-path: inset(12% 0 80% 0); }
+    90%   { opacity:.75; transform: translate(3px,0);  clip-path: inset(6% 0 86% 0); }
+    90.4% { opacity:.6;  transform: translate(-2px,0); clip-path: inset(52% 0 38% 0); }
+    90.8% { opacity: 0; }
+    91.1% { opacity:.7;  transform: translate(2px,0);  clip-path: inset(70% 0 22% 0); }
+    91.5% { opacity:.5;  transform: translate(-3px,0); clip-path: inset(26% 0 64% 0); }
+    91.9% { opacity: 0; }
+    92.2% { opacity:.65; transform: translate(1px,0);  clip-path: inset(58% 0 30% 0); }
+    92.6% { opacity:.45; transform: translate(-2px,0); clip-path: inset(2% 0 90% 0); }
+    93%   { opacity: 0; }
+    93.3% { opacity:.6;  transform: translate(2px,0);  clip-path: inset(80% 0 10% 0); }
+    93.8% { opacity:.4;  transform: translate(-1px,0); clip-path: inset(36% 0 56% 0); }
   }
   @keyframes ghostG {
-    0%, 89.9%, 94.4%, 100% { opacity: 0; }
-    90.4% { opacity:.6; transform: translate(-3px,0); clip-path: inset(64% 0 8% 0); }
-    91.4% { opacity:.6; transform: translate(3px,0);  clip-path: inset(2% 0 74% 0); }
-    92.6% { opacity:.45; transform: translate(-2px,0); clip-path: inset(40% 0 34% 0); }
+    0%, 37.9%, 38.9%, 89.9%, 94.4%, 100% { opacity: 0; }
+    38.2% { opacity:.4;  transform: translate(-2px,0); clip-path: inset(66% 0 26% 0); }
+    38.6% { opacity: 0; }
+    90.2% { opacity:.5;  transform: translate(-2px,0); clip-path: inset(30% 0 62% 0); }
+    90.6% { opacity:.45; transform: translate(2px,0);  clip-path: inset(78% 0 14% 0); }
+    91%   { opacity: 0; }
+    91.3% { opacity:.5;  transform: translate(-1px,0); clip-path: inset(8% 0 84% 0); }
+    91.7% { opacity: 0; }
+    92.1% { opacity:.45; transform: translate(2px,0);  clip-path: inset(48% 0 44% 0); }
+    92.5% { opacity: 0; }
+    92.9% { opacity:.4;  transform: translate(-2px,0); clip-path: inset(18% 0 74% 0); }
+    93.4% { opacity:.35; transform: translate(1px,0);  clip-path: inset(60% 0 32% 0); }
   }
   .fig-cap {
     margin-top: 10px;
@@ -426,7 +452,6 @@
 
   /* ---- 発光（色は既存の朱と緑だけ。白×墨のルールは崩さない）---- */
   .f-tag b { text-shadow: 0 0 2px rgba(210,31,18,.45), 0 0 10px rgba(210,31,18,.3); }
-  .wordmark::before { text-shadow: 0 0 3px rgba(210,31,18,.8), 0 0 14px rgba(210,31,18,.45); }
   .f-display .digits { text-shadow: 0 0 5px rgba(51,209,94,.5), 0 0 16px rgba(51,209,94,.25); }
   @media (prefers-reduced-motion: no-preference) {
     .f-tag b { animation: freeGlow 3.8s ease-in-out infinite; }
