@@ -1271,10 +1271,10 @@ function arriveSpin() {
   if (window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var specs = [
-    { sel: '.orbitA', dir: 1,  dur: 90,  v0: 257 },  /* v0 ≒ 旧arriveの周期(1.4s)相当 */
-    { sel: '.orbitB', dir: -1, dur: 130, v0: 180 },
-    { sel: '.orbitC', dir: 1,  dur: 200, v0: 138 },
-    { sel: '.redarc', dir: -1, dur: 60,  v0: 327 }
+    { sel: '.orbitA', dir: 1,  dur: 90,  v0: 320 },
+    { sel: '.orbitB', dir: -1, dur: 130, v0: 225 },
+    { sel: '.orbitC', dir: 1,  dur: 200, v0: 172 },
+    { sel: '.redarc', dir: -1, dur: 60,  v0: 409 }
   ];
   var groups = [];
   specs.forEach(function (s) {
@@ -1291,17 +1291,18 @@ function arriveSpin() {
   });
   if (!groups.length) return;
   if (window.__w3kArrive) cancelAnimationFrame(window.__w3kArrive);
-  var last = performance.now();
+  var t0 = performance.now(), last = t0;
   function frame(now) {
     var dt = Math.min((now - last) / 1000, .05); last = now;
     var done = true;
     groups.forEach(function (g) {
-      g.v = g.base + (g.v - g.base) * Math.exp(-2.2 * dt);
+      g.v = g.base + (g.v - g.base) * Math.exp(-1.5 * dt); /* 減速はゆっくり長く（約4秒強で静けさへ） */
       g.a += g.dir * g.v * dt;
       g.el.style.transform = 'rotate(' + g.a + 'deg)';
       if (g.v - g.base > .5) done = false; /* ベースとの差0.5deg/s未満で引き渡し */
     });
-    if (!done) { window.__w3kArrive = requestAnimationFrame(frame); return; }
+    /* rAFが間引かれても宙づりにならないよう、6秒で強制引き渡し */
+    if (!done && now - t0 < 6000) { window.__w3kArrive = requestAnimationFrame(frame); return; }
     groups.forEach(function (g) {
       var frac = ((((g.dir > 0 ? g.a : -g.a) % 360) + 360) % 360) / 360;
       g.el.style.animation = '';
