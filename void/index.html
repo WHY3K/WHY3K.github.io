@@ -23,14 +23,20 @@
     opacity: 0; animation: appear 1.2s ease forwards;
     white-space: nowrap;
   }
-  .ln:nth-child(1) { animation-delay: .8s; }
-  .ln:nth-child(2) { animation-delay: 2.2s; }
-  .ln:nth-child(3) { animation-delay: 3.6s; }
-  .ln:nth-child(4) { animation-delay: 5.2s; color: #9a9aa3; }
+  .ln:nth-child(1) { animation-delay: .9s; }
+  .ln:nth-child(2) { animation-delay: 1.8s; }
+  .ln:nth-child(3) { animation-delay: 2.7s; }
+  .ln:nth-child(4) { animation-delay: 3.9s; }
+  .ln:nth-child(5) { animation-delay: 4.8s; }
+  .ln:nth-child(6) { animation-delay: 6s; }
+  .ln:nth-child(7) { animation-delay: 6.9s; }
+  .ln:nth-child(8) { animation-delay: 8.1s; }
+  .ln.dim { color: #9a9aa3; }
+  .ln.sp { margin-top: 26px; }
   @keyframes appear { to { opacity: 1; } }
 
-  /* 2行目だけ、たまに機械的に痙攣する */
-  .ln:nth-child(2) { animation: appear 1.2s ease 2.2s forwards, twitch 7s steps(1) 4s infinite; }
+  /* 「9 は とびら」だけ、たまに機械的に痙攣する */
+  .ln:nth-child(3) { animation: appear 1.2s ease 2.7s forwards, twitch 9s steps(1) 4.5s infinite; }
   @keyframes twitch {
     0%, 96.9%, 98.3%, 100% { transform: none; }
     97%   { transform: translateX(3px) skewX(-4deg); }
@@ -39,7 +45,7 @@
 
   .cur {
     display: inline-block; margin-top: 34px; font-size: 11px;
-    opacity: 0; animation: appear .1s ease 6.6s forwards;
+    opacity: 0; animation: appear .1s ease 9.3s forwards;
   }
   .cur::after { content: "▮"; animation: blink 1.2s steps(2) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
@@ -48,12 +54,14 @@
     position: fixed; right: 12vw; bottom: 18vh;
     width: 5px; height: 5px; border-radius: 50%;
     background: #d21f12;
+    animation: breathe 3.69s ease-in-out infinite;
   }
+  @keyframes breathe { 50% { opacity: .25; } }
   .back {
     position: fixed; left: 24px; bottom: 22px;
     color: #9a9aa3; text-decoration: none;
     font-size: 12px; letter-spacing: .3em;
-    opacity: 0; animation: appear 1s ease 7.4s forwards;
+    opacity: 0; animation: appear 1s ease 9.9s forwards;
   }
   .back:hover { color: #131316; }
   .coords {
@@ -67,10 +75,14 @@
 </head>
 <body>
 <main>
-  <p class="ln">ここは 地図にのっていない部屋</p>
-  <p class="ln">見つけた人だけが 入れる</p>
-  <p class="ln">新しい音や道具は ここに最初に置く</p>
-  <p class="ln">また来て</p>
+  <p class="ln">3 は かたち</p>
+  <p class="ln">6 は ながれ</p>
+  <p class="ln">9 は とびら</p>
+  <p class="ln sp">1 2 4 8 7 5 は 円のなか</p>
+  <p class="ln">3 と 6 と 9 だけが その外にいる</p>
+  <p class="ln sp">ここは 外がわの部屋 — 見つけた人だけが入れる</p>
+  <p class="ln">新しい音と道具は ここに最初に置かれる</p>
+  <p class="ln dim">のぞくなら 3・6・9 のつく日がいい</p>
   <br>
   <span class="cur"></span>
 </main>
