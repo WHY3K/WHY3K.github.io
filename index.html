@@ -439,6 +439,49 @@
     0%, 100% { text-shadow: 0 0 5px rgba(51,209,94,.45), 0 0 14px rgba(51,209,94,.2); }
     50%      { text-shadow: 0 0 6px rgba(51,209,94,.7), 0 0 22px rgba(51,209,94,.38); }
   }
+
+  /* ---- fig.03 アーティストファイル ---- */
+  .profile { width: min(92vw, 900px); margin: 90px auto 0; }
+  .p-cap {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
+    color: var(--ink-soft); text-transform: uppercase; margin-bottom: 22px;
+  }
+  .p-inner {
+    display: flex; gap: 46px; align-items: center;
+    border: 1px solid var(--line); padding: 36px 40px;
+    background: rgba(255,255,255,.4);
+  }
+  .p-photo { position: relative; flex: 0 0 auto; width: 168px; height: 168px; }
+  .p-photo img {
+    width: 100%; height: 100%; border-radius: 50%; display: block;
+    filter: grayscale(1) contrast(1.02);
+    border: 1px solid var(--line);
+  }
+  .p-photo::after {
+    content: "id.3K"; position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 9px; letter-spacing: .25em; color: var(--ink-soft);
+  }
+  .p-rows { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .p-row {
+    display: flex; gap: 18px; align-items: baseline; padding: 11px 0;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--ink);
+  }
+  .p-val { flex: 1 1 0; min-width: 0; }
+  .p-row a { overflow-wrap: anywhere; } /* メールアドレスだけはどこでも折り返してよい */
+  .p-row:last-child { border-bottom: 1px solid var(--line); }
+  .p-key {
+    flex: 0 0 88px; font-size: 10px; letter-spacing: .3em;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .p-row a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .p-row a:hover { opacity: .55; }
+  .p-row .soonmk { color: var(--ink-soft); font-size: 10px; letter-spacing: .3em; }
+  @media (max-width: 720px) {
+    .p-inner { flex-direction: column; gap: 36px; padding: 32px 20px; }
+    .p-rows { width: 100%; }
+    .p-key { flex-basis: 74px; }
+  }
   .f-title {
     font-family: var(--disp); font-weight: 700;
     font-size: clamp(40px, 9vw, 58px); line-height: 1.02; letter-spacing: .02em;
@@ -555,7 +598,7 @@
   body.summon .gears { opacity: .9; }
 
   /* 第0幕（.summon）：図版以外が溶けて消える */
-  body.summon .links, body.summon .fig-cap, body.summon .feature,
+  body.summon .links, body.summon .fig-cap, body.summon .feature, body.summon .profile,
   body.summon .ticker, body.summon footer,
   body.summon .scatter, body.summon .cosmos, body.summon .blades,
   body.summon .ink, body.summon .ruler, body.summon .side-cap,
@@ -786,7 +829,7 @@
       border: 1px solid var(--line);
     }
     .links::before {
-      content: "contents — 07 entries";
+      content: "contents — 08 entries";
       display: block;
       font-family: var(--mono);
       font-size: 10px; letter-spacing: .3em;
@@ -1213,6 +1256,9 @@ phase ...... hold</div>
     <a class="link primary" href="https://why3k.github.io/why3k-plugins/?t=20260709z">
       <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">→</span>
     </a>
+
+    <!-- TODO: note のURL（公開されたら href を差し替えて class="link soon" → class="link"、SOON → → に） -->
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">08</span> note <span class="lead"></span><span class="mk">SOON</span></a>
   </nav>
 </main>
 
@@ -1233,6 +1279,21 @@ phase ...... hold</div>
         <span class="win-title">disp</span>
       </div>
       <div class="digits">00:00:00<b>.000</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== アーティストファイル（fig. 03） ===== -->
+<section class="profile" aria-label="Artist file">
+  <div class="p-cap">fig. 03 — artist file</div>
+  <div class="p-inner">
+    <div class="p-photo"><img src="assets/artist.jpg" alt="WHY3K" loading="lazy" width="400" height="400"></div>
+    <div class="p-rows">
+      <div class="p-row"><span class="p-key">name</span><span class="p-val">WHY3K</span></div>
+      <div class="p-row"><span class="p-key">field</span><span class="p-val">glitch / idm / hyperpop / botanical dubstep</span></div>
+      <div class="p-row"><span class="p-key">output</span><span class="p-val">music / plugins</span></div>
+      <div class="p-row"><span class="p-key">contact</span><span class="p-val"><a id="pmail" href="#" rel="nofollow">…</a></span></div>
+      <div class="p-row"><span class="p-key">archive</span><span class="p-val">note <span class="soonmk">soon</span></span></div>
     </div>
   </div>
 </section>
@@ -1265,7 +1326,7 @@ phase ...... hold</div>
     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
   </div>
   <div class="copyright">© <span id="yr"></span> WHY3K</div>
-  <div class="copyright" style="letter-spacing:.35em;">10.07.2026 — r75</div>
+  <div class="copyright" style="letter-spacing:.35em;">13.07.2026 — r88</div>
   <div class="pageno">01</div>
 </footer>
 
@@ -1273,6 +1334,29 @@ phase ...... hold</div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* 連絡先：収集ボット対策でJSで組み立てる */
+(function () {
+  var a = document.getElementById('pmail');
+  if (!a) return;
+  var ad = ['why3k', 'music'].join('') + '\u0040' + 'gmail.com';
+  a.href = 'mailto:' + ad;
+  a.textContent = ad;
+})();
+
+/* 隠し部屋への入口：ロゴを1.2秒以内に3回タップ */
+(function () {
+  var wm = document.querySelector('.wordmark');
+  if (!wm) return;
+  var n = 0, t0 = 0;
+  wm.addEventListener('click', function () {
+    var now = Date.now();
+    if (now - t0 > 1200) n = 0;
+    t0 = now;
+    if (++n >= 3) { n = 0; window.location.href = 'void/'; }
+  });
+  try { console.log('%c\u2590 3000 : 0117 \u2014 \u4fe1\u53f7\u306f\u767d\u306e\u307b\u3046\u304b\u3089 / .\u002fvoid\u002f', 'font-family:monospace;letter-spacing:.15em;color:#131316;'); } catch (_) {}
+})();
 
 /* iOSの凍結保存(bfcache)を無効化：戻る時は常に作りたてを読み込む
    （凍結復元が固定ヘッダーの描画を壊すため） */
