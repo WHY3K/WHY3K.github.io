@@ -242,6 +242,14 @@
   }
   .qr img { width: 100%; display: block; }
   .qr small { display: block; margin-top: 5px; font-family: var(--mono); font-size: 7px; letter-spacing: .18em; color: var(--ink-soft); text-align: center; }
+  .schem { position: absolute; pointer-events: none; }
+  .schem.s1 { opacity: .15; }
+  .schem.s2 { opacity: .11; }
+  @media (prefers-reduced-motion: no-preference) {
+    .schem.s1 { animation: schemspin 480s linear infinite; } /* 気づくか気づかないかの速度で回る */
+  }
+  @keyframes schemspin { to { transform: rotate(360deg); } }
+
   .disp {
     position: absolute; border-radius: 50%;
     background:
@@ -966,6 +974,10 @@
   <span class="pt float f2 hide-m" style="bottom:18%; right:36%; width:6px; height:6px; opacity:.35;"></span>
   <span class="pt float hide-m"    style="bottom:8%;  left:52%; width:3px; height:3px; opacity:.45;"></span>
   <span class="pt float f3 hide-m" style="top:8%; left:64%; width:4px; height:4px; opacity:.4;"></span>
+
+  <!-- 回路図面（プロシージャル生成の放射ダイアグラム） -->
+  <img class="schem s1" src="assets/schematic.svg" alt="" style="top:-14%; right:-13%; width:min(52vw, 600px);">
+  <img class="schem s2 hide-m" src="assets/schematic.svg" alt="" style="bottom:-20%; left:-11%; width:min(40vw, 450px); transform: rotate(140deg);">
 
   <!-- 分光のにじみ -->
   <div class="disp"        style="top:20%; right:18%; width:120px; height:120px;"></div>

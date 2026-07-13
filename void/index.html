@@ -17,21 +17,35 @@
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  main { text-align: center; }
+  main { text-align: center; position: relative; z-index: 1; }
+  .schem {
+    position: fixed; left: 50%; top: 50%;
+    width: min(94vw, 660px);
+    transform: translate(-50%, -50%);
+    opacity: 0; pointer-events: none;
+    animation: schemin 2.4s ease .4s forwards;
+  }
+  @keyframes schemin { to { opacity: .16; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .schem { animation: schemin 2.4s ease .4s forwards, schemspin 420s linear infinite; }
+  }
+  @keyframes schemspin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
   .ln {
     font-size: 11px; letter-spacing: .42em; line-height: 3.2;
     opacity: 0; animation: appear 1.2s ease forwards;
     white-space: nowrap;
   }
   .ln:nth-child(1) { animation-delay: .9s; }
-  .ln:nth-child(2) { animation-delay: 2.2s; }
-  .ln:nth-child(3) { animation-delay: 3.5s; }
-  .ln:nth-child(4) { animation-delay: 5s; }
+  .ln:nth-child(2) { animation-delay: 2.4s; }
+  .ln:nth-child(3) { animation-delay: 3.9s; }
   .ln.dim { color: #9a9aa3; }
   @keyframes appear { to { opacity: 1; } }
 
   /* 「地図にない部屋」だけ、たまに機械的に痙攣する */
-  .ln:nth-child(2) { animation: appear 1.2s ease 2.2s forwards, twitch 9s steps(1) 4.5s infinite; }
+  .ln:nth-child(1) { animation: appear 1.2s ease .9s forwards, twitch 9s steps(1) 4.5s infinite; }
   @keyframes twitch {
     0%, 96.9%, 98.3%, 100% { transform: none; }
     97%   { transform: translateX(3px) skewX(-4deg); }
@@ -40,7 +54,7 @@
 
   .cur {
     display: inline-block; margin-top: 34px; font-size: 11px;
-    opacity: 0; animation: appear .1s ease 6.2s forwards;
+    opacity: 0; animation: appear .1s ease 5.1s forwards;
   }
   .cur::after { content: "▮"; animation: blink 1.2s steps(2) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
@@ -56,7 +70,7 @@
     position: fixed; left: 24px; bottom: 22px;
     color: #9a9aa3; text-decoration: none;
     font-size: 12px; letter-spacing: .3em;
-    opacity: 0; animation: appear 1s ease 7s forwards;
+    opacity: 0; animation: appear 1s ease 5.9s forwards;
   }
   .back:hover { color: #131316; }
   .coords {
@@ -69,8 +83,8 @@
 </style>
 </head>
 <body>
+<img class="schem" src="../assets/schematic.svg" alt="" aria-hidden="true">
 <main>
-  <p class="ln">よく見つけたね</p>
   <p class="ln">ここは 地図にない部屋</p>
   <p class="ln">できたての音と道具は まず ここに置かれる</p>
   <p class="ln dim">気が向いたら また来て</p>
