@@ -66,6 +66,12 @@
     animation: breathe 3.69s ease-in-out infinite;
   }
   @keyframes breathe { 50% { opacity: .25; } }
+  .resident {
+    position: fixed; left: 16vw; bottom: 10vh;
+    height: 120px; width: auto;
+    opacity: 0; animation: appear 2s ease 6.5s forwards; /* 文字のあとに静かに現れる */
+  }
+  @media (max-width: 480px) { .resident { height: 92px; left: 10vw; } }
   .back {
     position: fixed; left: 24px; bottom: 22px;
     color: #9a9aa3; text-decoration: none;
@@ -93,6 +99,7 @@
 </main>
 <span class="dot" aria-hidden="true"></span>
 <span class="coords" aria-hidden="true">void — 00</span>
+<img class="resident" src="../assets/chara.png" alt="" aria-hidden="true">
 <a class="back" href="../" aria-label="戻る">←</a>
 </body>
 </html>
