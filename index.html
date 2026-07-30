@@ -735,6 +735,13 @@
     .topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
   }
 
+  /* 項目が5つになり、幅が足りない画面では中央ブランドとナビが重なる。
+     その帯だけブランドを左に寄せる（広い画面では従来どおり中央配置のまま）。 */
+  @media (min-width: 1000px) and (max-width: 1420px) {
+    /* 左端の doc-head（■ INDEX — 01）とぶつからない位置から始める */
+    .topnav .brand { position: static; transform: none; margin-right: auto; margin-left: 158px; }
+  }
+
   /* ---- 戻る/進むボタン ---- */
   .topnav .hist { position: fixed; top: 15px; right: 42px; z-index: 5; display: flex; gap: 8px; }
   @media (max-width: 999px) {
@@ -850,7 +857,7 @@
       border: 1px solid var(--line);
     }
     .links::before {
-      content: "contents — 08 entries";
+      content: "contents — 09 entries";
       display: block;
       font-family: var(--mono);
       font-size: 10px; letter-spacing: .3em;
@@ -1012,8 +1019,9 @@
   </span>
   <a class="active" href="/"><span class="no">01</span>Index</a>
   <a href="https://why3k.github.io/why3k-plugins/?t=20260709z"><span class="no">02</span>Plugins</a>
-  <a class="soon" href="#" aria-disabled="true"><span class="no">03</span>Music<span class="soonmk">SOON</span></a>
-  <a class="soon" href="#" aria-disabled="true"><span class="no">04</span>Store<span class="soonmk">SOON</span></a>
+  <a href="/themes/"><span class="no">03</span>Themes</a>
+  <a class="soon" href="#" aria-disabled="true"><span class="no">04</span>Music<span class="soonmk">SOON</span></a>
+  <a class="soon" href="#" aria-disabled="true"><span class="no">05</span>Store<span class="soonmk">SOON</span></a>
 </nav>
 <div class="side-cap">WHY3K — official index</div>
 
@@ -1312,8 +1320,10 @@ phase ...... hold</div>
       <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">→</span>
     </a>
 
+    <a class="link" href="/themes/"><span class="idx">08</span> WHY3K THEMES <span class="lead"></span><span class="mk">→</span></a>
+
     <!-- TODO: note のURL（公開されたら href を差し替えて class="link soon" → class="link"、SOON → → に） -->
-    <a class="link soon" href="#" aria-disabled="true"><span class="idx">08</span> note <span class="lead"></span><span class="mk">SOON</span></a>
+    <a class="link soon" href="#" aria-disabled="true"><span class="idx">09</span> note <span class="lead"></span><span class="mk">SOON</span></a>
   </nav>
 </main>
 
