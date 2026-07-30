@@ -58,26 +58,6 @@ body {
 .topnav .brand i { display: block; }
 .topnav .brand .ln { width: 34px; height: 1px; background: var(--faint); }
 .topnav .brand .d2 { width: 7px; height: 7px; background: var(--ink); }
-.topnav a {
-  color: var(--ink); text-decoration: none;
-  position: relative; padding: 4px 0; transition: color .15s;
-}
-.topnav a .no { color: var(--ink-soft); margin-right: .7em; font-size: 9px; }
-.topnav a:hover { color: var(--ink-soft); }
-.topnav a:hover .no { color: var(--ink-soft); }
-.topnav a.active::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: -3px;
-  height: 2px; background: var(--ink);
-}
-.topnav a.soon { color: #c6c6cd; pointer-events: none; }
-.topnav a.soon .no { color: #d4d4da; }
-.topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
-
-/* 項目が5つ並ぶと、中央のブランドと重なるまでの余裕は約1500px。
-   それ未満の画面ではブランドを左に寄せる（広い画面では中央配置のまま）。 */
-@media (min-width: 1000px) and (max-width: 1520px) {
-  .topnav .brand { position: static; transform: none; margin-right: auto; }
-}
 
 /* 戻る/進む */
 .topnav .hist { position: fixed; top: 15px; right: 42px; z-index: 5; display: flex; gap: 8px; }
@@ -103,7 +83,6 @@ body {
     background: rgba(251,251,250,.94);
     -webkit-backdrop-filter: none; backdrop-filter: none;
   }
-  .topnav a:not(.brand) { display: none; }
   .topnav .brand {
     position: static; transform: none; margin: 0;
     font-size: 17px; gap: 10px;
@@ -113,33 +92,12 @@ body {
   .topnav .hist { position: absolute; top: 8px; right: 18px; }
 }
 
-/* ---- 遷移演出：白幕と、その中で回る時計 ---- */
+/* ---- 入場の白幕（トップから来たときに白から現れる） ---- */
 .warp {
   position: fixed; inset: 0; z-index: 99;
   background: var(--paper);
   opacity: 0; visibility: hidden; pointer-events: none;
 }
-.warp.in { visibility: visible; opacity: 1; transition: opacity .5s ease .55s; }
 .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .34s ease; }
 html.backnav .warp { visibility: visible; opacity: 1; }
 
-/* 時計（遷移のあいだだけ召喚される） */
-.warpfig {
-  position: fixed; left: 50%; top: 50%;
-  width: min(78vw, 500px);
-  transform: translate(-50%, -50%);
-  z-index: 100; opacity: 0; pointer-events: none;
-  transition: opacity .5s ease;
-}
-.warpfig svg { width: 100%; height: auto; display: block; }
-body.departing .warpfig { opacity: .9; }
-body.departing2 .warpfig { transform: translate(-50%, -50%) scale(1.7); transition: transform .7s cubic-bezier(.5, 0, .8, .45); }
-.warpfig .handH, .warpfig .handM, .warpfig .handS,
-.warpfig .orbitA, .warpfig .orbitB, .warpfig .orbitC, .warpfig .redarc {
-  transform-origin: 300px 258px;
-}
-
-/* 出るとき：紙面が先に溶ける */
-body.departing .topnav, body.departing .wrap, body.departing footer {
-  opacity: 0 !important; transition: opacity .4s ease;
-}
