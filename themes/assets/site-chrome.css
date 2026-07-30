@@ -59,6 +59,14 @@ body {
 .topnav .brand .ln { width: 34px; height: 1px; background: var(--faint); }
 .topnav .brand .d2 { width: 7px; height: 7px; background: var(--ink); }
 
+/* ホームへ戻る（右上・全ページ共通） */
+.topnav .home {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink); text-decoration: none;
+  padding: 4px 0; transition: color .15s;
+}
+@media (hover: hover) and (pointer: fine) { .topnav .home:hover { color: var(--ink-soft); } }
+
 /* 戻る/進む */
 .topnav .hist { position: fixed; top: 15px; right: 42px; z-index: 5; display: flex; gap: 8px; }
 .topnav .hb {
@@ -89,6 +97,7 @@ body {
   }
   .topnav .brand .ln { width: 20px; }
   .topnav .brand .d2 { width: 5px; height: 5px; }
+  .topnav .home { display: none; }
   .topnav .hist { position: absolute; top: 8px; right: 18px; }
 }
 
