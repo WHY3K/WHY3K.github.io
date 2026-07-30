@@ -1,6 +1,6 @@
-/* WHY3K — サイト共通の外装（トップ /index.html と同じ演出をサブページにも敷く）
-   ここは「紙面の装飾」だけを持つ。ページ本文の体裁は themes.css 側。
-   HTML は site-chrome.js が流し込むので、各ページは <body> にクラスを書くだけでよい。 */
+/* WHY3K — サブページ共通の外装。
+   ここが持つのは「上部バー」「白幕と時計の遷移演出」だけ。
+   トップの背景装飾（刃・インク・ガラス・定規・散乱データ）は持ち込まない。 */
 
 @font-face {
   font-family: "Cormorant";
@@ -33,186 +33,15 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  overflow-x: clip;
   position: relative;
 }
-/* 方眼のドット */
-body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: 0;
-  background-image: radial-gradient(circle, rgba(19,19,22,.13) .7px, transparent .8px);
-  background-size: 56px 56px;
-  background-position: 28px 28px;
-  pointer-events: none;
-}
 
-/* iOSのアドレスバー伸縮で固定レイヤーが跳ねないように */
-@supports (height: 100lvh) {
-  body::before { bottom: auto; height: 100lvh; }
-  .scatter, .blades, .ink { bottom: auto; height: 100lvh; }
-  .cosmos { top: -6lvh; bottom: auto; height: 112lvh; }
-  .ruler { bottom: auto; height: 100lvh; }
-  .side-cap { top: 50lvh; }
-}
-
-/* ---- 四隅トンボ ---- */
-.reg { position: fixed; width: 16px; height: 16px; z-index: 2; pointer-events: none; }
-.reg.tl { top: 14px; left: 14px;  border-top: 2px solid var(--ink); border-left: 2px solid var(--ink); }
-.reg.tr { top: 14px; right: 14px; border-top: 2px solid var(--ink); border-right: 2px solid var(--ink); }
-.reg.bl { bottom: 14px; left: 14px;  border-bottom: 2px solid var(--ink); border-left: 2px solid var(--ink); }
-.reg.br { bottom: 14px; right: 14px; border-bottom: 2px solid var(--ink); border-right: 2px solid var(--ink); }
-
-/* ---- 左上の見出しラベル・右上のバー ---- */
-.doc-head {
-  position: fixed; top: 22px; left: 40px; z-index: 4;
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
-  color: var(--ink); text-transform: uppercase;
-}
-.doc-head .bar { width: 46px; height: 10px; background: var(--ink); }
-.head-bar2 { position: fixed; top: 22px; right: 40px; width: 84px; height: 10px; background: var(--ink); z-index: 2; }
-.head-bar2::after { content: ""; position: absolute; right: -14px; top: 0; width: 8px; height: 10px; background: var(--ink); }
-
-.side-cap {
-  position: fixed; right: 12px; top: 50%; transform: translateY(-50%);
-  writing-mode: vertical-rl; z-index: 2;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .5em;
-  color: var(--ink-soft); text-transform: uppercase; pointer-events: none;
-}
-
-/* ---- 左端の定規 ---- */
-.ruler {
-  position: fixed; left: 0; top: 0; bottom: 0; width: 26px; z-index: 1;
-  border-right: 1px solid #dcdce2;
-  background:
-    repeating-linear-gradient(to bottom, transparent 0 19px, #c9c9d0 19px 20px) right/6px 100% no-repeat,
-    repeating-linear-gradient(to bottom, transparent 0 99px, #9a9aa3 99px 100px) right/12px 100% no-repeat;
-  pointer-events: none;
-}
-.ruler b { position: absolute; right: 2px; font-family: var(--mono); font-size: 7px; font-weight: 400; color: #b3b3bb; transform: rotate(90deg); transform-origin: right top; }
-
-/* ---- ページ全体を横切る細線（刃）とインクの爆発 ---- */
-.blades { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.blades svg { width: 100%; height: 100%; will-change: transform; }
-.ink { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .09; }
-.ink svg { width: 100%; height: 100%; }
-
-/* ---- マテリアル層（ガラス・塵・回路図・分光） ---- */
-.cosmos { position: fixed; inset: -6%; z-index: 0; pointer-events: none; will-change: transform; }
-.glassring { position: absolute; will-change: transform; }
-@media (prefers-reduced-motion: no-preference) {
-  .glassring { animation: gfloat 13s ease-in-out infinite alternate; }
-  .glassring.g2 { animation-duration: 17s; animation-delay: -7s; }
-  .glassring.g3 { animation-duration: 23s; animation-delay: -13s; }
-}
-@keyframes gfloat {
-  from { transform: translate(0,0)        rotate(var(--r, 0deg)); }
-  to   { transform: translate(14px,-20px) rotate(calc(var(--r, 0deg) + 10deg)); }
-}
-.pt { position: absolute; border-radius: 50%; background: #131316; }
-@media (prefers-reduced-motion: no-preference) {
-  .float    { animation: floaty 11s ease-in-out infinite alternate; }
-  .float.f2 { animation-duration: 15s; animation-delay: -6s; }
-  .float.f3 { animation-duration: 19s; animation-delay: -11s; }
-}
-@keyframes floaty {
-  from { transform: translate(0,0)       rotate(var(--r, 0deg)); }
-  to   { transform: translate(10px,-16px) rotate(calc(var(--r, 0deg) + 7deg)); }
-}
-.schem { position: absolute; pointer-events: none; }
-.schem.s1 { opacity: .15; }
-.schem.s2 { opacity: .11; }
-@media (prefers-reduced-motion: no-preference) {
-  .schem.s1 { animation: schemspin 480s linear infinite; }
-}
-@keyframes schemspin { to { transform: rotate(360deg); } }
-.disp {
-  position: absolute; border-radius: 50%;
-  background:
-    radial-gradient(60% 60% at 32% 40%, rgba(255,75,216,.22), transparent 72%),
-    radial-gradient(60% 60% at 68% 42%, rgba(75,216,255,.22), transparent 72%),
-    radial-gradient(62% 62% at 50% 72%, rgba(216,235,75,.18), transparent 72%);
-}
-
-/* ---- 散乱レイヤー（座標・ブラケット・データ塊） ---- */
-.scatter { position: fixed; inset: 0; z-index: 1; pointer-events: none; will-change: transform; }
-.coord {
-  position: absolute;
-  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
-  color: #bdbdc5; white-space: nowrap;
-}
-.coord::before { content: "⌐ "; color: #a9a9b2; }
-.coord.rot { transform: rotate(90deg); transform-origin: left top; }
-.brk { position: absolute; width: 10px; height: 10px; }
-.brk::before, .brk::after { content: ""; position: absolute; width: 10px; height: 10px; }
-.brk::before { border-top: 1px solid #a9a9b2; border-left: 1px solid #a9a9b2; left: -14px; top: 0; }
-.brk::after  { border-bottom: 1px solid #a9a9b2; border-right: 1px solid #a9a9b2; right: -14px; bottom: 0; }
-.rule {
-  position: absolute; border-top: 1px solid #131316;
-  font-family: var(--mono); font-size: 9px; letter-spacing: .14em;
-  color: var(--ink); padding-top: 3px; text-transform: uppercase;
-}
-.rule.gray { border-color: #c9c9d0; color: #b3b3bb; }
-.datablock {
-  position: absolute;
-  font-family: var(--mono); font-size: 8px; line-height: 1.7;
-  color: #c3c3cb; white-space: pre; letter-spacing: .05em;
-}
-.term { letter-spacing: .12em; }
-.term b { font-weight: 400; color: var(--ink); }
-.patch { position: absolute; background: linear-gradient(120deg, rgba(227,179,190,.10), rgba(217,211,160,.09), rgba(170,201,227,.10), rgba(188,179,227,.10)); }
-.patch.p2 { background: linear-gradient(120deg, rgba(170,201,227,.07), rgba(179,211,189,.06), rgba(217,176,204,.07)); }
-.patch.p3 { background: linear-gradient(120deg, rgba(188,179,227,.09), rgba(170,201,227,.08), rgba(227,201,168,.09)); }
-.cross { position: absolute; width: 9px; height: 9px; }
-.cross::before { content: ""; position: absolute; left: 4px; top: 0; width: 1px; height: 9px; background: #b3b3bb; }
-.cross::after  { content: ""; position: absolute; left: 0; top: 4px; width: 9px; height: 1px; background: #b3b3bb; }
-.sq { position: absolute; width: 5px; height: 5px; background: var(--ink); }
-.sq.s2 { width: 8px; height: 8px; }
-.sq.hollow { background: transparent; border: 1px solid var(--ink); }
-.num { position: absolute; font-family: var(--mono); font-size: 9px; color: #b3b3bb; letter-spacing: .1em; }
-.tri { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .5em; color: var(--ink); opacity: .7; }
-.plusfield { position: absolute; font-family: var(--mono); font-size: 11px; line-height: 2.1; letter-spacing: .9em; color: var(--ink); opacity: .3; white-space: pre; }
-.dotmat { position: absolute; background-image: radial-gradient(circle, rgba(19,19,22,.55) 1px, transparent 1.3px); background-size: 11px 10px; }
-.stripeblk { position: absolute; background: repeating-linear-gradient(45deg, var(--ink) 0 5px, transparent 5px 12px); }
-.bcode {
-  position: absolute;
-  background:
-    repeating-linear-gradient(90deg, #131316 0 2px, transparent 2px 5px),
-    repeating-linear-gradient(90deg, #131316 0 1px, transparent 1px 7px);
-  opacity: .5;
-}
-.bcode::after {
-  content: attr(data-n);
-  position: absolute; left: 0; right: 0; top: 100%; margin-top: 3px;
-  font-family: var(--mono); font-size: 7px; letter-spacing: .3em;
-  color: #b3b3bb; text-align: center; white-space: nowrap;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .flicker { animation: flick 7s infinite steps(1); }
-  .flicker.f2 { animation-delay: 3.3s; }
-}
-@keyframes flick {
-  0%, 81.9%, 84.1%, 100% { opacity: 1; }
-  82% { opacity: .2; } 82.6% { opacity: 1; } 83.2% { opacity: .35; }
-}
-
-/* ---- カーソル追従の十字線＋座標 ---- */
-.cursor-x, .cursor-y { position: fixed; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .3s; }
-.cursor-x { top: 0; bottom: 0; width: 1px; background: rgba(19,19,22,.18); }
-.cursor-y { left: 0; right: 0; height: 1px; background: rgba(19,19,22,.18); }
-.cursor-tag {
-  position: fixed; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .3s;
-  font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--ink);
-  transform: translate(12px, 14px); white-space: nowrap;
-}
-body.has-pointer .cursor-x, body.has-pointer .cursor-y, body.has-pointer .cursor-tag { opacity: 1; }
-@media (pointer: coarse) { .cursor-x, .cursor-y, .cursor-tag { display: none; } }
-
-/* ---- 上部バー（サブページ共通。行き先は置かず、戻る手段だけ） ---- */
+/* ---- 上部バー（トップと同じ体裁・同じ項目） ---- */
 .topnav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 3;
-  display: flex; align-items: center; justify-content: center;
-  height: 54px; padding: 0 130px 0 40px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 34px;
+  height: 54px;
+  padding: 0 130px 0 40px;
   font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
   text-transform: uppercase;
   background: rgba(251,251,250,.78);
@@ -220,16 +49,35 @@ body.has-pointer .cursor-x, body.has-pointer .cursor-y, body.has-pointer .cursor
   border-bottom: 1px solid var(--line);
 }
 .topnav .brand {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   display: flex; align-items: center; gap: 14px;
   font-family: var(--disp); font-weight: 700; font-size: 26px;
   letter-spacing: .06em; text-transform: none;
   color: var(--ink); text-decoration: none; white-space: nowrap;
-  transition: opacity .15s;
 }
 .topnav .brand i { display: block; }
 .topnav .brand .ln { width: 34px; height: 1px; background: var(--faint); }
 .topnav .brand .d2 { width: 7px; height: 7px; background: var(--ink); }
-@media (hover: hover) and (pointer: fine) { .topnav .brand:hover { opacity: .55; } }
+.topnav a {
+  color: var(--ink); text-decoration: none;
+  position: relative; padding: 4px 0; transition: color .15s;
+}
+.topnav a .no { color: var(--ink-soft); margin-right: .7em; font-size: 9px; }
+.topnav a:hover { color: var(--ink-soft); }
+.topnav a:hover .no { color: var(--ink-soft); }
+.topnav a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px;
+  height: 2px; background: var(--ink);
+}
+.topnav a.soon { color: #c6c6cd; pointer-events: none; }
+.topnav a.soon .no { color: #d4d4da; }
+.topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
+
+/* 項目が5つ並ぶと、中央のブランドと重なるまでの余裕は約1500px。
+   それ未満の画面ではブランドを左に寄せる（広い画面では中央配置のまま）。 */
+@media (min-width: 1000px) and (max-width: 1520px) {
+  .topnav .brand { position: static; transform: none; margin-right: auto; }
+}
 
 /* 戻る/進む */
 .topnav .hist { position: fixed; top: 15px; right: 42px; z-index: 5; display: flex; gap: 8px; }
@@ -247,35 +95,51 @@ body.has-pointer .cursor-x, body.has-pointer .cursor-y, body.has-pointer .cursor
 .topnav .hb:active { opacity: .4; }
 .topnav .hb:disabled { color: #d8d8de; cursor: default; pointer-events: none; }
 
-
+/* スマホ：中央ブランドだけ（トップと同じ振る舞い） */
 @media (max-width: 999px) {
-  .topnav { position: sticky; height: 48px; padding: 0 20px; justify-content: center; }
-  .topnav .brand { font-size: 17px; gap: 10px; }
+  .topnav {
+    position: sticky; height: 48px; padding: 0 20px;
+    justify-content: center;
+    background: rgba(251,251,250,.94);
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .topnav a:not(.brand) { display: none; }
+  .topnav .brand {
+    position: static; transform: none; margin: 0;
+    font-size: 17px; gap: 10px;
+  }
   .topnav .brand .ln { width: 20px; }
   .topnav .brand .d2 { width: 5px; height: 5px; }
   .topnav .hist { position: absolute; top: 8px; right: 18px; }
-  .doc-head, .head-bar2, .ruler, .side-cap { display: none; }
-  .hide-m { display: none !important; }
-}
-@media (max-width: 640px) {
-  .reg { display: none; }
-  .topnav .hb { padding: 9px 11px; }
 }
 
-/* ---- 遷移の白幕（トップと同じ作法で、出るときも入るときも白に溶ける） ---- */
+/* ---- 遷移演出：白幕と、その中で回る時計 ---- */
 .warp {
   position: fixed; inset: 0; z-index: 99;
   background: var(--paper);
   opacity: 0; visibility: hidden; pointer-events: none;
 }
-.warp.in { visibility: visible; opacity: 1; transition: opacity .3s ease; }
+.warp.in { visibility: visible; opacity: 1; transition: opacity .5s ease .55s; }
 .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .34s ease; }
 html.backnav .warp { visibility: visible; opacity: 1; }
 
+/* 時計（遷移のあいだだけ召喚される） */
+.warpfig {
+  position: fixed; left: 50%; top: 50%;
+  width: min(78vw, 500px);
+  transform: translate(-50%, -50%);
+  z-index: 100; opacity: 0; pointer-events: none;
+  transition: opacity .5s ease;
+}
+.warpfig svg { width: 100%; height: auto; display: block; }
+body.departing .warpfig { opacity: .9; }
+body.departing2 .warpfig { transform: translate(-50%, -50%) scale(1.7); transition: transform .7s cubic-bezier(.5, 0, .8, .45); }
+.warpfig .handH, .warpfig .handM, .warpfig .handS,
+.warpfig .orbitA, .warpfig .orbitB, .warpfig .orbitC, .warpfig .redarc {
+  transform-origin: 300px 258px;
+}
+
 /* 出るとき：紙面が先に溶ける */
-body.leaving .topnav, body.leaving .doc-head, body.leaving .head-bar2,
-body.leaving .side-cap, body.leaving .ruler, body.leaving .scatter,
-body.leaving .cosmos, body.leaving .blades, body.leaving .ink,
-body.leaving .wrap, body.leaving footer {
-  opacity: 0 !important; transition: opacity .26s ease;
+body.departing .topnav, body.departing .wrap, body.departing footer {
+  opacity: 0 !important; transition: opacity .4s ease;
 }

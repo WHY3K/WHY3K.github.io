@@ -13,14 +13,6 @@ body {
 
 /* ---- 版面 ---- */
 .wrap { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 108px 28px 110px; }
-/* 装飾の上でも文字が読めるように、版面だけ紙を一枚敷く（トップの索引リストと同じ考え方） */
-.wrap::before {
-  content: ""; position: absolute; inset: 84px -18px 40px;
-  background: rgba(251,251,250,.72);
-  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
-  z-index: -1; pointer-events: none;
-}
-@media (max-width: 640px) { .wrap::before { inset: 30px -12px 20px; } }
 .cap { font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--ink-soft); text-transform: uppercase; }
 .mark {
   display: inline-block; font-family: var(--mono);
@@ -70,14 +62,14 @@ ol.steps li::before {
 }
 
 /* ---- 注意書き ---- */
-.note { border-left: 2px solid var(--red); background: rgba(253,243,242,.85); padding: 16px 20px; margin: 30px 0; font-size: 14.5px; }
+.note { border-left: 2px solid var(--red); background: #fdf3f2; padding: 16px 20px; margin: 30px 0; font-size: 14.5px; }
 .note strong { color: var(--red); }
-.quiet { border: 1px solid var(--line); background: rgba(255,255,255,.55); padding: 20px 22px; margin: 34px 0 0; font-size: 14px; color: #3a3a42; }
+.quiet { border: 1px solid var(--line); background: #f6f6f8; padding: 20px 22px; margin: 34px 0 0; font-size: 14px; color: #3a3a42; }
 .quiet h3 { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; margin: 0 0 12px; color: var(--ink); }
 
 /* ---- ダウンロード ---- */
 .dlbox {
-  border: 1px solid var(--ink); background: rgba(255,255,255,.62);
+  border: 1px solid var(--ink); background: #fff;
   padding: 26px 28px; margin: 34px 0 0;
   display: flex; flex-wrap: wrap; align-items: center; gap: 22px; justify-content: space-between;
 }
@@ -117,9 +109,29 @@ ol.steps li::before {
 .item .mk { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: .1em; flex: 0 0 auto; }
 .item .mk .free { color: var(--red); }
 @media (hover: hover) and (pointer: fine) {
-  .item:hover { background: rgba(243,243,244,.8); padding-left: 10px; }
+  .item:hover { padding-left: 10px; }
   .item:hover .idx, .item:hover .mk { color: var(--ink); }
 }
+/* ---- 一覧のホバー：黒が斜めに流れ込む（トップの索引と同じ演出） ---- */
+a.item { position: relative; overflow: hidden; z-index: 0; transition: color .3s, padding-left .15s; }
+a.item::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -8%; width: 116%;
+  z-index: -1; background: var(--ink);
+  transform: translateX(-108%) skewX(-16deg);
+  transition: transform .2s cubic-bezier(.76, 0, .24, 1);
+}
+a.item .mk { transition: transform .3s cubic-bezier(.65,0,.35,1), color .3s; }
+@media (hover: hover) and (pointer: fine) {
+  a.item:hover { color: #fff; }
+  a.item:hover::before { transform: translateX(0) skewX(-16deg); }
+  a.item:hover .idx { color: rgba(255,255,255,.6); }
+  a.item:hover .for { color: rgba(255,255,255,.55); }
+  a.item:hover .lead2 { border-color: rgba(255,255,255,.3); }
+  a.item:hover .mk { color: #fff; transform: translateX(12px); }
+  a.item:hover .mk .free { color: #ff6b5e; }
+}
+a.item:active { opacity: .8; }
+
 .item.soon { pointer-events: none; color: #c6c6cd; }
 .item.soon .idx, .item.soon .mk, .item.soon .for { color: #d4d4da; }
 
