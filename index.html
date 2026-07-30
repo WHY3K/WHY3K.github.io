@@ -1320,7 +1320,7 @@ phase ...... hold</div>
       <span class="idx">07</span> WHY3K PLUGINS <span class="lead"></span><span class="mk">→</span>
     </a>
 
-    <a class="link" href="/themes/"><span class="idx">08</span> WHY3K THEMES <span class="lead"></span><span class="mk">→</span></a>
+    <a class="link primary" href="/themes/"><span class="idx">08</span> WHY3K THEMES <span class="lead"></span><span class="mk">→</span></a>
 
     <!-- TODO: note のURL（公開されたら href を差し替えて class="link soon" → class="link"、SOON → → に） -->
     <a class="link soon" href="#" aria-disabled="true"><span class="idx">09</span> note <span class="lead"></span><span class="mk">SOON</span></a>
@@ -1640,7 +1640,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       window.location.href = href;
     }, tGo);
   }
-  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"]').forEach(function (a) {
+  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"], a[href^="/themes/"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       if (reduce) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey) return;
