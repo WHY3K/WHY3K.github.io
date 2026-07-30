@@ -1,103 +1,26 @@
-/* WHY3K THEMES — メインサイト（/index.html）のパレットと骨格だけを継承した資料ページ用CSS。
-   トップの演出（グリッチ・軌道・散乱レイヤー）は持ち込まず、紙・墨・トンボ・Cormorant・モノラベルで揃える。 */
-
-@font-face {
-  font-family: "Cormorant";
-  src: url("../../assets/fonts/cormorant.woff2") format("woff2");
-  font-weight: 500 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* WHY3K THEMES — ページ本文の体裁だけ。
+   パレット・フォント・装飾・上部バーは site-chrome.css / site-chrome.js 側にある。 */
 
 :root {
-  --paper: #fbfbfa;
-  --ink: #131316;
-  --ink-soft: #9a9aa3;
-  --faint: #c9c9d0;
-  --line: #e2e2e7;
-  --acc: #2f9fd0;
-  --red: #d21f12;
-  --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
-  --disp: "Cormorant", serif;
-  --tech: "Cormorant", "Hiragino Mincho ProN", serif;
   --body: "Hiragino Sans", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-:focus { outline: none; }
-:focus-visible { outline: 2px solid rgba(19,19,22,.5); outline-offset: 3px; }
-
 html { scroll-behavior: smooth; }
 body {
-  background: var(--paper);
-  color: var(--ink);
   font-family: var(--body);
   line-height: 1.9;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  position: relative;
-  min-height: 100%;
-}
-/* トップと同じ方眼のドット */
-body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: 0;
-  background-image: radial-gradient(circle, rgba(19,19,22,.13) .7px, transparent .8px);
-  background-size: 56px 56px;
-  background-position: 28px 28px;
-  pointer-events: none;
 }
 
-/* 四隅のトンボ */
-.reg { position: fixed; width: 16px; height: 16px; z-index: 2; pointer-events: none; }
-.reg.tl { top: 14px; left: 14px;  border-top: 2px solid var(--ink); border-left: 2px solid var(--ink); }
-.reg.tr { top: 14px; right: 14px; border-top: 2px solid var(--ink); border-right: 2px solid var(--ink); }
-.reg.bl { bottom: 14px; left: 14px;  border-bottom: 2px solid var(--ink); border-left: 2px solid var(--ink); }
-.reg.br { bottom: 14px; right: 14px; border-bottom: 2px solid var(--ink); border-right: 2px solid var(--ink); }
-
-/* ---- 上部ナビ（トップと同じ体裁） ---- */
-.topnav {
-  position: sticky; top: 0; z-index: 3;
-  display: flex; align-items: center; justify-content: center; gap: 26px;
-  height: 48px; padding: 0 20px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
-  text-transform: uppercase;
-  background: rgba(251,251,250,.94);
-  border-bottom: 1px solid var(--line);
+/* ---- 版面 ---- */
+.wrap { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 108px 28px 110px; }
+/* 装飾の上でも文字が読めるように、版面だけ紙を一枚敷く（トップの索引リストと同じ考え方） */
+.wrap::before {
+  content: ""; position: absolute; inset: 84px -18px 40px;
+  background: rgba(251,251,250,.72);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  z-index: -1; pointer-events: none;
 }
-.topnav .brand {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--disp); font-weight: 700; font-size: 17px;
-  letter-spacing: .06em; text-transform: none;
-  color: var(--ink); text-decoration: none; white-space: nowrap;
-}
-.topnav .brand i { display: block; }
-.topnav .brand .ln { width: 20px; height: 1px; background: var(--faint); }
-.topnav .brand .d2 { width: 5px; height: 5px; background: var(--ink); }
-.topnav a:not(.brand) { display: none; }
-.topnav a { color: var(--ink); text-decoration: none; position: relative; padding: 4px 0; transition: color .15s; }
-.topnav a .no { color: var(--ink-soft); margin-right: .7em; font-size: 9px; }
-.topnav a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--ink); }
-.topnav a.soon { color: #c6c6cd; pointer-events: none; }
-.topnav a.soon .no { color: #d4d4da; }
-.topnav .soonmk { font-size: 8px; letter-spacing: .18em; color: #c6c6cd; margin-left: .6em; }
-.topnav .navlinks { display: none; }
-@media (min-width: 1000px) {
-  .topnav {
-    justify-content: space-between; gap: 34px; height: 54px; padding: 0 40px;
-    -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
-    background: rgba(251,251,250,.78);
-  }
-  .topnav .navlinks { display: flex; align-items: center; gap: 34px; }
-  .topnav a:not(.brand) { display: inline; }
-  .topnav .brand { font-size: 26px; gap: 14px; }
-  .topnav .brand .ln { width: 34px; }
-  .topnav .brand .d2 { width: 7px; height: 7px; }
-  .topnav a:hover { color: var(--ink-soft); }
-}
-
-/* ---- 中身 ---- */
-.wrap { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 68px 28px 110px; }
+@media (max-width: 640px) { .wrap::before { inset: 30px -12px 20px; } }
 .cap { font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--ink-soft); text-transform: uppercase; }
 .mark {
   display: inline-block; font-family: var(--mono);
@@ -129,13 +52,13 @@ pre {
   padding: 14px 16px; margin: 0 0 18px; overflow-x: auto;
 }
 
-/* 図版 */
+/* ---- 図版 ---- */
 figure { margin: 26px 0 40px; }
-figure img { display: block; max-width: 100%; border: 1px solid var(--faint); }
+figure img { display: block; max-width: 100%; border: 1px solid var(--faint); background: var(--paper); }
 figure img.native { width: 489px; max-width: 100%; }
 figcaption { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--ink-soft); margin-top: 10px; text-transform: uppercase; }
 
-/* 手順 */
+/* ---- 手順 ---- */
 ol.steps { list-style: none; counter-reset: step; margin: 0 0 26px; }
 ol.steps li { counter-increment: step; position: relative; padding-left: 46px; margin-bottom: 18px; }
 ol.steps li::before {
@@ -146,15 +69,15 @@ ol.steps li::before {
   padding: 3px 7px 2px;
 }
 
-/* 注意書き */
-.note { border-left: 2px solid var(--red); background: #fdf3f2; padding: 16px 20px; margin: 30px 0; font-size: 14.5px; }
+/* ---- 注意書き ---- */
+.note { border-left: 2px solid var(--red); background: rgba(253,243,242,.85); padding: 16px 20px; margin: 30px 0; font-size: 14.5px; }
 .note strong { color: var(--red); }
-.quiet { border: 1px solid var(--line); background: rgba(255,255,255,.5); padding: 20px 22px; margin: 34px 0 0; font-size: 14px; color: #3a3a42; }
+.quiet { border: 1px solid var(--line); background: rgba(255,255,255,.55); padding: 20px 22px; margin: 34px 0 0; font-size: 14px; color: #3a3a42; }
 .quiet h3 { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; margin: 0 0 12px; color: var(--ink); }
 
 /* ---- ダウンロード ---- */
 .dlbox {
-  border: 1px solid var(--ink); background: rgba(255,255,255,.55);
+  border: 1px solid var(--ink); background: rgba(255,255,255,.62);
   padding: 26px 28px; margin: 34px 0 0;
   display: flex; flex-wrap: wrap; align-items: center; gap: 22px; justify-content: space-between;
 }
@@ -175,7 +98,7 @@ ol.steps li::before {
   .btn:hover .free { color: var(--red); }
 }
 
-/* ---- 一覧（索引リスト。トップの .link と同じ体裁） ---- */
+/* ---- 一覧（索引リスト） ---- */
 .list { display: flex; flex-direction: column; margin-top: 34px; }
 .item {
   display: flex; align-items: center; gap: 16px;
@@ -194,7 +117,7 @@ ol.steps li::before {
 .item .mk { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: .1em; flex: 0 0 auto; }
 .item .mk .free { color: var(--red); }
 @media (hover: hover) and (pointer: fine) {
-  .item:hover { background: #f3f3f4; padding-left: 10px; }
+  .item:hover { background: rgba(243,243,244,.8); padding-left: 10px; }
   .item:hover .idx, .item:hover .mk { color: var(--ink); }
 }
 .item.soon { pointer-events: none; color: #c6c6cd; }
@@ -203,9 +126,9 @@ ol.steps li::before {
 /* ---- フッター ---- */
 footer {
   position: relative; z-index: 1;
-  max-width: 880px; margin: 0 auto; padding: 0 28px 46px;
+  max-width: 880px; margin: 0 auto; padding: 22px 28px 46px;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 18px;
-  border-top: 1px solid var(--line); padding-top: 22px;
+  border-top: 1px solid var(--line);
   font-family: var(--mono); font-size: 9px; letter-spacing: .22em; color: var(--ink-soft);
 }
 footer a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--faint); }
@@ -217,9 +140,10 @@ footer a:hover { color: var(--ink); }
 .barcode i:nth-child(5n) { width: 3px; }
 .barcode i:nth-child(7n) { height: 55%; }
 
-@media (max-width: 640px) {
+@media (max-width: 999px) {
   .wrap { padding: 44px 20px 80px; }
-  .reg { display: none; }
+}
+@media (max-width: 640px) {
   .dlbox { flex-direction: column; align-items: stretch; }
   .btn { justify-content: center; }
 }
