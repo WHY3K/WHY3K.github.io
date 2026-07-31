@@ -71,21 +71,38 @@
   })();
 
   /* ---------- コード欄のコピーボタン ---------- */
+  var ICON_COPY =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<rect x="8" y="8" width="13" height="13" rx="2"/>' +
+    '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var ICON_DONE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M20 6 9 17l-5-5"/></svg>';
+  var ICON_FAIL =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M18 6 6 18M6 6l12 12"/></svg>';
+
   Array.prototype.forEach.call(document.querySelectorAll('pre'), function (pre) {
     var text = pre.textContent;
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'copy';
-    btn.textContent = 'COPY';
+    btn.innerHTML = ICON_COPY;
+    btn.title = 'コピー';
     btn.setAttribute('aria-label', 'コマンドをコピー');
     var timer;
     function flash(ok) {
-      btn.textContent = ok ? 'COPIED' : 'FAILED';
+      btn.innerHTML = ok ? ICON_DONE : ICON_FAIL;
       btn.classList.add('done');
+      btn.title = ok ? 'コピーしました' : 'コピーできませんでした';
       clearTimeout(timer);
       timer = setTimeout(function () {
-        btn.textContent = 'COPY';
+        btn.innerHTML = ICON_COPY;
         btn.classList.remove('done');
+        btn.title = 'コピー';
       }, 1600);
     }
     btn.addEventListener('click', function () {
@@ -104,7 +121,12 @@
       document.body.removeChild(ta);
       flash(ok);
     });
-    pre.appendChild(btn);
+    /* pre 自体は横スクロールするので、外側の箱にボタンを置いて右上に固定する */
+    var holder = document.createElement('div');
+    holder.className = 'codeblock';
+    pre.parentNode.insertBefore(holder, pre);
+    holder.appendChild(pre);
+    holder.appendChild(btn);
   });
 
   /* ---------- 入場：白から紙面へ ---------- */

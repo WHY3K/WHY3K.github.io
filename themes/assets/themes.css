@@ -39,23 +39,26 @@ code {
   background: #f1f1f4; border: 1px solid var(--line); border-radius: 2px; padding: 2px 6px;
 }
 pre {
-  position: relative;
   font-family: var(--mono); font-size: 12.5px; line-height: 1.7;
   background: #f1f1f4; border: 1px solid var(--line); border-left: 2px solid var(--acc);
-  padding: 14px 84px 14px 16px; margin: 0 0 18px; overflow-x: auto;
+  padding: 14px 52px 14px 16px; margin: 0 0 18px; overflow-x: auto;
 }
-pre .copy {
-  position: absolute; top: 9px; right: 9px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+/* コピーボタンを枠の右上に固定するための入れ物（横スクロールしても流れない） */
+.codeblock { position: relative; }
+.codeblock .copy {
+  position: absolute; top: 8px; right: 8px;
+  width: 30px; height: 30px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
   color: var(--ink-soft); background: var(--paper);
   border: 1px solid var(--line); border-radius: 0;
-  padding: 4px 9px; cursor: pointer; line-height: 1;
+  cursor: pointer;
   transition: color .15s, background .15s, border-color .15s;
 }
+.codeblock .copy svg { width: 15px; height: 15px; display: block; }
 @media (hover: hover) and (pointer: fine) {
-  pre .copy:hover { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+  .codeblock .copy:hover { color: var(--paper); background: var(--ink); border-color: var(--ink); }
 }
-pre .copy.done { color: var(--red); border-color: var(--red); background: var(--paper); }
+.codeblock .copy.done { color: var(--red); border-color: var(--red); background: var(--paper); }
 
 /* ---- 図版 ---- */
 figure { margin: 26px 0 40px; }
