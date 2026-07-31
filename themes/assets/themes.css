@@ -149,6 +149,16 @@ a.item .mk { transition: transform .3s cubic-bezier(.65,0,.35,1), color .3s; }
   a.item:hover .mk .free { color: #ff6b5e; }
 }
 a.item:active { opacity: .8; }
+/* 指で触る画面には hover がないので、押している間に同じ黒を出す */
+@media (hover: none), (pointer: coarse) {
+  a.item:active { opacity: 1; color: #fff; }
+  a.item:active::before { transform: translateX(0) skewX(-16deg); transition-duration: .12s; }
+  a.item:active .idx { color: rgba(255,255,255,.6); }
+  a.item:active .for { color: rgba(255,255,255,.55); }
+  a.item:active .lead2 { border-color: rgba(255,255,255,.3); }
+  a.item:active .mk { color: #fff; }
+  a.item:active .mk .free { color: #ff6b5e; }
+}
 
 .item.soon { pointer-events: none; color: #c6c6cd; }
 .item.soon .idx, .item.soon .mk, .item.soon .for { color: #d4d4da; }

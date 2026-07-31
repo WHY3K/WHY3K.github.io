@@ -384,7 +384,6 @@
     .link:hover .idx, .link:hover .mk { color: var(--ink); }
   }
   .link:active { background: #ececee; }
-  /* タップ時は黒を出さない（出発演出は溶け→白で統一）。PCホバーのみ黒ワイプ */
 
   .link.primary {
     height: 62px;
@@ -406,6 +405,14 @@
     .link:not(.soon):hover .idx { color: rgba(255,255,255,.6); }
     .link:not(.soon):hover .lead { border-color: rgba(255,255,255,.3); }
     .link:not(.soon):hover .mk { color: #fff; transform: translateX(12px); }
+  }
+  /* 指で触る画面には hover がないので、押している間に同じ黒を出す */
+  @media (hover: none), (pointer: coarse) {
+    .link:not(.soon):active { color: #fff; background: transparent; }
+    .link:not(.soon):active::before { transform: translateX(0) skewX(-16deg); transition-duration: .12s; }
+    .link:not(.soon):active .idx { color: rgba(255,255,255,.6); }
+    .link:not(.soon):active .lead { border-color: rgba(255,255,255,.3); }
+    .link:not(.soon):active .mk { color: #fff; transform: translateX(12px); }
   }
 
   .link.soon { pointer-events: none; color: #c6c6cd; }
