@@ -70,6 +70,17 @@
     }
   })();
 
+  /* ---------- トップへ戻るリンク（ブランド／← HOME）----------
+     履歴の「←」と同じ帰りの演出（白から明ける＋軌道の減速）にするため、
+     遷移する前に戻りフラグを立てておく。 */
+  Array.prototype.forEach.call(document.querySelectorAll('a[href="/"]'), function (a) {
+    a.addEventListener('click', function (e) {
+      /* 新しいタブ・別ウィンドウで開くときはこのページに留まるので立てない */
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      try { sessionStorage.setItem('w3kBack', '1'); } catch (_) {}
+    });
+  });
+
   /* ---------- コード欄のコピーボタン ---------- */
   var ICON_COPY =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
