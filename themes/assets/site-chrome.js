@@ -95,15 +95,16 @@
     btn.setAttribute('aria-label', 'コマンドをコピー');
     var timer;
     function flash(ok) {
+      clearTimeout(timer);
+      /* 中身を作り直すので、連打しても毎回アニメーションが最初から出る */
       btn.innerHTML = ok ? ICON_DONE : ICON_FAIL;
       btn.classList.add('done');
       btn.title = ok ? 'コピーしました' : 'コピーできませんでした';
-      clearTimeout(timer);
       timer = setTimeout(function () {
         btn.innerHTML = ICON_COPY;
         btn.classList.remove('done');
         btn.title = 'コピー';
-      }, 1600);
+      }, 1200);
     }
     btn.addEventListener('click', function () {
       if (navigator.clipboard && navigator.clipboard.writeText) {
