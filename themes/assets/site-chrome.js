@@ -28,7 +28,7 @@
   var nav =
     '<nav class="topnav" aria-label="Primary">' +
     '<a class="brand" href="/" aria-label="WHY3K インデックスへ"><i class="d2"></i><i class="ln"></i>WHY3K<i class="ln"></i><i class="d2"></i></a>' +
-    '<a class="home" href="/">← home</a>' +
+    '<a class="home" href="/">← HOME</a>' +
     '<span class="hist">' +
     '<button class="hb" id="histBack" aria-label="前のページへ" disabled>←</button>' +
     '<button class="hb" id="histFwd" aria-label="次のページへ" disabled>→</button>' +
@@ -69,6 +69,43 @@
       window.navigation.addEventListener('currententrychange', update);
     }
   })();
+
+  /* ---------- コード欄のコピーボタン ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('pre'), function (pre) {
+    var text = pre.textContent;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy';
+    btn.textContent = 'COPY';
+    btn.setAttribute('aria-label', 'コマンドをコピー');
+    var timer;
+    function flash(ok) {
+      btn.textContent = ok ? 'COPIED' : 'FAILED';
+      btn.classList.add('done');
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        btn.textContent = 'COPY';
+        btn.classList.remove('done');
+      }, 1600);
+    }
+    btn.addEventListener('click', function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash(true); }, function () { flash(false); });
+        return;
+      }
+      /* clipboard API が使えないときの逃げ道 */
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+      document.body.removeChild(ta);
+      flash(ok);
+    });
+    pre.appendChild(btn);
+  });
 
   /* ---------- 入場：白から紙面へ ---------- */
   var warp = document.querySelector('.warp');
