@@ -76,10 +76,6 @@
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<rect x="8" y="8" width="13" height="13" rx="2"/>' +
     '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-  var ICON_DONE =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
-    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M20 6 9 17l-5-5"/></svg>';
   var ICON_FAIL =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -96,13 +92,14 @@
     var timer;
     function flash(ok) {
       clearTimeout(timer);
-      /* 中身を作り直すので、連打しても毎回アニメーションが最初から出る */
-      btn.innerHTML = ok ? ICON_DONE : ICON_FAIL;
-      btn.classList.add('done');
+      /* 成功はアイコンの色だけで知らせる。失敗したときだけ形を変える */
+      btn.innerHTML = ok ? ICON_COPY : ICON_FAIL;
+      btn.classList.add(ok ? 'done' : 'fail');
       btn.title = ok ? 'コピーしました' : 'コピーできませんでした';
       timer = setTimeout(function () {
         btn.innerHTML = ICON_COPY;
         btn.classList.remove('done');
+        btn.classList.remove('fail');
         btn.title = 'コピー';
       }, 700);
     }

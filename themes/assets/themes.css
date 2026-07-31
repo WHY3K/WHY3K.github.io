@@ -46,7 +46,7 @@ pre {
 /* コピーボタンを枠の右上に固定するための入れ物（横スクロールしても流れない） */
 .codeblock { position: relative; }
 .codeblock .copy {
-  position: absolute; top: 10px; right: 10px;
+  position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
   width: 26px; height: 26px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   color: var(--ink-soft); background: none; border: 0;
@@ -58,17 +58,9 @@ pre {
   .codeblock .copy:hover { color: var(--ink); }
 }
 .codeblock .copy:active { opacity: .5; }
+/* コピーできたら形は変えず、一瞬だけ色で知らせる */
 .codeblock .copy.done { color: var(--acc); }
-/* 押すたびに出し直すので、連打しても毎回この動きが出る */
-.codeblock .copy.done svg { animation: copypop .3s cubic-bezier(.2, .8, .3, 1); }
-@keyframes copypop {
-  0%   { transform: scale(.5); opacity: 0; }
-  60%  { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .codeblock .copy.done svg { animation: none; }
-}
+.codeblock .copy.fail { color: var(--red); }
 
 /* ---- 図版 ---- */
 figure { margin: 26px 0 40px; }
