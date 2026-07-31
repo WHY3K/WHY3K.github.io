@@ -104,7 +104,7 @@
         btn.innerHTML = ICON_COPY;
         btn.classList.remove('done');
         btn.title = 'コピー';
-      }, 1200);
+      }, 700);
     }
     btn.addEventListener('click', function () {
       if (navigator.clipboard && navigator.clipboard.writeText) {
