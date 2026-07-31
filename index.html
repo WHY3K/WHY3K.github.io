@@ -627,6 +627,15 @@
     opacity: 0 !important; transition: opacity .3s ease;
   }
   body.depart .figure svg { transform: scale(1.08); transition: transform .6s cubic-bezier(.4,0,.6,1); }
+  /* 出発演出のあいだは、どこまでスクロールしていても図版を画面中央に置く
+     （そのままだと画面外や見切れた位置で演出が始まってしまう） */
+  body.summon .figure {
+    position: fixed; top: 50%; left: 50%;
+    width: min(52vw, 560px);
+    /* transform はダイブ演出側が使うので、中央寄せは負マージンで行う */
+    margin: calc(min(52vw, 560px) * .86 / -2) 0 0 calc(min(52vw, 560px) / -2);
+    z-index: 98; /* 白幕(99)のすぐ下 */
+  }
   /* スマホ：図版を固定化して画面中央へ（JSのFLIPで現在地からスーッと移動してくる） */
   @media (max-width: 999px) {
     body.summon .figure {

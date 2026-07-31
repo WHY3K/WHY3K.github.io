@@ -28,7 +28,7 @@
   var nav =
     '<nav class="topnav" aria-label="Primary">' +
     '<a class="brand" href="/" aria-label="WHY3K インデックスへ"><i class="d2"></i><i class="ln"></i>WHY3K<i class="ln"></i><i class="d2"></i></a>' +
-    '<a class="home" href="/">← index</a>' +
+    '<a class="home" href="/">← home</a>' +
     '<span class="hist">' +
     '<button class="hb" id="histBack" aria-label="前のページへ" disabled>←</button>' +
     '<button class="hb" id="histFwd" aria-label="次のページへ" disabled>→</button>' +
