@@ -46,12 +46,14 @@ pre {
 /* コピーボタンを枠の右上に固定するための入れ物（横スクロールしても流れない） */
 .codeblock { position: relative; }
 .codeblock .copy {
-  position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
-  width: 26px; height: 26px; padding: 0;
+  position: absolute; top: 1px; right: 1px; bottom: 1px;
+  width: 42px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
-  color: var(--ink-soft); background: none; border: 0;
+  color: var(--ink-soft); border: 0;
   -webkit-appearance: none; appearance: none;
   cursor: pointer; transition: color .15s;
+  /* 長い一行を横スクロールさせる箱でも、文字がボタンの下に潜って読めるように地色で伏せる */
+  background: #f1f1f4; box-shadow: -10px 0 10px -6px #f1f1f4;
 }
 .codeblock .copy svg { width: 16px; height: 16px; display: block; }
 @media (hover: hover) and (pointer: fine) {
