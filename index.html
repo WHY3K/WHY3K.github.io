@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260803a'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260803b'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -526,12 +526,6 @@
     font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--ink);
   }
   .p-val { flex: 1 1 0; min-width: 0; }
-  .p-chara { flex: 0 0 auto; align-self: flex-end; margin: -96px -18px -42px 0; }
-  .p-chara img { display: block; height: 368px; width: auto; }
-  @media (max-width: 720px) {
-    .p-chara { align-self: center; margin: -4px 0 -42px; }
-    .p-chara img { height: 290px; }
-  }
   .p-row a { overflow-wrap: anywhere; } /* メールアドレスだけはどこでも折り返してよい */
   .p-row:last-child { border-bottom: 1px solid var(--line); }
   .p-key {
@@ -1411,7 +1405,6 @@ phase ...... hold</div>
       <div class="p-row"><span class="p-key">contact</span><span class="p-val"><a id="pmail" href="#" rel="nofollow">…</a></span></div>
       <div class="p-row"><span class="p-key">archive</span><span class="p-val">note <span class="soonmk">soon</span></span></div>
     </div>
-    <div class="p-chara" aria-hidden="true"><img src="assets/chara2d.png" alt="" loading="lazy" width="800" height="1200"></div>
   </div>
 </section>
 
