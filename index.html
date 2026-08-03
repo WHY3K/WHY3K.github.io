@@ -397,7 +397,8 @@
     height: 62px;
     font-size: 18px;
   }
-  .link.primary .mk { font-weight: 700; color: var(--ink); }
+  /* 矢印の濃さは SOON 以外すべて同じ（PLUGINS / THEMES に合わせる） */
+  .link:not(.soon) .mk { font-weight: 700; color: var(--ink); }
   /* 黒のワイプ層（左から流れ込む）。SOON 以外の行すべてに出す */
   .link:not(.soon) { position: relative; overflow: hidden; z-index: 0; transition: color .3s, padding-left .15s; }
   .link:not(.soon)::before {
