@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260803c'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260803d'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -312,6 +312,13 @@
   /* ---- 図版 ---- */
   .figure { position: relative; width: min(92vw, 540px); aspect-ratio: 1 / .86; will-change: transform; }
   .figure svg { position:absolute; inset:0; width:100%; height:100%; }
+  /* 図版の直下に白いベールを敷いて、軌道の点線のコントラストを守る（全幅共通） */
+  .figure::before {
+    content: "";
+    position: absolute; inset: -8%;
+    background: radial-gradient(closest-side, rgba(251,251,250,.92), rgba(251,251,250,.6) 58%, transparent 80%);
+    z-index: -1;
+  }
   @media (prefers-reduced-motion: no-preference) {
     .orbitA { animation: spin 90s linear infinite; transform-origin: 300px 258px; }
     .orbitB { animation: spinR 130s linear infinite; transform-origin: 300px 258px; }
@@ -867,13 +874,6 @@
   @media (max-width: 640px) {
     .bigring { width: 130vw !important; margin: -65vw 0 0 -68vw !important; top: calc(90px + 47.5vw) !important; opacity: .18 !important; }
     .bigring { animation: none !important; } /* スクロール時のカクつき対策 */
-    /* 図版の直下に白いベールを敷いて、軌道の点線のコントラストを守る */
-    .figure::before {
-      content: "";
-      position: absolute; inset: -8%;
-      background: radial-gradient(closest-side, rgba(251,251,250,.92), rgba(251,251,250,.6) 58%, transparent 80%);
-      z-index: -1;
-    }
   }
   /* ===== デスクトップ（≥1000px）：見開きレイアウト =====
      左＝軌道図・右＝索引。中央1カラムをやめて画面全体を誌面として使う */
