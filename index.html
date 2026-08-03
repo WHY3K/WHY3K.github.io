@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260803d'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260803e'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -463,49 +463,7 @@
   .link.soon { pointer-events: none; color: #c6c6cd; }
   .link.soon .idx, .link.soon .mk { color: #d4d4da; }
 
-  /* ---- フィーチャー枠（fig. 02 — 最新デバイス） ---- */
-  .feature {
-    width: 100%;
-    position: relative; z-index: 1;
-    border-top: 1px solid var(--line);
-    background: rgba(251,251,250,.62);
-    padding: 58px 30px 64px;
-    display: flex; justify-content: center;
-  }
-  .feature-inner {
-    width: 100%; max-width: 560px;
-    min-width: 0; /* 桁表示のnowrapで親がはみ出すのを防ぐ */
-    display: flex; flex-direction: column; gap: 30px;
-  }
-  .f-left { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
-  .f-cap {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
-    color: var(--ink-soft); text-transform: uppercase;
-  }
-  .f-tag {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
-    text-transform: uppercase; color: var(--ink);
-    border: 1px solid var(--ink); padding: 6px 12px 5px;
-  }
-  .f-tag b { color: var(--red); font-weight: 400; }
-
-  /* ---- 発光（色は既存の朱と緑だけ。白×墨のルールは崩さない）---- */
-  .f-tag b { text-shadow: 0 0 2px rgba(210,31,18,.45), 0 0 10px rgba(210,31,18,.3); }
-  .f-display .digits { text-shadow: 0 0 5px rgba(51,209,94,.5), 0 0 16px rgba(51,209,94,.25); }
-  @media (prefers-reduced-motion: no-preference) {
-    .f-tag b { animation: freeGlow 3.8s ease-in-out infinite; }
-    .f-display .digits { animation: dispGlow 2.8s ease-in-out infinite; }
-  }
-  @keyframes freeGlow {
-    0%, 100% { text-shadow: 0 0 2px rgba(210,31,18,.35), 0 0 8px rgba(210,31,18,.2); }
-    50%      { text-shadow: 0 0 2px rgba(210,31,18,.65), 0 0 14px rgba(210,31,18,.5), 0 0 28px rgba(210,31,18,.2); }
-  }
-  @keyframes dispGlow {
-    0%, 100% { text-shadow: 0 0 5px rgba(51,209,94,.45), 0 0 14px rgba(51,209,94,.2); }
-    50%      { text-shadow: 0 0 6px rgba(51,209,94,.7), 0 0 22px rgba(51,209,94,.38); }
-  }
-
-  /* ---- fig.03 アーティストファイル ---- */
+  /* ---- fig.02 アーティストファイル ---- */
   .profile { width: min(92vw, 900px); margin: 90px auto 0; }
   .p-cap {
     font-family: var(--mono); font-size: 10px; letter-spacing: .3em;
@@ -547,80 +505,8 @@
     .p-rows { width: 100%; }
     .p-key { flex-basis: 74px; }
   }
-  .f-title {
-    font-family: var(--disp); font-weight: 700;
-    font-size: clamp(40px, 9vw, 58px); line-height: 1.02; letter-spacing: .02em;
-    color: var(--ink);
-  }
-  .f-sub {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .24em;
-    text-transform: uppercase; color: var(--ink-soft);
-  }
   /* 日本語の改行最適化：文節で折り返す（対応ブラウザ）＋段落の整形 */
   p { text-wrap: pretty; word-break: auto-phrase; }
-  .nb { display: inline-block; } /* この単位でしか改行しない */
-  .f-desc {
-    font-family: var(--tech); font-size: 15px; line-height: 2;
-    color: #55555e; max-width: 36em;
-  }
-  .f-btn {
-    touch-action: manipulation;
-    display: inline-flex; align-items: center; gap: 14px;
-    font-family: var(--tech); font-weight: 700; font-size: 15px;
-    letter-spacing: .24em; text-transform: uppercase;
-    color: #fff; background: var(--ink); text-decoration: none;
-    padding: 17px 28px; margin-top: 6px;
-    transition: background .15s;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .f-btn:hover { background: var(--paper); color: var(--ink); outline: 1px solid var(--ink); }
-  }
-  /* 配布サイトの「disp」ウィンドウと同じ見た目に合わせる */
-  .f-display {
-    position: relative;
-    background: #0b0b0d;
-    border: 1px solid #26262c;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 30px 70px -30px rgba(0,0,0,.6);
-    max-width: 100%; min-width: 0;
-    display: flex; flex-direction: column;
-  }
-  .f-titlebar {
-    display: flex; align-items: center; gap: 8px;
-    height: 34px; padding: 0 12px;
-    background: #1b1b20; border-bottom: 1px solid #000;
-  }
-  .f-titlebar .dots { display: flex; gap: 6px; }
-  .f-titlebar .dots i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a42; display: block; }
-  .f-titlebar .win-title {
-    flex: 1; text-align: center;
-    color: #8a8a95; font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
-    margin-right: 39px; /* 左のドット幅ぶんを相殺して中央寄せ */
-  }
-  .f-display .digits {
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", sans-serif;
-    font-variant-numeric: tabular-nums;
-    font-weight: 700; color: #33d15e;
-    font-size: clamp(24px, 7vw, 52px);
-    letter-spacing: .04em; text-align: center;
-    padding: 36px 20px;
-    text-shadow: 0 0 18px rgba(51,209,94,.45);
-    white-space: nowrap;
-  }
-  .f-display .digits b { font-weight: 700; color: #1f8f42; }
-
-  @media (min-width: 1000px) {
-    .feature { padding: 92px 72px 96px; }
-    .feature-inner {
-      max-width: 1360px;
-      display: grid;
-      grid-template-columns: 1.05fr .95fr;
-      align-items: center;
-      column-gap: clamp(48px, 6vw, 104px);
-    }
-    .f-display .digits { padding: 60px 20px; }
-  }
 
   /* ---- フッター ---- */
   footer {
@@ -666,7 +552,7 @@
   .handH, .handM, .handS { transform-origin: 300px 258px; }
 
   /* 第0幕（.summon）：図版以外が溶けて消える */
-  body.summon .links, body.summon .fig-cap, body.summon .feature, body.summon .profile,
+  body.summon .links, body.summon .fig-cap, body.summon .profile,
   body.summon .ticker, body.summon footer,
   body.summon .scatter, body.summon .cosmos, body.summon .blades,
   body.summon .ink, body.summon .ruler, body.summon .side-cap,
@@ -1380,30 +1266,9 @@ phase ...... hold</div>
   </nav>
 </main>
 
-<!-- ===== フィーチャー枠（fig. 02 — 最新デバイス） ===== -->
-<section class="feature" id="feature" aria-label="Featured device">
-  <div class="feature-inner">
-    <div class="f-left">
-      <div class="f-cap">fig. 02 — featured device</div>
-      <span class="f-tag">out now — <b>free</b></span>
-      <h2 class="f-title">CountUp Timer</h2>
-      <div class="f-sub">max for live device — v1.1 / ableton live</div>
-      <p class="f-desc"><span class="nb">再生した瞬間から数えはじめる、</span><span class="nb">Ableton Live用の</span><span class="nb">カウントアップタイマー。</span><span class="nb">ライブや舞台の経過時間を、</span><span class="nb">クリップの隣に</span><span class="nb">ただ置くだけで表示できる。</span></p>
-      <a class="f-btn" href="https://why3k.github.io/why3k-plugins/?t=20260709z">Free Download <span aria-hidden="true">→</span></a>
-    </div>
-    <div class="f-display" aria-hidden="true">
-      <div class="f-titlebar">
-        <span class="dots"><i></i><i></i><i></i></span>
-        <span class="win-title">disp</span>
-      </div>
-      <div class="digits">00:00:00<b>.000</b></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== アーティストファイル（fig. 03） ===== -->
+<!-- ===== アーティストファイル（fig. 02） ===== -->
 <section class="profile" aria-label="Artist file">
-  <div class="p-cap">fig. 03 — artist file</div>
+  <div class="p-cap">fig. 02 — artist file</div>
   <div class="p-inner">
     <div class="p-photo"><img src="assets/artist.jpg" alt="WHY3K" loading="lazy" width="400" height="400"></div>
     <div class="p-rows">
@@ -1419,8 +1284,8 @@ phase ...... hold</div>
 <!-- ===== 全幅データティッカー（PC専用） ===== -->
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
-    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> countup timer v1.1 — out now <b>▸</b> free download <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
-    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> countup timer v1.1 — out now <b>▸</b> free download <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> rev 1.1 <b>▸</b></span>
+    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> index rev 02 <b>▸</b></span>
+    <span>WHY3K — official index <b>▸</b> signal locked <b>▸</b> route white <b>▸</b> vector 3K-01 <b>▸</b> scan 0117 : 3000 <b>▸</b> field stable <b>▸</b> Δt 0.000 — hold <b>▸</b> carrier lock 03 <b>▸</b> index rev 02 <b>▸</b></span>
   </div>
 </div>
 
@@ -1715,29 +1580,6 @@ document.addEventListener('touchstart', function () {}, { passive: true });
     });
     link.classList.remove('wiping');
   });
-})();
-
-/* ===== fig.02 のカウントアップ（配布サイトと同じ挙動） ===== */
-(function () {
-  var el = document.querySelector('.f-display .digits');
-  if (!el) return;
-  var reduce = window.matchMedia &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) return; // 動きが苦手な人には静止表示のまま
-  var pad = function (n, l) { n = String(n); while (n.length < l) n = '0' + n; return n; };
-  var start = performance.now();
-  var tick = function (now) {
-    var t = Math.floor(now - start);
-    var ms = t % 1000;
-    var totalSec = Math.floor(t / 1000);
-    var s = totalSec % 60;
-    var m = Math.floor(totalSec / 60) % 60;
-    var h = Math.floor(totalSec / 3600) % 100;
-    el.innerHTML = pad(h, 2) + ':' + pad(m, 2) + ':' + pad(s, 2) +
-      '<b>.' + pad(ms, 3) + '</b>';
-    requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
 })();
 
 /* ===== 生きてる感：マウス追従（3Dチルト＋パララックス＋十字線） ===== */
