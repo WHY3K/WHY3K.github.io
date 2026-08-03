@@ -15,8 +15,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preload" href="../assets/fonts/cormorant.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/site-chrome.css?v=20260804a">
-<link rel="stylesheet" href="assets/themes.css?v=20260804a">
+<link rel="stylesheet" href="assets/site-chrome.css?v=20260804b">
+<link rel="stylesheet" href="assets/themes.css?v=20260804b">
 </head>
 <body>
 
@@ -85,34 +85,15 @@
   <h2><span class="no">02</span>入れ方</h2>
 
   <p>
-    <strong>ターミナルが使えるなら、これ1行で終わります。</strong>
-    ダウンロード・解凍・設置・後片付けまで全部やります。右上の印を押すとコピーできます。
-    貼り付けて <code>return</code>、あとは Serum を開き直すだけです。
-  </p>
-
-  <p>Serum 2：</p>
-  <pre>cd /tmp &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; curl -fsSL -o w3k.zip https://why3k.github.io/themes/downloads/WHY3K_Paper_Serum2_Skin.zip &amp;&amp; unzip -oq w3k.zip -d w3k &amp;&amp; cp -R w3k/*/"WHY3K Paper" w3k/*/"WHY3K Paper Glow" "/Library/Audio/Presets/Xfer Records/Serum 2 Presets/Skins/" &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; echo "入りました。Serum 2 を開き直してください"</pre>
-
-  <p>Serum（1系）：</p>
-  <pre>cd /tmp &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; curl -fsSL -o w3k.zip https://why3k.github.io/themes/downloads/WHY3K_Paper_Serum_Skin.zip &amp;&amp; unzip -oq w3k.zip -d w3k &amp;&amp; cp -R w3k/*/"WHY3K Paper" "/Library/Audio/Presets/Xfer Records/Serum Presets/Skins/" &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; echo "入りました。Serum を開き直してください"</pre>
-
-  <p>
-    <code>Permission denied</code> と出たら、同じ行の頭に <code>sudo </code> を足して、Mac のパスワードを入れてください。
-    やっていることは「ZIP を落として、中のスキンのフォルダを <code>Skins</code> へコピーして、置いた ZIP を消す」だけです。
-  </p>
-
-  <h2><span class="no">03</span>Finder で入れる</h2>
-
-  <p>
     ZIP を解凍して、中の <code>WHY3K Paper</code> フォルダを <code>Skins</code> フォルダへ
-    <strong>フォルダごと</strong>コピーするだけです。
+    <strong>フォルダごと</strong>コピーするだけです。ターミナルは要りません。
   </p>
 
   <p>Serum 2 はここ：</p>
-  <pre>/Library/Audio/Presets/Xfer Records/Serum 2 Presets/Skins/</pre>
+  <pre class="nocopy">/Library/Audio/Presets/Xfer Records/Serum 2 Presets/Skins/</pre>
 
   <p>Serum（1系）はここ：</p>
-  <pre>/Library/Audio/Presets/Xfer Records/Serum Presets/Skins/</pre>
+  <pre class="nocopy">/Library/Audio/Presets/Xfer Records/Serum Presets/Skins/</pre>
 
   <ol class="steps">
     <li>Finder で <code>⌘⇧G</code> を押して、上のパスを貼り付けて移動</li>
@@ -127,7 +108,7 @@
     スキンを切り替えただけだと、絵は新しくなっても色が前のまま、ということが起きます。
   </div>
 
-  <h2><span class="no">04</span>うまくいかないとき</h2>
+  <h2><span class="no">03</span>うまくいかないとき</h2>
 
   <p>
     <strong>一覧に出てこない</strong> — 入れる場所が違う可能性があります。
@@ -147,6 +128,25 @@
     入れたフォルダを消しても構いません。Serum 本体には何も書き換えていません。
   </p>
 
+  <h2><span class="no">04</span>ターミナルで一気に入れる</h2>
+
+  <p>
+    ターミナルが分かる人向けです。<strong>この1行で終わります。</strong>
+    ダウンロード・解凍・設置・後片付けまで全部やります。右上の印を押すとコピーできるので、
+    貼り付けて <code>return</code>。あとは Serum を開き直すだけです。
+  </p>
+
+  <p>Serum 2：</p>
+  <pre>cd /tmp &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; curl -fsSL -o w3k.zip https://why3k.github.io/themes/downloads/WHY3K_Paper_Serum2_Skin.zip &amp;&amp; unzip -oq w3k.zip -d w3k &amp;&amp; cp -R w3k/*/"WHY3K Paper" w3k/*/"WHY3K Paper Glow" "/Library/Audio/Presets/Xfer Records/Serum 2 Presets/Skins/" &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; echo "入りました。Serum 2 を開き直してください"</pre>
+
+  <p>Serum（1系）：</p>
+  <pre>cd /tmp &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; curl -fsSL -o w3k.zip https://why3k.github.io/themes/downloads/WHY3K_Paper_Serum_Skin.zip &amp;&amp; unzip -oq w3k.zip -d w3k &amp;&amp; cp -R w3k/*/"WHY3K Paper" "/Library/Audio/Presets/Xfer Records/Serum Presets/Skins/" &amp;&amp; rm -rf w3k w3k.zip &amp;&amp; echo "入りました。Serum を開き直してください"</pre>
+
+  <p>
+    <code>Permission denied</code> と出たら、同じ行の頭に <code>sudo </code> を足して、Mac のパスワードを入れてください。
+    やっていることは「ZIP を落として、中のスキンのフォルダを <code>Skins</code> へコピーして、置いた ZIP を消す」だけです。
+  </p>
+
   <div class="quiet">
     <h3>権利について</h3>
     <p style="margin:0">
@@ -164,6 +164,6 @@
   <span><a href="/themes/">← THEMES</a></span>
 </footer>
 
-<script src="assets/site-chrome.js?v=20260804a"></script>
+<script src="assets/site-chrome.js?v=20260804b"></script>
 </body>
 </html>

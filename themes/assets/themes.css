@@ -43,6 +43,8 @@ pre {
   background: #f1f1f4; border: 1px solid var(--line); border-left: 2px solid var(--acc);
   padding: 14px 46px 14px 16px; margin: 0 0 18px; overflow-x: auto;
 }
+/* ボタンが付かない箱は、その分の余白も要らない */
+pre.nocopy { padding-right: 16px; }
 /* コピーボタンを枠の右上に固定するための入れ物（横スクロールしても流れない） */
 .codeblock { position: relative; }
 .codeblock .copy {

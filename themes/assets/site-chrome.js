@@ -92,7 +92,8 @@
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M18 6 6 18M6 6l12 12"/></svg>';
 
-  Array.prototype.forEach.call(document.querySelectorAll('pre'), function (pre) {
+  /* .nocopy は貼り付けて使うものではない（場所を示しているだけ）のでボタンを付けない */
+  Array.prototype.forEach.call(document.querySelectorAll('pre:not(.nocopy)'), function (pre) {
     var text = pre.textContent;
     var btn = document.createElement('button');
     btn.type = 'button';
