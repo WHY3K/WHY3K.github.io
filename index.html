@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260804c'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260804d'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}

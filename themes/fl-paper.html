@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WHY3K Paper — FL Studio テーマ</title>
+<meta name="description" content="WHY3K が FL Studio で使っているテーマ。落ち着いた青灰色。無料で配布しています。">
+<link rel="canonical" href="https://why3k.github.io/themes/fl-paper.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WHY3K">
+<meta property="og:title" content="WHY3K Paper — FL Studio テーマ">
+<meta property="og:description" content="落ち着いた青灰色の FL Studio。無料。">
+<meta property="og:url" content="https://why3k.github.io/themes/fl-paper.html">
+<meta property="og:image" content="https://why3k.github.io/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preload" href="../assets/fonts/cormorant.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site-chrome.css?v=20260804b">
+<link rel="stylesheet" href="assets/themes.css?v=20260804b">
+</head>
+<body>
+
+<div class="wrap">
+
+  <span class="mark">FREE</span>
+  <h1>WHY3K Paper</h1>
+  <p class="lead">
+    WHY3K が FL Studio で使っている画面です。落ち着いた青灰色で、長く見ていても目が痛くならない明るさに寄せてあります。
+    <strong>ファイルは1つ</strong>、置いて選ぶだけです。
+  </p>
+
+  <figure>
+    <img src="img/fl.jpg" alt="WHY3K Paper を適用した FL Studio" width="1400" loading="eager">
+    <figcaption>FL Studio</figcaption>
+  </figure>
+
+  <div class="dlbox">
+    <span class="dlmeta">
+      <b>WHY3K Paper</b> for FL Studio<br>
+      ZIP / 4 KB / macOS<br>
+      テーマファイル1つ＋説明
+    </span>
+    <a class="btn" href="downloads/WHY3K_Paper_FL_Theme.zip" download>
+      Download <span class="free">FREE</span> ↓
+    </a>
+  </div>
+
+  <h2><span class="no">01</span>これは何が変わるのか</h2>
+
+  <p>
+    FL Studio のテーマは<strong>色の設定だけ</strong>です。Ableton や Serum のスキンと違って、
+    ボタンや絵そのものは差し替わりません。だから中身は数値が並んだ小さなファイル1つで、
+    <strong>FL の再起動も要りません</strong>。選んだ瞬間に色が変わります。
+  </p>
+
+  <p>
+    合わなければ <strong>(Default)</strong> を選べばすぐ戻せます。FL 本体には何も書き換えません。
+  </p>
+
+  <h2><span class="no">02</span>入れ方</h2>
+
+  <p>
+    ZIP を解凍して、中の <code>WHY3K Paper.flstheme</code> を下の場所へコピーするだけです。
+  </p>
+
+  <pre class="nocopy">~/Documents/Image-Line/FL Studio/Settings/Themes/</pre>
+
+  <ol class="steps">
+    <li>Finder で <code>⌘⇧G</code> を押して、上のパスを貼り付けて移動</li>
+    <li><code>WHY3K Paper.flstheme</code> をそこへコピー</li>
+    <li>FL Studio を開いて <code>OPTIONS</code> → <code>Theme settings</code> →
+      <strong>WHY3K Paper</strong> を選ぶ</li>
+  </ol>
+
+  <div class="note">
+    <strong>テーマの入口は <code>OPTIONS</code> → <code>Theme settings</code> です。</strong>
+    設定ウィンドウの <code>Theme</code> タブが開いて、入れたテーマが一覧に並びます。
+  </div>
+
+  <h2><span class="no">03</span>うまくいかないとき</h2>
+
+  <p>
+    <strong>一覧に出てこない</strong> — 入れる場所が違う可能性があります。
+    <code>Settings</code> の中の <code>Themes</code> フォルダ（<code>Skins</code> ではありません）の直下に、
+    ファイルがそのまま置かれているか確かめてください。
+  </p>
+
+  <p>
+    <strong>色が変わらない</strong> — テーマを選び直すと必ず反映されます。
+    それでも変わらないときは、FL Studio を開き直してからもう一度選んでください。
+  </p>
+
+  <h2><span class="no">04</span>ターミナルで一気に入れる</h2>
+
+  <p>
+    ターミナルが分かる人向けです。<strong>この1行で終わります。</strong>
+    右上の印を押すとコピーできるので、貼り付けて <code>return</code>。
+    あとは FL Studio で <code>OPTIONS</code> → <code>Theme settings</code> から選ぶだけです。
+  </p>
+
+  <pre>cd /tmp &amp;&amp; rm -rf w3kfl w3kfl.zip &amp;&amp; curl -fsSL -o w3kfl.zip https://why3k.github.io/themes/downloads/WHY3K_Paper_FL_Theme.zip &amp;&amp; unzip -oq w3kfl.zip -d w3kfl &amp;&amp; cp w3kfl/*/"WHY3K Paper.flstheme" ~/Documents/Image-Line/"FL Studio"/Settings/Themes/ &amp;&amp; rm -rf w3kfl w3kfl.zip &amp;&amp; echo "入りました。FL の OPTIONS → Theme settings から選んでください"</pre>
+
+  <div class="quiet">
+    <h3>権利について</h3>
+    <p style="margin:0">
+      色は WHY3K が組んだものです。FL Studio 本体の意匠の権利は Image-Line にあります。
+      個人で使う範囲でどうぞ。再配布や販売はしないでください。
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  <span>WHY3K PAPER — FL STUDIO</span>
+  <span class="barcode" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  <span><a href="/themes/">← THEMES</a></span>
+</footer>
+
+<script src="assets/site-chrome.js?v=20260804b"></script>
+</body>
+</html>
