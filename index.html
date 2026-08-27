@@ -793,6 +793,10 @@
       grid-area: links;
       margin-top: 0;
       align-self: center;
+      justify-content: center;
+      /* パネルを1画面に収める（はみ出す分は行のflex収縮で吸収＝内部スクロールなし） */
+      max-height: calc(100dvh - 130px);
+      overflow: hidden;
       padding: 24px 28px 28px;
       background: rgba(251,251,250,.78);
       -webkit-backdrop-filter: blur(7px);
@@ -802,13 +806,16 @@
     .links::before {
       content: "contents — 10 entries";
       display: block;
+      flex: 0 0 auto;              /* 見出しは縮めない */
       font-family: var(--mono);
       font-size: 10px; letter-spacing: .3em;
       color: var(--ink-soft); text-transform: uppercase;
       padding-bottom: 16px;
     }
-    .link { height: 62px; font-size: 17.5px; }
-    .link.primary { height: 74px; font-size: 19px; }
+    /* 高さは固定でなく、パネルの高さに合わせて各行が伸縮（項目が増えても全部が
+       1画面に収まる／広い画面では下の max-height までで止まり従来の見た目を保つ） */
+    .link { height: auto; flex: 1 1 0; min-height: 50px; max-height: 74px; font-size: 17.5px; }
+    .link.primary { height: auto; flex: 1 1 0; min-height: 50px; max-height: 74px; font-size: 19px; }
 
     .ticker {
       display: block;
