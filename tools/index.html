@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WHY3K — Ableton → FL 変換ツール</title>
+<meta name="description" content="Ableton Live のプロジェクト(.als)を FL Studio(.flp)へ移すツール。WHY3K が自作しています。">
+<link rel="canonical" href="https://why3k.github.io/tools/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WHY3K">
+<meta property="og:title" content="WHY3K — Ableton → FL 変換ツール">
+<meta property="og:description" content="Ableton(.als) を FL Studio(.flp) へ。トラック・オーディオ・自動化・プラグインごと移す自作ツール。">
+<meta property="og:url" content="https://why3k.github.io/tools/">
+<meta property="og:image" content="https://why3k.github.io/tools/img/converter.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preload" href="../assets/fonts/cormorant.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../themes/assets/site-chrome.css?v=20260804b">
+<link rel="stylesheet" href="../themes/assets/themes.css?v=20260804b">
+</head>
+<body>
+
+<div class="wrap">
+
+  <span class="mark">TOOL</span>
+  <h1>Ableton → FL</h1>
+  <p class="lead">
+    Ableton Live のプロジェクト(<code>.als</code>)を、FL Studio(<code>.flp</code>)へ移すツールです。
+    WHY3K が自分の曲を移すために作りました。
+  </p>
+
+  <figure>
+    <img src="img/converter.png" alt="Ableton → FL 変換ツールの画面" width="1400" loading="eager">
+    <figcaption>変換ツールの画面（ローカル版）</figcaption>
+  </figure>
+
+  <div class="dlbox">
+    <span class="dlmeta">
+      <b>今の状態</b>：自分の Mac で動く<strong>ローカル版</strong>。<br>
+      だれでもブラウザで使える公開版は<strong>準備中</strong>です。<br>
+      ここは何ができるかを見せるページです。
+    </span>
+    <span class="mark">準備中</span>
+  </div>
+
+  <h2><span class="no">01</span>何をするもの</h2>
+
+  <p>
+    DAW（作曲ソフト）を乗り換えると、それまで作った曲は基本ゼロからやり直しになります。
+    ファイルの形式が全く違うからです。このツールは、その乗り換えを自動でやります。
+  </p>
+
+  <p>
+    Ableton のプロジェクトを読み込んで、
+    <strong>トラック・オーディオ・タイムストレッチ・オートメーション・プラグイン・ミキサー</strong>を
+    できる限りそのまま FL Studio のプロジェクトに作り直します。
+    <code>.als</code> を放り込めば <code>.flp</code> が出てくる、それだけです。
+  </p>
+
+  <div class="note">
+    DAW をまたぐ移行ツールは、世界的にもほとんど存在しません。
+    「作った曲を別のソフトへ持っていけない」という当たり前の不便を、なくすのが狙いです。
+  </div>
+
+  <h2><span class="no">02</span>まだ公開していない理由</h2>
+
+  <p>
+    今の作りは WHY3K 本人の環境に合わせた<strong>ローカル版</strong>で、
+    誰の曲でも正しく動くところまでは、まだ届いていません。
+    どんなプロジェクトでも同じ結果になる<strong>汎用化</strong>ができてから、公開版として出します。
+  </p>
+
+  <p>
+    中途半端なものを配って「移したのに音が違う」となるのは、このツールの意味を壊します。
+    だからここは<strong>急がず、確実になってから</strong>。できたらこのページで知らせます。
+  </p>
+
+  <div class="quiet">
+    <h3>作っている人向けのメモ</h3>
+    <p style="margin:0">
+      変換は Ableton や FL を裏で起動せず、<code>.als</code> / <code>.flp</code> のファイル形式を直接読み書きしています。
+      だから変換そのものは速い（数秒）です。公開版は、この処理を誰の環境でも動く形にするのが最後の山です。
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  <span>WHY3K — ABLETON → FL</span>
+  <span class="barcode" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  <span><a href="/">← HOME</a></span>
+</footer>
+
+<script src="../themes/assets/site-chrome.js?v=20260804b"></script>
+</body>
+</html>

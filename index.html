@@ -800,7 +800,7 @@
       border: 1px solid var(--line);
     }
     .links::before {
-      content: "contents — 09 entries";
+      content: "contents — 10 entries";
       display: block;
       font-family: var(--mono);
       font-size: 10px; letter-spacing: .3em;
@@ -1263,6 +1263,9 @@ phase ...... hold</div>
 
     <!-- TODO: note のURL（公開されたら href を差し替えて class="link soon" → class="link"、SOON → → に） -->
     <a class="link soon" href="#" aria-disabled="true"><span class="idx">09</span> note <span class="lead"></span><span class="mk">SOON</span></a>
+
+    <!-- TOOLS（紹介ページ稼働中・配布は準備中） -->
+    <a class="link primary" href="/tools/"><span class="idx">10</span> ABLETON → FL <span class="lead"></span><span class="mk">→</span></a>
   </nav>
 </main>
 
@@ -1557,7 +1560,7 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       window.location.href = href;
     }, tGo);
   }
-  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"], a[href^="/themes/"]').forEach(function (a) {
+  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"], a[href^="/themes/"], a[href^="/tools/"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       if (reduce) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey) return;
