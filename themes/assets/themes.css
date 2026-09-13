@@ -175,7 +175,7 @@ footer {
   border-top: 1px solid var(--line);
   font-family: var(--mono); font-size: 9px; letter-spacing: .22em; color: var(--ink-soft);
 }
-footer a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--faint); }
+footer a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--faint); white-space: nowrap; } /* スマホ幅で「←」と「THEMES」が2行に割れて、間を押すと飛ばなかった */
 footer a:hover { color: var(--ink); }
 .barcode { display: flex; align-items: flex-end; gap: 2px; height: 18px; }
 .barcode i { display: block; background: var(--ink); width: 1px; height: 100%; }
