@@ -24,7 +24,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915a'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915b'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -2021,7 +2021,7 @@ function start() {
   try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: MOBILE ? "default" : "high-performance" }); }
   catch (_) { canvas.remove(); return; }
   renderer.setClearColor(0x000000, 0);
-  const px = Math.min(devicePixelRatio || 1, MOBILE ? 1.25 : 1.6);
+  const px = Math.min(devicePixelRatio || 1, MOBILE ? 2 : 1.6);
   renderer.setPixelRatio(px);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
