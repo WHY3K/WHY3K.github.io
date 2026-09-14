@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js" } }
+</script>
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
 <title>WHY3K</title>
 <meta name="description" content="WHY3K — official links. Music, plugins, and everything else.">
@@ -21,7 +24,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260914b'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260914c'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -846,6 +849,135 @@
   }
   @keyframes tick { to { transform: translateX(-50%); } }
 </style>
+
+<style id="remake">
+/* ===== リメイク試作2「図面に整列」：KIMIのシーズン地図で学んだことの上書き（アニメーション・JSは無変更） ===== */
+:root {
+  /* 第1層：元の色（リテラルはここだけ） */
+  --raw-paper: #fbfbfa;
+  --raw-ink-950: #131316;
+  --raw-ink-500: #9a9aa3;
+  --raw-ink-400: #b3b3bb;
+  --raw-ink-300: #c9c9d0;
+  --raw-ink-200: #e2e2e7;
+  /* 第2層：役割 */
+  --paper: var(--raw-paper);
+  --ink: var(--raw-ink-950);
+  --ink-soft: var(--raw-ink-500);
+  --mark: var(--raw-ink-400);
+  --faint: var(--raw-ink-300);
+  --line: var(--raw-ink-200);
+  --glass: rgb(251 251 250 / .84);
+  --grid: 56px;
+  --bracket: 12px;
+  --chamfer: 18px;
+  --brk: linear-gradient(var(--ink), var(--ink));
+  --frame:
+    var(--brk) 0 0 / var(--bracket) 1px no-repeat,
+    var(--brk) 0 0 / 1px var(--bracket) no-repeat,
+    var(--brk) 100% 0 / var(--bracket) 1px no-repeat,
+    var(--brk) 100% 0 / 1px var(--bracket) no-repeat,
+    var(--brk) 0 100% / var(--bracket) 1px no-repeat,
+    var(--brk) 0 100% / 1px var(--bracket) no-repeat,
+    var(--brk) calc(100% - var(--chamfer) - 6px) 100% / var(--bracket) 1px no-repeat,
+    var(--brk) 100% calc(100% - var(--chamfer) - 6px) / 1px var(--bracket) no-repeat;
+  --cut: polygon(0 0, 100% 0, 100% calc(100% - var(--chamfer)), calc(100% - var(--chamfer)) 100%, 0 100%);
+  --cut-line: linear-gradient(to top left, transparent 50%, var(--ink) 50%, var(--ink) calc(50% + 1px), transparent calc(50% + 1px));
+}
+
+/* ---- マス目：点を少し濃く＋5マスごとに＋印（飾りはすべてこの交点に乗る） ---- */
+body::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cpath d='M133 140.5h15M140.5 133v15' stroke='%23a9a9b2' stroke-width='1'/%3E%3C/svg%3E"), radial-gradient(circle, rgb(19 19 22 / .2) .8px, transparent .9px);
+  background-size: calc(var(--grid) * 5) calc(var(--grid) * 5), var(--grid) var(--grid);
+  background-position: -84px -84px, 28px 28px;
+}
+
+/* ---- 散乱レイヤー：乱雑な色面と曲線をやめ、残りは交点に整列（位置はHTML側で丸め済み） ---- */
+.patch, .disp { display: none; }
+/* 交点に丸めたら同じマスに重なった小物は外す（数を減らすのも整列のうち） */
+.datablock:not(.term), .plusfield, .num, .bcode[data-n="7 5 2 3 4 1"] { display: none; }
+.blades svg path, .blades svg circle { display: none; }
+.coord, .coord::before, .num, .ruler b, .bcode::after { color: var(--mark); }
+.datablock { color: var(--faint); }
+.brk::before, .brk::after { border-color: var(--mark); }
+.cross { margin: -4px 0 0 -4px; }
+.cross::before, .cross::after { background: var(--mark); }
+.sq { margin: -2.5px 0 0 -2.5px; }
+.sq.s2 { margin: -4px 0 0 -4px; }
+.coord { margin-top: -6px; }
+.rule.gray { border-color: var(--faint); color: var(--mark); }
+
+/* ---- 図面シート：軌道図と同じ場所・同じ大きさに重ねる（図と違いマウスで傾かない） ---- */
+.sheet { position: absolute; z-index: -1; pointer-events: none; aspect-ratio: 1 / .86; top: 30px; left: 50%; width: min(92vw, 540px); translate: -50% 0; }
+.sheet svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.sh-ht { opacity: .34; }
+.sh-rings circle { stroke: var(--ink); stroke-width: 1; opacity: .16; vector-effect: non-scaling-stroke; }
+.sh-axes line { stroke: var(--ink); stroke-width: 1; opacity: .38; stroke-dasharray: 12 8; vector-effect: non-scaling-stroke; }
+.sh-axes line.minor { opacity: .16; }
+.sh-ticks line { stroke: var(--ink); stroke-width: 1; opacity: .35; vector-effect: non-scaling-stroke; }
+.sh-labels text { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; fill: var(--ink-soft); text-anchor: middle; }
+.sh-marks rect { fill: var(--ink); }
+body.summon .sheet { opacity: 0 !important; transition: opacity .3s ease; }
+@media (min-width: 1000px) {
+  .sheet {
+    position: relative; top: auto; left: auto; translate: none;
+    grid-area: fig; justify-self: center; align-self: end;
+    width: min(44vw, calc((100svh - 270px) / .86), 660px);
+  }
+  /* 主軸は画面の端で切る（横スクロール・縦の伸びを出さない） */
+  .scroller { overflow: clip; }
+}
+@media (max-width: 999px) {
+  .scroller { overflow-x: hidden; }
+}
+
+/* ---- 索引パネル：四角い枠線 → 四隅の括弧＋右下の面取り ---- */
+.links { position: relative; border: 0; background: var(--frame), var(--glass); clip-path: var(--cut); }
+.links::after { content: ""; position: absolute; right: 0; bottom: 0; width: var(--chamfer); height: var(--chamfer); background: var(--cut-line); pointer-events: none; }
+.link .idx { font-variant-numeric: tabular-nums; }
+.link.primary .idx { color: var(--ink); }
+.link:last-of-type { border-bottom: 0; }
+
+/* ---- アーティスト欄：写真の区画と情報の区画を仕切った一枚板 ---- */
+.p-inner { position: relative; gap: 0; padding: 0; border: 0; background: var(--frame), var(--glass); clip-path: var(--cut); }
+.p-inner::after { content: ""; position: absolute; right: 0; bottom: 0; width: var(--chamfer); height: var(--chamfer); background: var(--cut-line); pointer-events: none; }
+.p-photo { box-sizing: content-box; align-self: stretch; display: flex; align-items: center; justify-content: center; padding: 40px 46px 48px 42px; border-right: 1px solid var(--line); }
+.p-photo::after { bottom: 16px; }
+.p-rows { padding: 30px 40px 30px 42px; }
+.p-row:first-child { border-top: 0; }
+.p-row:last-child { border-bottom: 0; }
+@media (max-width: 720px) {
+  .p-photo { width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 32px 20px 44px; }
+  .p-photo img { width: 168px; height: 168px; }
+  .p-rows { width: 100%; padding: 18px 20px 26px; }
+}
+
+/* ===== 背景の粒：図の後ろの輪 → アーティスト欄で植物。LIGHT/GLOW で全体を反転 ===== */
+.w3k-particles { position: fixed; inset: 0; width: 100%; height: 100lvh; z-index: 0; pointer-events: none; display: block; }
+/* 光る世界：ページ全体を後ろから反転する幕。既存の色指定には触らずに暗い世界にできる */
+.w3k-invert {
+  position: fixed; inset: 0; z-index: 100; pointer-events: none; visibility: hidden;
+  -webkit-backdrop-filter: invert(1) hue-rotate(180deg);
+  backdrop-filter: invert(1) hue-rotate(180deg);
+  background:
+    radial-gradient(110% 90% at 42% 40%, rgb(255 255 255 / .075), rgb(255 255 255 / 0) 62%),
+    linear-gradient(112deg, transparent 36%, rgb(255 255 255 / .05) 45%, rgb(255 255 255 / .015) 53%, transparent 62%);
+}
+.w3k-ring { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 101; pointer-events: none; opacity: 0; border-radius: 50%;
+  border: 1px solid rgb(225 238 255 / .9); box-shadow: 0 0 26px 6px rgb(160 210 255 / .35), inset 0 0 44px 10px rgb(160 210 255 / .18); }
+/* 写真だけは反転を打ち消して元の見た目に戻す */
+.p-inner { background: var(--frame), rgb(251 251 250 / .42); }
+html.glow .p-photo img { filter: invert(1) hue-rotate(180deg) grayscale(1) contrast(1.02); }
+.w3k-mode { position: fixed; right: 40px; bottom: 84px; z-index: 6; display: flex; padding: 0; cursor: pointer;
+  border: 1px solid var(--ink); background: rgb(251 251 250 / .82); color: var(--ink);
+  font: 10px/1 var(--mono); letter-spacing: .22em; text-transform: uppercase; }
+.w3k-mode span { padding: 8px 12px; transition: background .3s ease, color .3s ease; }
+.w3k-mode[aria-pressed="false"] span:first-child, .w3k-mode[aria-pressed="true"] span:last-child { background: var(--ink); color: var(--paper); }
+.w3k-mode:active { transform: translateY(1px); }
+.w3k-mode:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+@media (max-width: 999px) { .w3k-mode { right: 20px; bottom: 26px; } }
+body.summon .w3k-mode { opacity: 0; transition: opacity .3s ease; }
+</style>
 </head>
 <body>
 
@@ -950,6 +1082,9 @@
   <div class="disp hide-m" style="bottom:16%; left:18%; width:90px; height:90px; opacity:.14;"></div>
 </div>
 
+<!-- ===== 背景の粒（リメイク試作3） ===== -->
+<canvas class="w3k-particles" aria-hidden="true"></canvas>
+
 <!-- ===== 左端の定規 ===== -->
 <div class="ruler hide-m" aria-hidden="true">
   <b style="top:104px;">100</b>
@@ -980,121 +1115,121 @@
 <!-- ===== 散乱レイヤー ===== -->
 <div class="scatter" aria-hidden="true">
   <!-- 淡い青パッチ -->
-  <div class="patch"    style="top:9%;  right:8%;  width:26%; height:64px;"></div>
-  <div class="patch p2" style="top:37%; left:-4%;  width:22%; height:110px;"></div>
-  <div class="patch p2 hide-m" style="bottom:6%;  left:22%;  width:14%; height:40px;"></div>
+  <div class="patch"    style="top:max(56px, round(down, 9%, 56px)); width:26%; height:64px; left:max(56px, round(down, 100% - 8%, 56px)); translate:-100% 0;"></div>
+  <div class="patch p2" style="top:max(56px, round(down, 37%, 56px)); left:max(56px, round(down, -4%, 56px)); width:22%; height:110px;"></div>
+  <div class="patch p2 hide-m" style="left:max(56px, round(down, 22%, 56px)); width:14%; height:40px; top:max(56px, round(down, 100% - 6%, 56px)); translate:0 -100%;"></div>
 
   <!-- 座標 -->
-  <span class="coord" style="top:15%; left:6%;">1223 : 378</span>
-  <span class="coord" style="top:10%; right:13%;">2138 : 2234</span>
-  <span class="coord hide-m" style="top:26%; right:5%;">L 449 y:1562</span>
-  <span class="coord hide-m" style="top:41%; left:3.5%;">3373 : 3448</span>
-  <span class="coord hide-m" style="top:55%; right:4%;">1049 : 2448</span>
-  <span class="coord flicker" style="top:64%; left:7%;">L 4413 y:262</span>
-  <span class="coord hide-m" style="bottom:26%; right:9%;">2331 : 878</span>
-  <span class="coord hide-m flicker f2" style="bottom:19%; left:5%;">7523 : 4138</span>
-  <span class="coord" style="bottom:9%; right:14%;">1583 y:2448</span>
-  <span class="coord hide-m" style="bottom:5%; left:40%;">0117 : 3000</span>
+  <span class="coord" style="top:max(56px, round(down, 15%, 56px)); left:max(56px, round(down, 6%, 56px));">1223 : 378</span>
+  <span class="coord" style="top:max(56px, round(down, 10%, 56px)); left:max(56px, round(down, 100% - 13%, 56px)); translate:-100% 0;">2138 : 2234</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 26%, 56px)); left:max(56px, round(down, 100% - 5%, 56px)); translate:-100% 0;">L 449 y:1562</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 41%, 56px)); left:max(56px, round(down, 3.5%, 56px));">3373 : 3448</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 55%, 56px)); left:max(56px, round(down, 100% - 4%, 56px)); translate:-100% 0;">1049 : 2448</span>
+  <span class="coord flicker" style="top:max(56px, round(down, 64%, 56px)); left:max(56px, round(down, 7%, 56px));">L 4413 y:262</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 100% - 26%, 56px)); left:max(56px, round(down, 100% - 9%, 56px)); translate:-100% -100%;">2331 : 878</span>
+  <span class="coord hide-m flicker f2" style="left:max(56px, round(down, 5%, 56px)); top:max(56px, round(down, 100% - 19%, 56px)); translate:0 -100%;">7523 : 4138</span>
+  <span class="coord" style="top:max(56px, round(down, 100% - 9%, 56px)); left:max(56px, round(down, 100% - 14%, 56px)); translate:-100% -100%;">1583 y:2448</span>
+  <span class="coord hide-m" style="left:max(56px, round(down, 40%, 56px)); top:max(56px, round(down, 100% - 5%, 56px)); translate:0 -100%;">0117 : 3000</span>
 
   <!-- ブラケット・十字 -->
-  <span class="brk" style="top:20%; right:24%;"></span>
-  <span class="brk hide-m" style="top:48%; left:12%;"></span>
-  <span class="brk hide-m" style="bottom:33%; right:18%;"></span>
-  <span class="brk hide-m" style="bottom:12%; left:16%;"></span>
-  <span class="cross" style="top:31%; left:8%;"></span>
-  <span class="cross hide-m" style="top:18%; left:28%;"></span>
-  <span class="cross hide-m" style="top:70%; right:7%;"></span>
-  <span class="cross hide-m" style="bottom:8%; right:30%;"></span>
+  <span class="brk" style="top:max(56px, round(down, 20%, 56px)); left:max(56px, round(down, 100% - 24%, 56px)); translate:-100% 0;"></span>
+  <span class="brk hide-m" style="top:max(56px, round(down, 48%, 56px)); left:max(56px, round(down, 12%, 56px));"></span>
+  <span class="brk hide-m" style="top:max(56px, round(down, 100% - 33%, 56px)); left:max(56px, round(down, 100% - 18%, 56px)); translate:-100% -100%;"></span>
+  <span class="brk hide-m" style="left:max(56px, round(down, 16%, 56px)); top:max(56px, round(down, 100% - 12%, 56px)); translate:0 -100%;"></span>
+  <span class="cross" style="top:max(56px, round(down, 31%, 56px)); left:max(56px, round(down, 8%, 56px));"></span>
+  <span class="cross hide-m" style="top:max(56px, round(down, 18%, 56px)); left:max(56px, round(down, 28%, 56px));"></span>
+  <span class="cross hide-m" style="top:max(56px, round(down, 70%, 56px)); left:max(56px, round(down, 100% - 7%, 56px)); translate:-100% 0;"></span>
+  <span class="cross hide-m" style="top:max(56px, round(down, 100% - 8%, 56px)); left:max(56px, round(down, 100% - 30%, 56px)); translate:-100% -100%;"></span>
 
   <!-- 罫線＋ラベル -->
-  <div class="rule hide-m" style="top:13%; right:5%; width:200px;">carrier lock — 03</div>
-  <div class="rule gray hide-m" style="top:47%; left:2%; width:150px;">aux signal</div>
-  <div class="rule gray hide-m" style="bottom:22%; right:6%; width:170px;">Δt 0.000 — hold</div>
+  <div class="rule hide-m" style="top:max(56px, round(down, 13%, 56px)); width:200px; left:max(56px, round(down, 100% - 5%, 56px)); translate:-100% 0;">carrier lock — 03</div>
+  <div class="rule gray hide-m" style="top:max(56px, round(down, 47%, 56px)); left:max(56px, round(down, 2%, 56px)); width:150px;">aux signal</div>
+  <div class="rule gray hide-m" style="width:170px; top:max(56px, round(down, 100% - 22%, 56px)); left:max(56px, round(down, 100% - 6%, 56px)); translate:-100% -100%;">Δt 0.000 — hold</div>
 
   <!-- 微小データ塊 -->
-  <div class="datablock hide-m" style="top:22%; left:4%;">sys.3k
+  <div class="datablock hide-m" style="top:max(56px, round(down, 22%, 56px)); left:max(56px, round(down, 4%, 56px));">sys.3k
 scan  ....... ok
 field ....... ok
 gain  ....... +0.4
 noise ....... floor</div>
-  <div class="datablock hide-m" style="bottom:28%; left:8%;">rev 1.1
+  <div class="datablock hide-m" style="left:max(56px, round(down, 8%, 56px)); top:max(56px, round(down, 100% - 28%, 56px)); translate:0 -100%;">rev 1.1
 axis  y
 mode  idx</div>
 
   <!-- ── 増量ぶん ── -->
-  <span class="coord" style="top:6%; left:32%;">0031 : 990</span>
-  <span class="coord hide-m" style="top:33%; right:16%;">L 2210 y:434</span>
-  <span class="coord hide-m rot" style="top:22%; left:15%;">4451 : 108</span>
-  <span class="coord hide-m" style="top:74%; left:13%;">0900 : 1424</span>
-  <span class="coord hide-m rot" style="bottom:36%; right:3%;">2231 : 550</span>
-  <span class="coord" style="top:47%; right:11%;">L 118 y:3448</span>
-  <span class="coord hide-m" style="bottom:42%; left:2%;">6613 : 070</span>
-  <span class="coord hide-m" style="top:3%; right:32%;">3141 : 5926</span>
+  <span class="coord" style="top:max(56px, round(down, 6%, 56px)); left:max(56px, round(down, 32%, 56px));">0031 : 990</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 33%, 56px)); left:max(56px, round(down, 100% - 16%, 56px)); translate:-100% 0;">L 2210 y:434</span>
+  <span class="coord hide-m rot" style="top:max(56px, round(down, 22%, 56px)); left:max(56px, round(down, 15%, 56px));">4451 : 108</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 74%, 56px)); left:max(56px, round(down, 13%, 56px));">0900 : 1424</span>
+  <span class="coord hide-m rot" style="top:max(56px, round(down, 100% - 36%, 56px)); left:max(56px, round(down, 100% - 3%, 56px)); translate:-100% -100%;">2231 : 550</span>
+  <span class="coord" style="top:max(56px, round(down, 47%, 56px)); left:max(56px, round(down, 100% - 11%, 56px)); translate:-100% 0;">L 118 y:3448</span>
+  <span class="coord hide-m" style="left:max(56px, round(down, 2%, 56px)); top:max(56px, round(down, 100% - 42%, 56px)); translate:0 -100%;">6613 : 070</span>
+  <span class="coord hide-m" style="top:max(56px, round(down, 3%, 56px)); left:max(56px, round(down, 100% - 32%, 56px)); translate:-100% 0;">3141 : 5926</span>
 
-  <span class="sq" style="top:17%; left:22%;"></span>
-  <span class="sq s2" style="top:57%; right:13%;"></span>
-  <span class="sq hollow" style="top:36%; left:19%;"></span>
-  <span class="sq hide-m" style="bottom:16%; right:24%;"></span>
-  <span class="sq hollow hide-m" style="bottom:38%; left:26%;"></span>
-  <span class="sq s2 hide-m" style="top:8%; left:48%;"></span>
+  <span class="sq" style="top:max(56px, round(down, 17%, 56px)); left:max(56px, round(down, 22%, 56px));"></span>
+  <span class="sq s2" style="top:max(56px, round(down, 57%, 56px)); left:max(56px, round(down, 100% - 13%, 56px)); translate:-100% 0;"></span>
+  <span class="sq hollow" style="top:max(56px, round(down, 36%, 56px)); left:max(56px, round(down, 19%, 56px));"></span>
+  <span class="sq hide-m" style="top:max(56px, round(down, 100% - 16%, 56px)); left:max(56px, round(down, 100% - 24%, 56px)); translate:-100% -100%;"></span>
+  <span class="sq hollow hide-m" style="left:max(56px, round(down, 26%, 56px)); top:max(56px, round(down, 100% - 38%, 56px)); translate:0 -100%;"></span>
+  <span class="sq s2 hide-m" style="top:max(56px, round(down, 8%, 56px)); left:max(56px, round(down, 48%, 56px));"></span>
 
-  <span class="num" style="top:29%; right:8%;">+0.4</span>
-  <span class="num hide-m" style="top:52%; left:11%;">03</span>
-  <span class="num hide-m" style="bottom:31%; right:12%;">v1.1</span>
-  <span class="num" style="bottom:14%; left:30%;">Δ 12</span>
-  <span class="num hide-m" style="top:12%; left:12%;">.000</span>
+  <span class="num" style="top:max(56px, round(down, 29%, 56px)); left:max(56px, round(down, 100% - 8%, 56px)); translate:-100% 0;">+0.4</span>
+  <span class="num hide-m" style="top:max(56px, round(down, 52%, 56px)); left:max(56px, round(down, 11%, 56px));">03</span>
+  <span class="num hide-m" style="top:max(56px, round(down, 100% - 31%, 56px)); left:max(56px, round(down, 100% - 12%, 56px)); translate:-100% -100%;">v1.1</span>
+  <span class="num" style="left:max(56px, round(down, 30%, 56px)); top:max(56px, round(down, 100% - 14%, 56px)); translate:0 -100%;">Δ 12</span>
+  <span class="num hide-m" style="top:max(56px, round(down, 12%, 56px)); left:max(56px, round(down, 12%, 56px));">.000</span>
 
-  <span class="brk" style="top:63%; right:28%;"></span>
-  <span class="brk hide-m" style="top:9%; left:38%;"></span>
-  <span class="cross" style="top:44%; right:20%;"></span>
-  <span class="cross hide-m" style="bottom:45%; right:36%;"></span>
-  <span class="cross hide-m" style="top:59%; left:20%;"></span>
+  <span class="brk" style="top:max(56px, round(down, 63%, 56px)); left:max(56px, round(down, 100% - 28%, 56px)); translate:-100% 0;"></span>
+  <span class="brk hide-m" style="top:max(56px, round(down, 9%, 56px)); left:max(56px, round(down, 38%, 56px));"></span>
+  <span class="cross" style="top:max(56px, round(down, 44%, 56px)); left:max(56px, round(down, 100% - 20%, 56px)); translate:-100% 0;"></span>
+  <span class="cross hide-m" style="top:max(56px, round(down, 100% - 45%, 56px)); left:max(56px, round(down, 100% - 36%, 56px)); translate:-100% -100%;"></span>
+  <span class="cross hide-m" style="top:max(56px, round(down, 59%, 56px)); left:max(56px, round(down, 20%, 56px));"></span>
 
-  <div class="rule gray hide-m" style="top:31%; right:22%; width:120px;">idx 03 — hold</div>
-  <div class="rule hide-m" style="bottom:9%; right:26%; width:140px;">field — stable</div>
-  <div class="rule gray hide-m" style="top:68%; left:14%; width:110px;">sig. path b</div>
+  <div class="rule gray hide-m" style="top:max(56px, round(down, 31%, 56px)); width:120px; left:max(56px, round(down, 100% - 22%, 56px)); translate:-100% 0;">idx 03 — hold</div>
+  <div class="rule hide-m" style="width:140px; top:max(56px, round(down, 100% - 9%, 56px)); left:max(56px, round(down, 100% - 26%, 56px)); translate:-100% -100%;">field — stable</div>
+  <div class="rule gray hide-m" style="top:max(56px, round(down, 68%, 56px)); left:max(56px, round(down, 14%, 56px)); width:110px;">sig. path b</div>
 
-  <div class="datablock hide-m" style="top:56%; right:2%;">ch 01 ....... on
+  <div class="datablock hide-m" style="top:max(56px, round(down, 56%, 56px)); left:max(56px, round(down, 100% - 2%, 56px)); translate:-100% 0;">ch 01 ....... on
 ch 02 ....... on
 ch 03 ....... mute
 lim   ....... -0.1</div>
-  <div class="datablock hide-m" style="top:8%; left:20%;">x 3000
+  <div class="datablock hide-m" style="top:max(56px, round(down, 8%, 56px)); left:max(56px, round(down, 20%, 56px));">x 3000
 y 0117
 z ----</div>
 
-  <div class="patch p2 hide-m" style="top:58%; left:-2%; width:17%; height:72px;"></div>
-  <div class="patch p3 hide-m" style="top:2%;  left:56%; width:12%; height:46px;"></div>
+  <div class="patch p2 hide-m" style="top:max(56px, round(down, 58%, 56px)); left:max(56px, round(down, -2%, 56px)); width:17%; height:72px;"></div>
+  <div class="patch p3 hide-m" style="top:max(56px, round(down, 2%, 56px)); left:max(56px, round(down, 56%, 56px)); width:12%; height:46px;"></div>
 
   <!-- ── ARS/CUBE風の記号系 ── -->
-  <span class="tri" style="top:44%; left:2%;">▶ ▶ ▶</span>
-  <span class="tri hide-m" style="bottom:20%; right:3%;">▲ ▲ ▲</span>
-  <span class="tri hide-m" style="top:6%; right:22%;">▼ ▼</span>
+  <span class="tri" style="top:max(56px, round(down, 44%, 56px)); left:max(56px, round(down, 2%, 56px));">▶ ▶ ▶</span>
+  <span class="tri hide-m" style="top:max(56px, round(down, 100% - 20%, 56px)); left:max(56px, round(down, 100% - 3%, 56px)); translate:-100% -100%;">▲ ▲ ▲</span>
+  <span class="tri hide-m" style="top:max(56px, round(down, 6%, 56px)); left:max(56px, round(down, 100% - 22%, 56px)); translate:-100% 0;">▼ ▼</span>
 
-  <div class="plusfield hide-m" style="top:9%; left:33%;">+ + + +
+  <div class="plusfield hide-m" style="top:max(56px, round(down, 9%, 56px)); left:max(56px, round(down, 33%, 56px));">+ + + +
 + + + +
 + + + +</div>
-  <div class="plusfield hide-m" style="bottom:24%; right:29%; font-size:9px; opacity:.25;">+ + +
+  <div class="plusfield hide-m" style="font-size:9px; opacity:.25; top:max(56px, round(down, 100% - 24%, 56px)); left:max(56px, round(down, 100% - 29%, 56px)); translate:-100% -100%;">+ + +
 + + +</div>
 
-  <div class="dotmat" style="top:16%; right:6%; width:121px; height:32px;"></div>
-  <div class="dotmat hide-m" style="bottom:13%; left:23%; width:88px; height:28px;"></div>
+  <div class="dotmat" style="top:max(56px, round(down, 16%, 56px)); width:121px; height:32px; left:max(56px, round(down, 100% - 6%, 56px)); translate:-100% 0;"></div>
+  <div class="dotmat hide-m" style="left:max(56px, round(down, 23%, 56px)); width:88px; height:28px; top:max(56px, round(down, 100% - 13%, 56px)); translate:0 -100%;"></div>
 
-  <div class="stripeblk hide-m" style="bottom:7%; right:3%; width:54px; height:54px;"></div>
-  <div class="stripeblk hide-m" style="top:3%; left:44%; width:26px; height:26px; opacity:.8;"></div>
+  <div class="stripeblk hide-m" style="width:54px; height:54px; top:max(56px, round(down, 100% - 7%, 56px)); left:max(56px, round(down, 100% - 3%, 56px)); translate:-100% -100%;"></div>
+  <div class="stripeblk hide-m" style="top:max(56px, round(down, 3%, 56px)); left:max(56px, round(down, 44%, 56px)); width:26px; height:26px; opacity:.8;"></div>
 
   <!-- バーコード柄 -->
-  <div class="bcode" data-n="3 0 0 0 1 1 7" style="top:12%; left:52%; width:84px; height:22px;"></div>
-  <div class="bcode hide-m" data-n="0 1 1 7" style="bottom:31%; left:2.5%; width:60px; height:18px; opacity:.4;"></div>
-  <div class="bcode hide-m" data-n="7 5 2 3 4 1" style="bottom:11%; right:37%; width:88px; height:24px;"></div>
-  <div class="bcode hide-m" data-n="2 2 3 1" style="top:36%; right:2%; width:56px; height:16px; opacity:.38;"></div>
+  <div class="bcode" data-n="3 0 0 0 1 1 7" style="top:max(56px, round(down, 12%, 56px)); left:max(56px, round(down, 52%, 56px)); width:84px; height:22px;"></div>
+  <div class="bcode hide-m" data-n="0 1 1 7" style="left:max(56px, round(down, 2.5%, 56px)); width:60px; height:18px; opacity:.4; top:max(56px, round(down, 100% - 31%, 56px)); translate:0 -100%;"></div>
+  <div class="bcode hide-m" data-n="7 5 2 3 4 1" style="width:88px; height:24px; top:max(56px, round(down, 100% - 11%, 56px)); left:max(56px, round(down, 100% - 37%, 56px)); translate:-100% -100%;"></div>
+  <div class="bcode hide-m" data-n="2 2 3 1" style="top:max(56px, round(down, 36%, 56px)); width:56px; height:16px; opacity:.38; left:max(56px, round(down, 100% - 2%, 56px)); translate:-100% 0;"></div>
 
   <!-- ターミナル風ブロック -->
-  <div class="datablock term hide-m" style="top:25%; left:1.5%;"><b>| terminal_</b>
+  <div class="datablock term hide-m" style="top:max(56px, round(down, 25%, 56px)); left:max(56px, round(down, 1.5%, 56px));"><b>| terminal_</b>
 system ..... WHY3K.v3
 route ...... white
 status ..... authorized
 signal ..... locked</div>
-  <div class="datablock term hide-m" style="bottom:7%; right:19%;"><b>| navigation_</b>
+  <div class="datablock term hide-m" style="top:max(56px, round(down, 100% - 7%, 56px)); left:max(56px, round(down, 100% - 19%, 56px)); translate:-100% -100%;"><b>| navigation_</b>
 vector ..... 3K-01
 drift ...... 0.02
 phase ...... hold</div>
@@ -1105,6 +1240,38 @@ phase ...... hold</div>
 <div class="cursor-tag" aria-hidden="true">0000 : 0000</div>
 
 <main>
+
+  <!-- ===== 図面シート（リメイク試作2：飾りの基準になる主軸・同心円・点描） ===== -->
+  <div class="sheet" aria-hidden="true">
+    <svg viewBox="0 0 600 516" overflow="visible" fill="none">
+      <defs>
+        <pattern id="shHt" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.1" fill="#131316"/></pattern>
+        <radialGradient id="shFade" cx="300" cy="258" r="1400" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+        <mask id="shLand" maskUnits="userSpaceOnUse" x="-3000" y="-1500" width="6600" height="3500">
+          <path fill="url(#shFade)" d="M-1500 258 C-1200 120 -900 60 -560 120 C-380 150 -260 90 -80 110 C120 130 180 60 320 70 C520 80 640 150 820 120 C1040 80 1260 160 1500 110 C1800 60 2000 190 2100 258 C1980 360 1760 420 1480 390 C1240 370 1040 450 820 420 C620 395 520 470 300 450 C120 435 -40 480 -240 420 C-480 350 -760 430 -1020 390 C-1260 350 -1440 330 -1500 258 Z"/>
+          <ellipse cx="300" cy="258" rx="330" ry="300" fill="#000"/>
+        </mask>
+      </defs>
+      <rect class="sh-ht" x="-3000" y="-1500" width="6600" height="3500" fill="url(#shHt)" mask="url(#shLand)"/>
+      <g class="sh-rings">
+        <circle cx="300" cy="258" r="330"/>
+        <circle cx="300" cy="258" r="410" stroke-dasharray="3 9"/>
+      </g>
+      <g class="sh-axes">
+        <line x1="-4000" x2="4600" y1="258" y2="258"/>
+        <line x1="300" x2="300" y1="-700" y2="1250"/>
+        <line class="minor" x1="-300" x2="-300" y1="-700" y2="1250"/>
+        <line class="minor" x1="900" x2="900" y1="-700" y2="1250"/>
+        <line class="minor" x1="-4000" x2="4600" y1="-42" y2="-42"/>
+        <line class="minor" x1="-4000" x2="4600" y1="558" y2="558"/>
+      </g>
+      <g class="sh-ticks"><line x1="-1200" x2="-1200" y1="252" y2="264"/><line x1="-1140" x2="-1140" y1="252" y2="264"/><line x1="-1080" x2="-1080" y1="252" y2="264"/><line x1="-1020" x2="-1020" y1="252" y2="264"/><line x1="-960" x2="-960" y1="252" y2="264"/><line x1="-900" x2="-900" y1="252" y2="264"/><line x1="-840" x2="-840" y1="252" y2="264"/><line x1="-780" x2="-780" y1="252" y2="264"/><line x1="-720" x2="-720" y1="252" y2="264"/><line x1="-660" x2="-660" y1="252" y2="264"/><line x1="-600" x2="-600" y1="252" y2="264"/><line x1="-540" x2="-540" y1="252" y2="264"/><line x1="-480" x2="-480" y1="252" y2="264"/><line x1="-420" x2="-420" y1="252" y2="264"/><line x1="-360" x2="-360" y1="252" y2="264"/><line x1="-300" x2="-300" y1="252" y2="264"/><line x1="-240" x2="-240" y1="252" y2="264"/><line x1="-180" x2="-180" y1="252" y2="264"/><line x1="-120" x2="-120" y1="252" y2="264"/><line x1="-60" x2="-60" y1="252" y2="264"/><line x1="0" x2="0" y1="252" y2="264"/><line x1="60" x2="60" y1="252" y2="264"/><line x1="120" x2="120" y1="252" y2="264"/><line x1="180" x2="180" y1="252" y2="264"/><line x1="240" x2="240" y1="252" y2="264"/><line x1="360" x2="360" y1="252" y2="264"/><line x1="420" x2="420" y1="252" y2="264"/><line x1="480" x2="480" y1="252" y2="264"/><line x1="540" x2="540" y1="252" y2="264"/><line x1="600" x2="600" y1="252" y2="264"/><line x1="660" x2="660" y1="252" y2="264"/><line x1="720" x2="720" y1="252" y2="264"/><line x1="780" x2="780" y1="252" y2="264"/><line x1="840" x2="840" y1="252" y2="264"/><line x1="900" x2="900" y1="252" y2="264"/><line x1="960" x2="960" y1="252" y2="264"/><line x1="1020" x2="1020" y1="252" y2="264"/><line x1="1080" x2="1080" y1="252" y2="264"/><line x1="1140" x2="1140" y1="252" y2="264"/><line x1="1200" x2="1200" y1="252" y2="264"/><line x1="1260" x2="1260" y1="252" y2="264"/><line x1="1320" x2="1320" y1="252" y2="264"/><line x1="1380" x2="1380" y1="252" y2="264"/><line x1="1440" x2="1440" y1="252" y2="264"/><line x1="1500" x2="1500" y1="252" y2="264"/><line x1="1560" x2="1560" y1="252" y2="264"/><line x1="1620" x2="1620" y1="252" y2="264"/><line x1="1680" x2="1680" y1="252" y2="264"/><line x1="1740" x2="1740" y1="252" y2="264"/><line x1="1800" x2="1800" y1="252" y2="264"/></g>
+      <g class="sh-labels"><text x="-600" y="284">-900</text><text x="-300" y="284">-600</text><text x="0" y="284">-300</text><text x="300" y="284">000</text><text x="600" y="284">+300</text><text x="900" y="284">+600</text><text x="1200" y="284">+900</text></g>
+      <g class="sh-marks"><rect x="-305" y="-47" width="10" height="10"/><rect x="-305" y="553" width="10" height="10"/><rect x="295" y="-47" width="10" height="10"/><rect x="295" y="553" width="10" height="10"/><rect x="895" y="-47" width="10" height="10"/><rect x="895" y="553" width="10" height="10"/><rect x="-305" y="253" width="10" height="10"/><rect x="895" y="253" width="10" height="10"/></g>
+    </svg>
+  </div>
   <!-- ===== 図版 ===== -->
   <div class="figure" id="fig">
     <svg viewBox="0 0 600 516" fill="none" aria-hidden="true">
@@ -1324,6 +1491,11 @@ phase ...... hold</div>
 </footer>
 
 </div><!-- /.scroller -->
+
+<!-- 光り方の切り替え（G キーでも可）と、そのための反転の幕・波の輪 -->
+<button class="w3k-mode" type="button" aria-label="光り方の切り替え（G キーでも切り替え）" aria-pressed="false"><span>light</span><span>glow</span></button>
+<div class="w3k-invert" aria-hidden="true"></div>
+<div class="w3k-ring" aria-hidden="true"></div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1662,5 +1834,354 @@ document.addEventListener('touchstart', function () {}, { passive: true });
 })();
 </script>
 <script src="assets/local-preview.js"></script>
+
+<script type="module">
+/* ===== 背景の粒（リメイク試作3）。既存の演出には触らず、図とアーティスト欄の位置を読んで重ねる ===== */
+import * as THREE from "three";
+
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOBILE = matchMedia("(max-width: 999px), (hover: none) and (pointer: coarse)").matches;
+const N = MOBILE ? 18000 : 40000; // 仮：全部細かい粒にしたぶん数を増やして形の密度を保つ
+const TAU = Math.PI * 2;
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const rng = (seed) => () => {
+  seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const R = rng(3000117);
+const gauss = () => { let u = 0; while (!u) u = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * R()); };
+
+/* 形1：図版の楕円をそのまま立体の輪にしたもの（半径およそ 2.43） */
+function orbitShape() {
+  const pts = [], S = 1 / 112;
+  const rings = [[244, 66, -14, 1], [154, 46, 26, .7], [188, 30, 8, .55], [212, 114, -38, .7], [124, 90, 52, .45], [252, 92, -60, .45], [272, 46, 18, .4]];
+  for (const [rx, ry, deg, w] of rings) {
+    const tilt = Math.acos(Math.min(1, ry / rx)), rz = (deg * Math.PI) / 180;
+    for (let i = 0, n = Math.round(2400 * w); i < n; i++) {
+      const a = R() * TAU;
+      const x = Math.cos(a) * rx * S, y0 = Math.sin(a) * rx * S;
+      const y = y0 * Math.cos(tilt), z = y0 * Math.sin(tilt);
+      pts.push([x * Math.cos(rz) - y * Math.sin(rz) + gauss() * .012, x * Math.sin(rz) + y * Math.cos(rz) + gauss() * .012, z + gauss() * .012]);
+    }
+  }
+  for (const [r, gap] of [[168, 11], [228, 14]]) {
+    const beads = Math.round((TAU * r) / gap);
+    for (let b = 0; b < beads; b++) {
+      const a = (b / beads) * TAU;
+      for (let k = 0; k < 10; k++) pts.push([Math.cos(a) * r * S + gauss() * .014, Math.sin(a) * r * S + gauss() * .014, gauss() * .014]);
+    }
+  }
+  for (let i = 0; i < 1200; i++) pts.push([gauss() * .008, (R() - .5) * 5.35, gauss() * .008]);
+  return pts;
+}
+/* 形2：霧から伸びる植物（高さ 3.9、足元 -1.95） */
+function plantShape() {
+  const segs = [], leaves = [];
+  const branch = (x, y, z, ang, lean, len, thick, depth) => {
+    const x1 = x + Math.cos(ang) * len, y1 = y + Math.sin(ang) * len, z1 = z + Math.sin(lean) * len * .45;
+    segs.push([x, y, z, x1, y1, z1, thick]);
+    if (depth <= 0 || len < .1) { leaves.push([x1, y1, z1, ang]); return; }
+    const kids = depth > 4 ? 2 : (R() < .55 ? 2 : 3);
+    for (let k = 0; k < kids; k++) {
+      const spread = (k - (kids - 1) / 2) * .62 + (R() - .5) * .5;
+      branch(x1, y1, z1, ang + spread + (Math.PI / 2 - ang) * .18, lean + (R() - .5) * 1.4, len * (.7 + R() * .1), thick * .64, depth - 1);
+    }
+    if (depth < 4 && R() < .7) leaves.push([(x + x1) / 2, (y + y1) / 2, (z + z1) / 2, ang + (R() < .5 ? 1.1 : -1.1)]);
+  };
+  branch(0, -1.9, 0, Math.PI / 2, 0, 1.0, .085, 6);
+  for (let r = 0; r < 5; r++) branch(0, -1.9, 0, -Math.PI / 2 + (R() - .5) * 1.9, (R() - .5) * 2, .32, .03, 1);
+  const pts = [];
+  for (const [x0, y0, z0, x1, y1, z1, th] of segs) {
+    const len = Math.hypot(x1 - x0, y1 - y0, z1 - z0);
+    for (let i = 0, n = Math.max(6, Math.round(len * 1500 * Math.min(1, th * 14))); i < n; i++) {
+      const t = R();
+      pts.push([x0 + (x1 - x0) * t + gauss() * th * .5, y0 + (y1 - y0) * t + gauss() * th * .35, z0 + (z1 - z0) * t + gauss() * th * .5]);
+    }
+  }
+  for (const [lx, ly, lz, ang] of leaves) {
+    const L = .2 + R() * .12, Wd = L * .38, ca = Math.cos(ang), sa = Math.sin(ang), tz = (R() - .5) * .6;
+    for (let i = 0; i < 90; i++) {
+      const u = R(), half = Math.sin(u * Math.PI) * Wd;
+      const v = R() < .55 ? (R() < .5 ? -1 : 1) : (R() * 2 - 1) * .8;
+      const px = u * L, py = v * half;
+      pts.push([lx + px * ca - py * sa, ly + px * sa + py * ca, lz + py * tz]);
+    }
+  }
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of pts) { minX = Math.min(minX, p[0]); maxX = Math.max(maxX, p[0]); minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]); }
+  const sc = 3.9 / (maxY - minY), cx = (minX + maxX) / 2;
+  return pts.map(([x, y, z]) => [(x - cx) * sc, (y - minY) * sc - 1.95, z * sc]);
+}
+const pick = (src) => {
+  const out = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { const p = src[(R() * src.length) | 0]; out.set(p, i * 3); }
+  return out;
+};
+
+const vertexShader = `
+  attribute vec3 aB; attribute vec3 aC; attribute vec3 aD; attribute vec3 aCol; attribute vec3 aGlowCol; attribute vec4 aRand;
+  uniform float uTime, uMorph, uIntro, uPx, uSize, uMotion, uSpin, uScatter, uGrow;
+  uniform vec2 uRes, uWaveO;
+  uniform float uWaveR, uGlowIn, uGlowOut, uWaveOn;
+  varying vec3 vCol; varying vec3 vGlowCol; varying float vAlpha; varying float vBurst; varying float vTw; varying float vGlow;
+  float e3(float x) { return x < .5 ? 4. * x * x * x : 1. - pow(-2. * x + 2., 3.) / 2.; }
+  vec3 rotY(vec3 p, float a) { float c = cos(a), s = sin(a); return vec3(c * p.x + s * p.z, p.y, -s * p.x + c * p.z); }
+  vec3 flow(vec3 p, float t) {
+    return vec3(sin(p.y * 1.7 + t * .9 + aRand.z * 6.2831) + sin(p.z * 2.3 - t * .7),
+                sin(p.z * 1.9 + t * 1.1 + aRand.z * 3.1) + sin(p.x * 1.3 + t * .5),
+                sin(p.x * 1.5 + t * .8) + cos(p.y * 2.1 - t * .6)) * .5;
+  }
+  void main() {
+    float t = uTime * uMotion;
+    vec3 orbit = rotY(aB, t * .12 + uSpin);
+    vec3 plant = rotY(aC, sin(t * .3) * .1);
+    plant.x += sin(t * .9 + aC.y * 1.8) * .025 * (aC.y + 1.95) * uMotion;
+    // スクロールの最初から少しずつほどける：輪 → 散った粒の雲 → 木が下から伸びて集める（uScatter / uGrow はスクロール量そのもの）
+    float sc = e3(clamp(uScatter * 1.5 - aRand.x * .5, 0., 1.));
+    vec3 dir = normalize(orbit + aD * .6 + 1e-3);
+    // ほどけながら中心へ半分まで縮み、密な渦になる（元の輪が大きいので広げると砂嵐になる）。スクロールに合わせて回して途中の動きを見せる
+    vec3 cloud = orbit * (1. - sc * .5) + dir * (.12 + aRand.y * .35) * sc + aD * .12 * sc;
+    // 散った雲はスクロールを止めていても時間で回り続ける
+    cloud = rotY(cloud, uScatter * 3.2 * (.5 + aRand.z) + uTime * .5 * (.6 + aRand.z) * sc);
+    cloud.y += sin(uScatter * 6.2831 + aRand.x * 6.2831) * .18 * sc;
+    float growY = mix(-2.3, 2.9, uGrow);
+    float g = e3(clamp((growY - aC.y) * 2.2 - aRand.x * .3, 0., 1.));
+    vec3 p = mix(cloud, plant, g);
+    // 木に集まる途中も渦を描いて回り続け、着地に近づくほど回転がほどけて木の形に収まる
+    p = rotY(p, (1. - g) * sc * (uTime * .7 * (.5 + aRand.z) + uGrow * 3.) );
+    float burst = sc * (1. - g) * .9 + sin(g * 3.14159) * .5;
+    p += flow(p * .9, t * .6) * burst * (.13 + aRand.y * .19) * uMotion;
+    p += flow(p * 1.4, t * .25) * .018 * uMotion;
+    float ik = e3(clamp((uIntro - aRand.x * .45) / .55, 0., 1.));
+    p = mix(aD * 1.6, p, ik);
+    vec4 mv = modelViewMatrix * vec4(p, 1.);
+    // 切り替えの波：円の内側に入った粒から光り方が入れ替わり、波頭では外へ弾ける
+    vec4 clip0 = projectionMatrix * mv;
+    vec2 sp = (clip0.xy / clip0.w * .5 + .5) * uRes;
+    float wd = distance(sp, uWaveO);
+    float lg = mix(uGlowOut, uGlowIn, 1. - smoothstep(uWaveR - 70., uWaveR, wd));
+    float front = exp(-pow((wd - uWaveR) / 55., 2.)) * uWaveOn;
+    mv.xy += normalize(sp - uWaveO + 1e-3) * front * .22;
+    gl_Position = projectionMatrix * mv;
+    // 大きさは全部細かい粒（18）にそろえる（大きい粒は一旦なし）
+    float sizeMix = 1.;
+    gl_PointSize = uSize * aRand.y * sizeMix * uPx / max(-mv.z, .1) * mix(1., 2.3, lg) * (1. + front * 1.3);
+    vCol = aCol; vGlowCol = aGlowCol; vGlow = lg;
+    vBurst = burst + front * 1.8;
+    float sparkle = pow(max(sin(t * (1.3 + aRand.z * 3.) + aRand.x * 60.), 0.), 14.);
+    vTw = .75 + .25 * sin(t * (.8 + aRand.y) + aRand.z * 20.) + sparkle * 1.4 * uMotion;
+    vAlpha = mix(.3, 1., ik);
+  }
+`;
+const fragmentShader = `
+  uniform float uDense;
+  varying vec3 vCol; varying vec3 vGlowCol; varying float vAlpha; varying float vBurst; varying float vTw; varying float vGlow;
+  void main() {
+    vec2 c = gl_PointCoord * 2. - 1.;
+    float r2 = dot(c, c);
+    if (r2 > 1.) discard;
+    float k = mix(1., 2.3, vGlow);
+    float br2 = r2 * k * k;
+    // 白の世界：光沢のある小さな墨の玉（ページの邪魔をしないよう少し薄く）
+    vec3 bead = vec3(0.);
+    float beadA = 0.;
+    if (br2 < 1.) {
+      vec3 n = vec3(c.x * k, -c.y * k, sqrt(1. - br2));
+      vec3 L = normalize(vec3(-.45, .65, .62));
+      float diff = max(dot(n, L), 0.);
+      float spec = pow(max(reflect(-L, n).z, 0.), 28.);
+      bead = min(vCol * (.45 + .7 * diff) + vec3(spec) * .85, vec3(1.));
+      beadA = smoothstep(1., .7, br2) * vAlpha * .78;
+    }
+    // 光る世界：この層は後で幕にまとめて反転されるので、光の「裏返し」を描いておく（反転されると光になる）
+    float core = exp(-br2 * 3.);
+    float halo = exp(-r2 * 5.) * .45;
+    vec3 g = min(vGlowCol * (core * .85 + halo) * vTw * (1. + vBurst * .7) * .62 * vAlpha / pow(uDense, .8), vec3(1.));
+    // 幕は invert → hue-rotate(180deg)。色相回転は自分の逆なので、先に同じ回転をかけておくと元の色で光る
+    mat3 hr = mat3(-.574, .426, .426,  1.43, .43, 1.43,  .144, .144, -.856);
+    g = clamp(hr * g, 0., 1.);
+    float ga = max(max(g.r, g.g), g.b);
+    vec3 neg = (vec3(1.) - g / max(ga, 1e-4)) * ga;
+    gl_FragColor = vec4(mix(bead * beadA, neg, vGlow), mix(beadA, ga, vGlow));
+  }
+`;
+
+function start() {
+  const canvas = document.querySelector(".w3k-particles");
+  const fig = document.getElementById("fig");
+  const photo = document.querySelector(".p-photo");
+  const prof = document.querySelector(".profile");
+  const btn = document.querySelector(".w3k-mode");
+  const veil = document.querySelector(".w3k-invert");
+  const ring = document.querySelector(".w3k-ring");
+  if (!canvas || !fig || !photo || !prof) return;
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: MOBILE ? "default" : "high-performance" }); }
+  catch (_) { canvas.remove(); return; }
+  renderer.setClearColor(0x000000, 0);
+  const px = Math.min(devicePixelRatio || 1, MOBILE ? 1.25 : 1.6);
+  renderer.setPixelRatio(px);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
+  camera.position.set(0, 0, 10);
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const geo = new THREE.BufferGeometry();
+  const dust = new Float32Array(N * 3), rand = new Float32Array(N * 4), col = new Float32Array(N * 3), glowCol = new Float32Array(N * 3);
+  const iri = ["#e3b3be", "#d9d3a0", "#b3d3bd", "#aac9e3", "#bcb3e3"].map((h) => new THREE.Color(h).toArray());
+  for (let i = 0; i < N; i++) {
+    dust.set([gauss() * 2.4, gauss() * 1.5, gauss() * 1.6], i * 3);
+    rand.set([R(), .35 + Math.pow(R(), 3) * 1.15, R(), R()], i * 4);
+    const k = R();
+    col.set(k < .7 ? [.07, .07, .085] : k < .92 ? [.58, .59, .63] : iri[(R() * iri.length) | 0], i * 3);
+    const gk = R();
+    glowCol.set(gk < .5 ? [.86, .89, 1] : gk < .72 ? [.52, .82, 1] : gk < .92 ? iri[(R() * iri.length) | 0].map((v) => Math.min(1, v * 1.15)) : [.76, .66, 1], i * 3);
+  }
+  const aB = pick(orbitShape()), aC = pick(plantShape());
+  geo.setAttribute("position", new THREE.BufferAttribute(aB.slice(), 3));
+  geo.setAttribute("aB", new THREE.BufferAttribute(aB, 3));
+  geo.setAttribute("aC", new THREE.BufferAttribute(aC, 3));
+  geo.setAttribute("aD", new THREE.BufferAttribute(dust, 3));
+  geo.setAttribute("aRand", new THREE.BufferAttribute(rand, 4));
+  geo.setAttribute("aCol", new THREE.BufferAttribute(col, 3));
+  geo.setAttribute("aGlowCol", new THREE.BufferAttribute(glowCol, 3));
+  geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 50);
+  const uniforms = {
+    uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: REDUCED ? 1 : 0 }, uPx: { value: px },
+    uSize: { value: MOBILE ? 16 : 18 }, uMotion: { value: REDUCED ? 0 : 1 }, uSpin: { value: 0 }, uScatter: { value: 0 }, uGrow: { value: 0 },
+    uDense: { value: MOBILE ? 2.2 : 1 },
+    uRes: { value: new THREE.Vector2(innerWidth, innerHeight) }, uWaveO: { value: new THREE.Vector2() },
+    uWaveR: { value: 0 }, uGlowIn: { value: 0 }, uGlowOut: { value: 0 }, uWaveOn: { value: 0 },
+  };
+  const mat = new THREE.ShaderMaterial({
+    vertexShader, fragmentShader, uniforms, transparent: true, depthWrite: false,
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+  });
+  group.add(new THREE.Points(geo, mat));
+
+  const resize = () => {
+    renderer.setSize(innerWidth, innerHeight, false);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    uniforms.uRes.value.set(innerWidth, innerHeight);
+  };
+  addEventListener("resize", resize);
+  resize();
+
+  /* LIGHT / GLOW：押した場所から円い波。円の内側からページ全体が反転し、粒は光る */
+  const root = document.documentElement;
+  let glowState = 0, wave = null;
+  const setWaveClip = (w) => {
+    const W = innerWidth, H = innerHeight, r = w.r, cx = w.cx, cy = w.cy;
+    veil.style.clipPath = w.to
+      ? `circle(${r}px at ${cx}px ${cy}px)`
+      : `path(evenodd, "M0 0H${W}V${H}H0Z M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z")`;
+    Object.assign(ring.style, { left: `${cx - r}px`, top: `${cy - r}px`, width: `${2 * r}px`, height: `${2 * r}px` });
+  };
+  const finishWave = () => {
+    if (!wave) return;
+    glowState = wave.to;
+    uniforms.uGlowIn.value = uniforms.uGlowOut.value = glowState;
+    uniforms.uWaveOn.value = 0;
+    veil.style.clipPath = "";
+    veil.style.visibility = glowState ? "visible" : "hidden";
+    ring.style.opacity = 0;
+    root.classList.toggle("glow", !!glowState);
+    wave = null;
+  };
+  const setMode = (on, cx = innerWidth / 2, cy = innerHeight / 2) => {
+    finishWave();
+    const to = on ? 1 : 0;
+    if (to === glowState) return;
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (REDUCED) {
+      glowState = to;
+      uniforms.uGlowIn.value = uniforms.uGlowOut.value = to;
+      veil.style.visibility = to ? "visible" : "hidden";
+      root.classList.toggle("glow", !!to);
+      return;
+    }
+    wave = { from: glowState, to, cx, cy, r: 0, start: performance.now(), dur: 1500, flipped: false,
+      maxR: Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy)) + 90 };
+    uniforms.uGlowIn.value = to;
+    uniforms.uGlowOut.value = glowState;
+    uniforms.uWaveO.value.set(cx, innerHeight - cy);
+    setWaveClip(wave);
+    veil.style.visibility = "visible";
+    ring.style.opacity = 1;
+  };
+  const current = () => (wave ? wave.to : glowState);
+  btn.addEventListener("click", () => { const r = btn.getBoundingClientRect(); setMode(!current(), r.left + r.width / 2, r.top + r.height / 2); });
+  addEventListener("keydown", (e) => {
+    if ((e.key === "g" || e.key === "G") && !e.metaKey && !e.ctrlKey && !/input|textarea/i.test(document.activeElement?.tagName || "")) setMode(!current());
+  });
+
+  const t0 = performance.now();
+  let last = t0, morph = 0, spin = 0, spinV = 0, sySmooth = null;
+  const vis = 2 * 10 * Math.tan((35 * Math.PI) / 360);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const frame = (now) => {
+    requestAnimationFrame(frame);
+    if (document.hidden) return;
+    const dt = Math.min(.1, (now - last) / 1000);
+    last = now;
+    const W = innerWidth, H = innerHeight, wpp = vis / H;
+    const fr = fig.getBoundingClientRect(), pr = photo.getBoundingClientRect(), pf = prof.getBoundingClientRect();
+    // アーティスト欄が画面に入ってくる量で、輪 → 植物
+    // ページが短く、欄は画面の中ほどまで上がってこない。スクロールの割合で決め、一番下で植物が完成する
+    const sc = document.querySelector(".scroller");
+    const mobileScroll = sc && sc.scrollHeight > sc.clientHeight + 1 && getComputedStyle(sc).overflowY !== "visible" && getComputedStyle(sc).overflowY !== "clip";
+    const sy = mobileScroll ? sc.scrollTop : scrollY;
+    const smax = Math.max(1, mobileScroll ? sc.scrollHeight - sc.clientHeight : document.documentElement.scrollHeight - H);
+    // 粒子演出試作と同じ感触：スクロール量そのものを Lenis と同じ割合でならし、粒はならした位置に付いてくる（行き過ぎない）
+    if (sySmooth === null || REDUCED) sySmooth = sy;
+    // スクロールへの追いつきをゆっくりに：粒は約2秒かけて移動・変身する
+    sySmooth += (sy - sySmooth) * (1 - Math.exp(-dt * 1.8));
+    const lag = 0; // 粒の位置はページにぴったり付ける（最初の版と同じ）
+    // 短いスクロールの全区間を使う：動かし始めた瞬間からほどけ、途中で欄へ流れ、後半で木が伸びる
+    const pr01 = clamp01(sySmooth / smax);
+    morph = pr01;
+    const scatter = clamp01(pr01 / .5);
+    const grow = clamp01((pr01 - .45) / .55);
+    const mv = clamp01((pr01 - .15) / .6);
+    const e = mv * mv * (3 - 2 * mv);
+    const ax = lerp(fr.left + fr.width / 2, pr.left + pr.width / 2, e);
+    const sO = (.72 * fr.width * wpp) / 2.43;
+    // 欄が写真と情報の縦積みになる幅（≤720px）では、写真の下端から写真の上へ樹冠を広げる。広い幅では欄より高く伸ばす
+    const stacked = W <= 720;
+    const plantPx = stacked ? pr.height * 1.75 : Math.max(pf.height, 260) * 1.45;
+    const sP = (plantPx * wpp) / 3.9;
+    // 植物の根元（ワールドの -1.95）を欄の下端にそろえ、樹冠を欄の上へ伸ばす
+    const ay = lerp(fr.top + fr.height / 2, (stacked ? pr.bottom : pf.bottom) - (1.95 * sP) / wpp, e) + lag;
+    group.position.set((ax - W / 2) * wpp, -(ay - H / 2) * wpp, 0);
+    group.scale.setScalar(lerp(sO, sP, e));
+    uniforms.uMorph.value = morph;
+    uniforms.uScatter.value = scatter;
+    uniforms.uGrow.value = grow;
+    uniforms.uTime.value = (now - t0) / 1000;
+    if (!REDUCED) uniforms.uIntro.value = clamp01((now - t0 - 200) / 2600);
+    // 飛び込み演出のあいだは、図の輪と一緒に回転を上げる
+    if (document.body.classList.contains("depart")) spinV += dt * 26; else spinV *= Math.exp(-dt * 1.5);
+    spin += spinV * dt;
+    uniforms.uSpin.value = spin + scatter * 2.2;
+    if (wave) {
+      const wt = clamp01((now - wave.start) / wave.dur);
+      const we = wt < .5 ? 4 * wt * wt * wt : 1 - Math.pow(-2 * wt + 2, 3) / 2;
+      wave.r = we * wave.maxR;
+      uniforms.uWaveR.value = wave.r;
+      uniforms.uWaveOn.value = Math.min(1, wt * 8) * (1 - clamp01((wt - .85) / .15));
+      setWaveClip(wave);
+      if (!wave.flipped && wt >= .5) { wave.flipped = true; root.classList.toggle("glow", !!wave.to); }
+      if (wt >= 1) finishWave();
+    }
+    renderer.render(scene, camera);
+  };
+  requestAnimationFrame(frame);
+}
+start();
+</script>
 </body>
 </html>
