@@ -24,7 +24,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260914c'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915a'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -2051,7 +2051,7 @@ function start() {
   geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 50);
   const uniforms = {
     uTime: { value: 0 }, uMorph: { value: 0 }, uIntro: { value: REDUCED ? 1 : 0 }, uPx: { value: px },
-    uSize: { value: MOBILE ? 16 : 18 }, uMotion: { value: REDUCED ? 0 : 1 }, uSpin: { value: 0 }, uScatter: { value: 0 }, uGrow: { value: 0 },
+    uSize: { value: MOBILE ? 10 : 11 }, uMotion: { value: REDUCED ? 0 : 1 }, uSpin: { value: 0 }, uScatter: { value: 0 }, uGrow: { value: 0 },
     uDense: { value: MOBILE ? 2.2 : 1 },
     uRes: { value: new THREE.Vector2(innerWidth, innerHeight) }, uWaveO: { value: new THREE.Vector2() },
     uWaveR: { value: 0 }, uGlowIn: { value: 0 }, uGlowOut: { value: 0 }, uWaveOn: { value: 0 },
