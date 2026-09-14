@@ -24,7 +24,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915c'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915d'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -2062,11 +2062,14 @@ function start() {
   });
   group.add(new THREE.Points(geo, mat));
 
+  // 描く大きさは canvas の実寸（CSS の 100lvh）に合わせる。iOS Safari は innerHeight がツールバーの分だけ短く、そのままだと絵が縦に引き伸ばされて粒が図より下にずれる
+  const size = () => [canvas.clientWidth || innerWidth, canvas.clientHeight || innerHeight];
   const resize = () => {
-    renderer.setSize(innerWidth, innerHeight, false);
-    camera.aspect = innerWidth / innerHeight;
+    const [w, h] = size();
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    uniforms.uRes.value.set(innerWidth, innerHeight);
+    uniforms.uRes.value.set(w, h);
   };
   addEventListener("resize", resize);
   resize();
@@ -2108,7 +2111,7 @@ function start() {
       maxR: Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy)) + 90 };
     uniforms.uGlowIn.value = to;
     uniforms.uGlowOut.value = glowState;
-    uniforms.uWaveO.value.set(cx, innerHeight - cy);
+    uniforms.uWaveO.value.set(cx, size()[1] - cy);
     setWaveClip(wave);
     veil.style.visibility = "visible";
     ring.style.opacity = 1;
@@ -2128,7 +2131,8 @@ function start() {
     if (document.hidden) return;
     const dt = Math.min(.1, (now - last) / 1000);
     last = now;
-    const W = innerWidth, H = innerHeight, wpp = vis / H;
+    const [W, H] = size(), wpp = vis / H;
+    if (W !== uniforms.uRes.value.x || H !== uniforms.uRes.value.y) resize();
     const fr = fig.getBoundingClientRect(), pr = photo.getBoundingClientRect(), pf = prof.getBoundingClientRect();
     // アーティスト欄が画面に入ってくる量で、輪 → 植物
     // ページが短く、欄は画面の中ほどまで上がってこない。スクロールの割合で決め、一番下で植物が完成する
