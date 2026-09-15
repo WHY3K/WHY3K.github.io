@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915h'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915i'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -68,6 +68,8 @@ if (!document.documentElement.classList.contains('backnav')) document.documentEl
 <link rel="modulepreload" href="assets/vendor/three/three.core.min.js">
 <link rel="modulepreload" href="assets/vendor/three/three.module.min.js">
 <link rel="preload" href="assets/fonts/cormorant.woff2" as="font" type="font/woff2" crossorigin>
+<!-- 待ち画面のゲージの数字（Michroma・OFL。ライセンスは assets/fonts/michroma-OFL.txt） -->
+<link rel="preload" href="assets/fonts/michroma.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   /* Cormorant可変フォント（自前配信・プリロード済みなので最初から正しい字形で出る） */
   @font-face {
@@ -997,112 +999,365 @@ body.summon .w3k-mode { opacity: 0; transition: opacity .3s ease; }
 </head>
 <body>
 
-<!-- ===== 読み込み待ち：遅いときだけ、軽い粒が図の位置に集まって輪になり、準備ができたら本物の粒の輪へ引き継ぐ ===== -->
+<!-- ===== 読み込み待ち：遅いときだけ、粒が渦を巻いて輪に集まり、真ん中の丸いゲージで進みを見せてから本物の粒の輪へ引き継ぐ ===== -->
 <div class="w3k-cover" aria-hidden="true"></div>
 <canvas class="w3k-loader" aria-hidden="true"></canvas>
 <script>
+/* 読み込み待ちの本体：遅いときだけ、粒が図の位置で渦を巻いて輪に集まり、真ん中の丸いゲージで進みを見せる。
+   準備ができたら輪を元の向き・本物と同じ回転の速さにそろえてから、本物の粒へ引き継ぐ。
+   粒とゲージは Worker（別スレッド）で描くので、three.js の組み立てでページが固まっても止まらない。 */
 window.W3KLoad = (function () {
   var root = document.documentElement;
   var api = { done: false, onReveal: null, particles: function () {} };
   if (!root.classList.contains('w3k-wait')) { api.done = true; return api; }
+
+  function loaderCore(port) {
+    const now = () => performance.timeOrigin + performance.now();
+    const raf = typeof requestAnimationFrame === "function" ? (f) => requestAnimationFrame(f) : (f) => setTimeout(f, 16);
+    const TAU = Math.PI * 2, VIS = 2 * 10 * Math.tan((35 * Math.PI) / 360);
+    const e3 = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const clamp01 = (v) => Math.min(1, Math.max(0, v));
+    const smooth = (a, b, v) => { const t = clamp01((v - a) / (b - a)); return t * t * (3 - 2 * t); };
+    const gauss = () => { let u = 0; while (!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); };
+    const BASE = .12; // 本物の粒の輪の回転（毎秒 0.12）
+    // 図版の楕円：[横半径, 縦半径, 傾き(度), 量, 読み込み中に自分で回る速さ]
+    const RINGS = [[244, 66, -14, 1, .9], [154, 46, 26, .7, -1.3], [188, 30, 8, .55, .7], [212, 114, -38, .7, -.5], [124, 90, 52, .45, 1.6], [252, 92, -60, .45, -1.1], [272, 46, 18, .4, .4]];
+    const AXIS = RINGS.length, BEADS = RINGS.length + 1;
+    let cv, ctx, W = 1, H = 1, DPR = 1, mobile = true, fig = null, P;
+    let pTarget, lastTarget, pShown, creep, finishing, finishAt, readySent, pulse, angle, boost, last, born, theta;
+    let style = { font: "wide" }, stopped = false;
+    let gauge, gctx, ghost, hctx, gl;
+    const mkCanvas = (w, h) => { if (typeof OffscreenCanvas !== "undefined") return new OffscreenCanvas(w, h); const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+    // Worker の中でも字を使えるように、フォントを自分で読み込む
+    function loadFonts(list) {
+      const set = (typeof self !== "undefined" && self.fonts) || (typeof document !== "undefined" && document.fonts);
+      if (!set || typeof FontFace === "undefined") return;
+      for (const [family, url, desc] of list) { try { const f = new FontFace(family, `url(${url})`, desc); set.add(f); f.load().catch(() => {}); } catch (_) {} }
+    }
+
+    function reset() {
+      pTarget = 0; lastTarget = 0; pShown = 0; creep = 0; finishing = false; finishAt = 0; readySent = false; pulse = -1;
+      angle = 0; boost = 1.1; last = now(); born = last; theta = new Float32Array(RINGS.length + 1);
+      gl = { next: last + 900, until: 0, frame: 0, on: false, done100: false, jx: 0, skew: 0, r: [0, 0], rx: 0, g: [0, 0], gx: 0, scramble: false };
+    }
+    function build() {
+      const src = [], S = 1 / 112;
+      RINGS.forEach(([rx, ry, deg, w], k) => {
+        const tilt = Math.acos(Math.min(1, ry / rx));
+        for (let i = 0, n = Math.round(2400 * w); i < n; i++) {
+          const a = Math.random() * TAU, y0 = Math.sin(a) * rx * S;
+          src.push([Math.cos(a) * rx * S + gauss() * .012, y0 * Math.cos(tilt) + gauss() * .012, y0 * Math.sin(tilt) + gauss() * .012, k]);
+        }
+      });
+      for (const [r, gap] of [[168, 11], [228, 14]]) {
+        const beads = Math.round((TAU * r) / gap);
+        for (let b = 0; b < beads; b++)
+          for (let j = 0; j < 10; j++) src.push([Math.cos((b / beads) * TAU) * r * S + gauss() * .014, Math.sin((b / beads) * TAU) * r * S + gauss() * .014, gauss() * .014, BEADS]);
+      }
+      for (let i = 0; i < 1200; i++) src.push([gauss() * .008, (Math.random() - .5) * 5.35, gauss() * .008, AXIS]);
+      const n = mobile ? 7000 : 14000, px = Math.min(DPR, mobile ? 2 : 1.6);
+      P = { n, A: new Float32Array(n * 3), D: new Float32Array(n * 3), L: new Uint8Array(n), X: new Float32Array(n), Z: new Float32Array(n), groups: [[], [], [], [], [], [], []],
+        colors: ["rgba(20,20,24,.74)", "rgba(118,120,128,.74)", "rgba(190,150,160,.74)", "rgba(180,176,130,.74)", "rgba(150,178,158,.74)", "rgba(140,168,190,.74)", "rgba(158,150,190,.74)"] };
+      for (let i = 0; i < n; i++) {
+        const s = src[(Math.random() * src.length) | 0];
+        P.A.set([s[0], s[1], s[2]], i * 3); P.L[i] = s[3];
+        P.D.set([gauss() * 3.84, gauss() * 2.4, gauss() * 2.56], i * 3);
+        P.X[i] = Math.random();
+        P.Z[i] = Math.max(1 / DPR, ((mobile ? 10 : 11) * (.35 + Math.pow(Math.random(), 3) * 1.15) * px) / 10 / DPR);
+        const k = Math.random();
+        P.groups[k < .7 ? 0 : k < .92 ? 1 : 2 + ((Math.random() * 5) | 0)].push(i);
+      }
+    }
+
+    function step(dt, t) {
+      // ゲージ：届いた分まで進み、止まっている間も少しずつ進む（ただし 96% で待つ）
+      if (pTarget > lastTarget) { lastTarget = pTarget; creep = 0; }
+      creep = Math.min(.05, creep + dt * .006);
+      const cap = finishing ? 1 : Math.min(.96, pTarget + creep);
+      pShown = Math.max(pShown, pShown + (cap - pShown) * (1 - Math.exp(-dt * (finishing ? 5 : 2.4))));
+      if (finishing && pShown > .9995) pShown = 1;
+      // 輪全体は速めに回り、仕上げで本物と同じ速さまで落とす
+      if (finishing) boost *= Math.exp(-dt * 2.4);
+      angle += (BASE + boost) * dt;
+      // 楕円ごとに勝手に回り、終盤で元の向きへ戻って止まる（奥行きにも傾いているので、同じ形になるのは360度ごと）
+      const run = 1 - smooth(.72, .93, pShown), pull = finishing && pShown > .99 ? 10 : 6 * clamp01((pShown - .8) / .15);
+      for (let k = 0; k <= AXIS; k++) {
+        const w = k < AXIS ? RINGS[k][4] : .35;
+        theta[k] += w * run * dt;
+        const home = Math.round(theta[k] / TAU) * TAU;
+        theta[k] += (home - theta[k]) * (1 - Math.exp(-dt * pull));
+        if (pShown === 1 && Math.abs(home - theta[k]) < .002) theta[k] = home;
+      }
+      if (pShown === 1 && pulse < 0) pulse = 0;
+      if (pulse >= 0 && pulse < 1) pulse = Math.min(1, pulse + dt / .8);
+      // グリッチ：ロゴと同じく約0.2秒のあいだ数コマ乱れる。間隔はばらつかせ、100% になった瞬間にも1回
+      if (t >= gl.next) { gl.until = t + 160 + Math.random() * 120; gl.next = gl.until + 1400 + Math.random() * 2600; gl.frame = 0; }
+      if (pShown === 1 && !gl.done100) { gl.done100 = true; gl.until = t + 280; gl.next = gl.until + 2200; gl.frame = 0; }
+      gl.on = t < gl.until;
+      if (gl.on && t - gl.frame > 45) {
+        gl.frame = t;
+        const band = () => { const a = Math.random() * .8; return [a, Math.min(1, a + .12 + Math.random() * .3)]; };
+        const sign = () => (Math.random() < .5 ? -1 : 1);
+        gl.jx = sign() * (1 + Math.random() * 2); gl.skew = (Math.random() - .5) * .1;
+        gl.r = band(); gl.rx = sign() * (2 + Math.random() * 3);
+        gl.g = band(); gl.gx = sign() * (2 + Math.random() * 2);
+        gl.scramble = Math.random() < .35;
+      }
+      let settled = pulse === 1 && boost < .03 && t - finishAt > 900;
+      for (let k = 0; k <= AXIS && settled; k++) if (Math.abs(Math.round(theta[k] / TAU) * TAU - theta[k]) > .003) settled = false;
+      if (finishing && settled && !readySent) { readySent = true; port.postMessage({ type: "ready", angle, at: t }); }
+    }
+
+    function spaced(text, x, y, align, sp = 2.2) {
+      let wsum = 0;
+      for (const ch of text) wsum += ctx.measureText(ch).width + sp;
+      wsum -= sp;
+      let cx = align === "right" ? x - wsum : x;
+      for (const ch of text) { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + sp; }
+    }
+
+    function draw(t) {
+      const bw = Math.round(W * DPR), bh = Math.round(H * DPR);
+      if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
+      ctx.setTransform(bw / W, 0, 0, bh / H, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      const fw = fig ? fig.width : Math.min(W * .92, 540), fcx = fig ? fig.left + fig.width / 2 : W / 2;
+      const fcy = fig ? fig.top + fig.height / 2 : H * .38, fbot = fig ? fig.top + fig.height : fcy + fw * .43;
+      const wpp = VIS / H, pk = pulse >= 0 && pulse < 1 ? Math.sin(pulse * Math.PI) : 0;
+      const sc = (.72 * fw * wpp) / 2.43, gx = (fcx - W / 2) * wpp, gy = -(fcy - H / 2) * wpp;
+      const c = Math.cos(angle), s = Math.sin(angle), A = P.A, D = P.D, L = P.L;
+      const lc = new Float32Array(AXIS + 2), ls = new Float32Array(AXIS + 2);
+      for (let k = 0; k <= BEADS; k++) {
+        const a = (k < AXIS ? (RINGS[k][2] * Math.PI) / 180 : 0) + (k <= AXIS ? theta[k] : 0);
+        lc[k] = Math.cos(a); ls[k] = Math.sin(a);
+      }
+      ctx.globalAlpha = clamp01((t - born) / 400);
+      for (let g = 0; g < P.groups.length; g++) {
+        const list = P.groups[g];
+        ctx.beginPath();
+        for (let j = 0; j < list.length; j++) {
+          const i = list[j], i3 = i * 3, k = L[i];
+          const qx = A[i3] * lc[k] - A[i3 + 1] * ls[k], qy = A[i3] * ls[k] + A[i3 + 1] * lc[k], qz = A[i3 + 2];
+          const ox = qx * c + qz * s, oz = -qx * s + qz * c;
+          const ik = e3(clamp01((pShown - P.X[i] * .45) / .55));
+          // まだ輪に入っていない粒は、速さの違う渦になって回る
+          const sw = angle * (.6 + P.X[i] * 1.4), dc = Math.cos(sw), ds = Math.sin(sw);
+          const dx = D[i3] * dc + D[i3 + 2] * ds, dz = -D[i3] * ds + D[i3 + 2] * dc;
+          const x = dx + (ox - dx) * ik, y = D[i3 + 1] + (qy - D[i3 + 1]) * ik, z = dz + (oz - dz) * ik;
+          const persp = 10 / Math.max(.1, 10 - z * sc);
+          const sz = P.Z[i] * persp;
+          ctx.rect(W / 2 + ((gx + x * sc) * persp) / wpp - sz / 2, H / 2 - ((gy + y * sc) * persp) / wpp - sz / 2, sz, sz);
+        }
+        ctx.fillStyle = P.colors[g];
+        ctx.fill();
+      }
+      // ゲージ：図面の目盛りのような細い線と、3桁の数字
+      // ゲージ：輪の真ん中に丸いゲージ。墨の線が12時から時計回りに進み、ときどきロゴと同じグリッチが走る
+      const R = Math.round(Math.min(56, Math.max(34, fw * .12))), dev = bw / W, a0 = ctx.globalAlpha;
+      // 数字が粒に埋もれないよう、中だけ紙の色でうっすら抜く（ここはグリッチさせない）
+      const halo = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, R * 1.05);
+      halo.addColorStop(0, "rgba(251,251,250,.92)"); halo.addColorStop(.72, "rgba(251,251,250,.8)"); halo.addColorStop(1, "rgba(251,251,250,0)");
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(fcx, fcy, R * 1.05, 0, TAU); ctx.fill();
+
+      // ゲージは小さな下書き用キャンバスに描いてから貼る（グリッチで帯に切ってずらすため）
+      const box = R * 2 + 64, px = Math.ceil(box * dev);
+      if (!gauge || gauge.width !== px) { gauge = mkCanvas(px, px); gctx = gauge.getContext("2d"); ghost = mkCanvas(px, px); hctx = ghost.getContext("2d"); }
+      const g = gctx, c0 = box / 2, top = -Math.PI / 2, end = top + TAU * pShown;
+      g.setTransform(dev, 0, 0, dev, 0, 0);
+      g.clearRect(0, 0, box, box);
+      g.lineWidth = 1; g.strokeStyle = "#e2e2e7";
+      g.beginPath(); g.arc(c0, c0, R, 0, TAU); g.stroke();
+      if (pShown > .002) {
+        g.lineCap = "round"; g.strokeStyle = "#131316"; g.lineWidth = 1.6;
+        g.beginPath(); g.arc(c0, c0, R, top, end); g.stroke();
+        // 先頭：墨の点と、通ってきた線に残る薄い尾
+        const trail = Math.min(end - top, .5);
+        for (let k = 0, segs = 12; k < segs; k++) {
+          const f = 1 - k / segs;
+          g.strokeStyle = `rgba(19,19,22,${(.35 * f * f).toFixed(3)})`; g.lineWidth = 1.6 + 1.6 * f;
+          g.beginPath(); g.arc(c0, c0, R, end - (trail * (k + 1)) / segs, end - (trail * k) / segs); g.stroke();
+        }
+        g.fillStyle = "#131316";
+        g.beginPath(); g.arc(c0 + Math.cos(end) * R, c0 + Math.sin(end) * R, 2.4, 0, TAU); g.fill();
+      }
+      // 数字：グリッチ中はときどき別の数字が一瞬混ざる
+      let digits = String(Math.floor(pShown * 100));
+      if (gl.on && gl.scramble) digits = String(Math.floor(Math.random() * 1000)).slice(0, 1 + ((Math.random() * 3) | 0));
+      const widthOf = (text, sp) => { let w = -sp; for (const ch of text) w += g.measureText(ch).width + sp; return w; };
+      const write = (text, x, y, sp) => { for (const ch of text) { g.fillText(ch, x, y); x += g.measureText(ch).width + sp; } };
+      const baseY = c0 + 3;
+      g.textBaseline = "alphabetic"; g.fillStyle = "#131316";
+      g.font = "400 15px Michroma, sans-serif"; const dW = widthOf(digits, .5);
+      g.font = "400 9px Michroma, sans-serif"; const pW = g.measureText("%").width + 2;
+      const x0 = c0 - (dW + pW) / 2;
+      g.font = "400 15px Michroma, sans-serif"; write(digits, x0, baseY, .5);
+      g.font = "400 9px Michroma, sans-serif"; g.fillText("%", x0 + dW + 2, baseY);
+      const lab = pShown === 1 ? "ready" : "loading";
+      g.font = "400 6px Michroma, sans-serif"; g.fillStyle = "#9a9aa3";
+      write(lab, c0 - widthOf(lab, 1.8) / 2, baseY + 12, 1.8);
+
+      // 貼る：ふだんはそのまま。グリッチ中はロゴと同じく「本体を横に揺らして傾ける＋赤と灰の残像を帯で切ってずらす」
+      const left = fcx - box / 2, topY = fcy - box / 2;
+      if (!gl.on) ctx.drawImage(gauge, left, topY, box, box);
+      else {
+        ctx.save();
+        ctx.translate(fcx, fcy); ctx.transform(1, 0, gl.skew, 1, 0, 0); ctx.translate(-fcx, -fcy);
+        ctx.drawImage(gauge, left + gl.jx, topY, box, box);
+        ctx.restore();
+        const ghostBand = (color, b, dx, alpha) => {
+          hctx.setTransform(1, 0, 0, 1, 0, 0);
+          hctx.globalCompositeOperation = "source-over"; hctx.clearRect(0, 0, px, px); hctx.drawImage(gauge, 0, 0);
+          hctx.globalCompositeOperation = "source-in"; hctx.fillStyle = color; hctx.fillRect(0, 0, px, px);
+          hctx.globalCompositeOperation = "source-over";
+          const y0 = box * b[0], h = Math.max(1, box * (b[1] - b[0]));
+          ctx.globalAlpha = a0 * alpha;
+          ctx.drawImage(ghost, 0, y0 * dev, px, h * dev, left + dx, topY + y0, box, h);
+          ctx.globalAlpha = a0;
+        };
+        ghostBand("#d21f12", gl.r, gl.rx, .75);
+        ghostBand("#b0b0b8", gl.g, gl.gx, .6);
+      }
+    }
+
+    function frame() {
+      const t = now(), dt = Math.min(.1, (t - last) / 1000);
+      last = t;
+      if (!ctx) return;
+      if (stopped) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); return; }
+      step(dt, t);
+      draw(t);
+      raf(frame);
+    }
+
+    port.onmessage = (e) => {
+      const m = e.data;
+      if (m.type === "init") {
+        cv = m.canvas; ctx = cv.getContext("2d"); W = m.w; H = m.h; DPR = Math.min(m.dpr || 1, 2); mobile = m.mobile; fig = m.fig || null;
+        if (m.fonts) loadFonts(m.fonts);
+        if (m.style) style = { ...style, ...m.style };
+        reset(); build(); port.postMessage({ type: "alive" }); raf(frame);
+      } else if (m.type === "style") style = { ...style, ...m.style };
+      else if (m.type === "size") { W = m.w; H = m.h; DPR = Math.min(m.dpr || 1, 2); fig = m.fig || fig; }
+      else if (m.type === "progress") pTarget = Math.max(pTarget, Math.min(1, m.p));
+      else if (m.type === "finish") { if (!finishing) { finishing = true; finishAt = now(); pTarget = 1; } }
+      else if (m.type === "reset") reset();
+      else if (m.type === "stop") stopped = true;
+    };
+  }
+
   var SHOW_AFTER = 600;   // これより早く準備できたら待ち画面は出さない（2回目以降など）
-  var MIN_SHOWN = 700;    // 出したら最低この時間は見せる（一瞬だけ出て消えるのを防ぐ）
   var GIVE_UP = 12000;    // 何かが届かなくても、この時間で開く
+  var BASE = .12;         // 本物の粒の輪の回転（毎秒 0.12）
   var need = { fonts: false, page: false, particles: false };
-  var started = 0, revealing = false, cv, ctx, pts;
-  var TAU = Math.PI * 2, VIS = 2 * 10 * Math.tan((35 * Math.PI) / 360);
-  var e3 = function (x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
-  var clamp01 = function (v) { return Math.min(1, Math.max(0, v)); };
-  // 背景の粒と同じ時間の進み方（集まるのに 2.6 秒・輪の回転は毎秒 0.12）
-  var introAt = function (now) { return clamp01((now - started - 200) / 2600); };
-  var angleAt = function (now) { return ((now - started) / 1000) * .12; };
+  var started = false, finishing = false, revealing = false, port = null, worker = null, cv = null, lastKey = '';
 
-  function build() {
-    var mobile = matchMedia('(max-width: 999px), (hover: none) and (pointer: coarse)').matches;
-    var gauss = function () { var u = 0; while (!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * Math.random()); };
-    // 形は背景の粒の orbitShape と同じ数値（図版の楕円を立体の輪にしたもの）
-    var src = [], S = 1 / 112;
-    [[244, 66, -14, 1], [154, 46, 26, .7], [188, 30, 8, .55], [212, 114, -38, .7], [124, 90, 52, .45], [252, 92, -60, .45], [272, 46, 18, .4]].forEach(function (r) {
-      var rx = r[0], tilt = Math.acos(Math.min(1, r[1] / rx)), rz = (r[2] * Math.PI) / 180;
-      for (var i = 0, n = Math.round(2400 * r[3]); i < n; i++) {
-        var a = Math.random() * TAU, x = Math.cos(a) * rx * S, y0 = Math.sin(a) * rx * S, y = y0 * Math.cos(tilt), z = y0 * Math.sin(tilt);
-        src.push([x * Math.cos(rz) - y * Math.sin(rz), x * Math.sin(rz) + y * Math.cos(rz), z]);
-      }
-    });
-    [[168, 11], [228, 14]].forEach(function (b) {
-      for (var k = 0, beads = Math.round((TAU * b[0]) / b[1]); k < beads; k++)
-        for (var j = 0; j < 10; j++) src.push([Math.cos((k / beads) * TAU) * b[0] * S + gauss() * .014, Math.sin((k / beads) * TAU) * b[0] * S + gauss() * .014, gauss() * .014]);
-    });
-    for (var i = 0; i < 1200; i++) src.push([gauss() * .008, (Math.random() - .5) * 5.35, gauss() * .008]);
-    var n = mobile ? 7000 : 14000, dpr = devicePixelRatio || 1, px = Math.min(dpr, mobile ? 2 : 1.6);
-    pts = { n: n, P: new Float32Array(n * 3), D: new Float32Array(n * 3), X: new Float32Array(n), Z: new Float32Array(n), groups: [[], [], [], [], [], [], []],
-      colors: ['rgba(20,20,24,.72)', 'rgba(118,120,128,.72)', 'rgba(190,150,160,.72)', 'rgba(180,176,130,.72)', 'rgba(150,178,158,.72)', 'rgba(140,168,190,.72)', 'rgba(158,150,190,.72)'] };
-    for (var p = 0; p < n; p++) {
-      var s = src[(Math.random() * src.length) | 0];
-      pts.P.set(s, p * 3);
-      pts.D.set([gauss() * 2.4 * 1.6, gauss() * 1.5 * 1.6, gauss() * 1.6 * 1.6], p * 3);
-      pts.X[p] = Math.random();
-      // 粒の大きさ（CSS px）：背景の粒の gl_PointSize と同じ式
-      pts.Z[p] = Math.max(1 / dpr, ((mobile ? 10 : 11) * (.35 + Math.pow(Math.random(), 3) * 1.15) * px) / 10 / dpr);
-      var k = Math.random();
-      pts.groups[k < .7 ? 0 : k < .92 ? 1 : 2 + ((Math.random() * 5) | 0)].push(p);
-    }
-  }
+  // ゲージの進み：届くものの重さ（KB）で割り振る。ページ本体は届いた時点で済み、最後に粒の組み立てを足す
+  var parts = { html: 20, 'cormorant.woff2': 35, 'three.core.min.js': 100, 'three.module.min.js': 86, 'ring_system.webp': 56, 'glass_knot.webp': 39,
+    'schematic.svg': 35, 'blade_cluster.webp': 30, 'artist.jpg': 30, 'glass_sphere.webp': 13, 'amber_beads.webp': 6, 'glass_debris.webp': 5, 'qr.svg': 3, particles: 40 };
+  var got = { html: true }, total = 0;
+  for (var key in parts) total += parts[key];
+  function progress() { var s = 0; for (var n in got) s += parts[n] || 0; return Math.min(1, s / total); }
+  function send(m) { if (port) port.postMessage(m); }
+  function mark(name) { if (got[name]) return; got[name] = true; send({ type: 'progress', p: progress() }); }
+  try {
+    new PerformanceObserver(function (list) {
+      list.getEntries().forEach(function (e) { for (var n in parts) if (e.name.indexOf(n) !== -1) mark(n); });
+    }).observe({ type: 'resource', buffered: true });
+  } catch (_) {}
 
-  function frame(now) {
-    if (api.done) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); return; }
-    requestAnimationFrame(frame);
-    var w = cv.clientWidth || innerWidth, h = cv.clientHeight || innerHeight, d = Math.min(devicePixelRatio || 1, 2);
-    var bw = Math.round(w * d), bh = Math.round(h * d);
-    if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
-    ctx.setTransform(bw / w, 0, 0, bh / h, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    // 本物の粒と同じ置き方：図の中心に、図の幅に合わせた大きさで
-    var fig = document.getElementById('fig'), fr = fig && fig.getBoundingClientRect(), ok = fr && fr.width > 0;
-    var fw = ok ? fr.width : Math.min(w * .92, 540), fcx = ok ? fr.left + fr.width / 2 : w / 2, fcy = ok ? fr.top + fr.height / 2 : h * .4;
-    var wpp = VIS / h, sc = (.72 * fw * wpp) / 2.43, gx = (fcx - w / 2) * wpp, gy = -(fcy - h / 2) * wpp;
-    var intro = introAt(now), ang = angleAt(now), c = Math.cos(ang), sn = Math.sin(ang), P = pts.P, D = pts.D;
-    ctx.globalAlpha = clamp01((now - started) / 400);
-    for (var g = 0; g < pts.groups.length; g++) {
-      var list = pts.groups[g];
-      ctx.beginPath();
-      for (var j = 0; j < list.length; j++) {
-        var i = list[j], i3 = i * 3;
-        var ik = e3(clamp01((intro - pts.X[i] * .45) / .55));
-        var ox = P[i3] * c + P[i3 + 2] * sn, oz = -P[i3] * sn + P[i3 + 2] * c;
-        var x = D[i3] + (ox - D[i3]) * ik, y = D[i3 + 1] + (P[i3 + 1] - D[i3 + 1]) * ik, z = D[i3 + 2] + (oz - D[i3 + 2]) * ik;
-        var persp = 10 / Math.max(.1, 10 - z * sc), sx = w / 2 + ((gx + x * sc) * persp) / wpp, sy = h / 2 - ((gy + y * sc) * persp) / wpp, sz = pts.Z[i] * persp;
-        ctx.rect(sx - sz / 2, sy - sz / 2, sz, sz);
-      }
-      ctx.fillStyle = pts.colors[g];
-      ctx.fill();
-    }
+  function figRect() {
+    var f = document.getElementById('fig'), r = f && f.getBoundingClientRect();
+    return r && r.width ? { left: r.left, top: r.top, width: r.width, height: r.height } : null;
   }
+  function sizeMsg() { return { w: cv.clientWidth || innerWidth, h: cv.clientHeight || innerHeight, dpr: devicePixelRatio || 1, fig: figRect() }; }
+  function onMsg(e) { if (e.data && e.data.type === 'ready') revealFromLoader(e.data); }
 
   function startLoader() {
     if (revealing || api.done || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     cv = document.querySelector('.w3k-loader');
-    ctx = cv && cv.getContext('2d');
-    if (!ctx) return;
-    build();
-    started = performance.now();
-    requestAnimationFrame(frame);
+    if (!cv) return;
+    var mobile = matchMedia('(max-width: 999px), (hover: none) and (pointer: coarse)').matches;
+    var init = Object.assign({ type: 'init', mobile: mobile, style: { font: 'wide' },
+      fonts: [['Michroma', new URL('assets/fonts/michroma.woff2', document.baseURI).href, {}]] }, sizeMsg());
+    var runHere = function (canvas) {
+      var a = {}, b = {};
+      a.postMessage = function (d) { setTimeout(function () { if (b.onmessage) b.onmessage({ data: d }); }); };
+      b.postMessage = function (d) { setTimeout(function () { if (a.onmessage) a.onmessage({ data: d }); }); };
+      loaderCore(b);
+      a.onmessage = onMsg;
+      port = a;
+      init.canvas = canvas;
+      port.postMessage(init);
+    };
+    try {
+      if (!cv.transferControlToOffscreen || !window.Worker || !window.OffscreenCanvas) throw new Error('no offscreen');
+      worker = new Worker(URL.createObjectURL(new Blob(['(' + loaderCore.toString() + ')(self)'], { type: 'text/javascript' })));
+      var off = cv.transferControlToOffscreen();
+      worker.onmessage = onMsg;
+      // Worker が動けなかったら、描く面を作り直してページの中で同じコードを動かす
+      worker.onerror = function () {
+        if (!worker) return;
+        worker.terminate(); worker = null;
+        var fresh = cv.cloneNode(false);
+        cv.replaceWith(fresh); cv = fresh;
+        Object.assign(init, sizeMsg());
+        runHere(fresh);
+        send({ type: 'progress', p: progress() });
+        if (finishing) send({ type: 'finish' });
+      };
+      port = worker;
+      init.canvas = off;
+      worker.postMessage(init, [off]);
+    } catch (_) { runHere(cv); }
+    started = true;
+    send({ type: 'progress', p: progress() });
+    // 図の位置と画面の大きさが変わったら知らせる
+    (function track() {
+      if (api.done) return;
+      var s = JSON.stringify(sizeMsg());
+      if (s !== lastKey) { lastKey = s; send(Object.assign({ type: 'size' }, JSON.parse(s))); }
+      requestAnimationFrame(track);
+    })();
   }
-  function finish() { api.done = true; root.classList.remove('w3k-wait', 'w3k-reveal'); }
-  function check() {
-    if (revealing || !(need.fonts && need.page && need.particles)) return;
-    var now = performance.now();
-    if (started && now - started < MIN_SHOWN) { setTimeout(check, MIN_SHOWN - (now - started)); return; }
+
+  function finish() {
+    api.done = true;
+    root.classList.remove('w3k-wait', 'w3k-reveal');
+    if (worker) { worker.terminate(); worker = null; } else send({ type: 'stop' });
+  }
+  function reveal(info) {
+    if (revealing) return;
     revealing = true;
-    // 本物の粒に「いまの集まり具合と角度」を渡してから幕を開ける
-    try { if (api.onReveal) api.onReveal({ shown: !!started, intro: started ? introAt(now) : 0, angle: started ? angleAt(now) : 0 }); } catch (_) {}
-    if (started) { root.classList.add('w3k-reveal'); setTimeout(finish, 750); } else finish();
+    try { if (api.onReveal) api.onReveal(info); } catch (_) {}
+    if (info.shown) { root.classList.add('w3k-reveal'); setTimeout(finish, 750); } else finish();
   }
-  api.particles = function () { need.particles = true; check(); };
-  if (document.fonts && document.fonts.load) document.fonts.load('600 16px Cormorant').then(function () { need.fonts = true; check(); }, function () { need.fonts = true; check(); });
-  else need.fonts = true;
-  if (document.readyState === 'complete') need.page = true;
-  else addEventListener('load', function () { need.page = true; check(); });
+  function revealFromLoader(m) {
+    // 輪の角度は Worker の時計の時刻つきで届くので、いまの時刻まで本物と同じ速さで進めて渡す
+    var nowAbs = performance.timeOrigin + performance.now();
+    reveal({ shown: true, intro: 1, angle: m.angle + (BASE * Math.max(0, nowAbs - m.at)) / 1000 });
+  }
+  function check() {
+    if (revealing || finishing || !(need.fonts && need.page && need.particles)) return;
+    if (!started) { reveal({ shown: false, intro: 0, angle: 0 }); return; }
+    // 100% まで進めて、輪が元の向きに戻り回転が落ち着いたら Worker から「ready」が届く
+    finishing = true;
+    send({ type: 'progress', p: 1 });
+    send({ type: 'finish' });
+    setTimeout(function () { reveal({ shown: false, intro: 0, angle: 0 }); }, 4000); // 合図が届かなかったとき
+  }
+  function pageDone() {
+    for (var n in parts) if (n !== 'particles') got[n] = true;
+    send({ type: 'progress', p: progress() });
+    need.page = true; check();
+  }
+
+  api.particles = function () { mark('particles'); need.particles = true; check(); };
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('600 16px Cormorant').then(function () { mark('cormorant.woff2'); need.fonts = true; check(); }, function () { need.fonts = true; check(); });
+  } else need.fonts = true;
+  if (document.readyState === 'complete') pageDone();
+  else addEventListener('load', pageDone);
   setTimeout(startLoader, Math.max(0, SHOW_AFTER - performance.now()));
   setTimeout(function () { need.fonts = need.page = need.particles = true; check(); }, Math.max(0, GIVE_UP - performance.now()));
   return api;
