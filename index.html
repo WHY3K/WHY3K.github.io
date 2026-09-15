@@ -24,7 +24,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915e'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915f'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -971,12 +971,8 @@ body.summon .sheet { opacity: 0 !important; transition: opacity .3s ease; }
     radial-gradient(110% 90% at 42% 40%, rgb(255 255 255 / .075), rgb(255 255 255 / 0) 62%),
     linear-gradient(112deg, transparent 36%, rgb(255 255 255 / .05) 45%, rgb(255 255 255 / .015) 53%, transparent 62%);
 }
-.w3k-sheen.hole {
-  -webkit-mask-image: radial-gradient(circle var(--r, 1px) at var(--x, 0) var(--y, 0), transparent 99%, #000 100%);
-  mask-image: radial-gradient(circle var(--r, 1px) at var(--x, 0) var(--y, 0), transparent 99%, #000 100%);
-}
-.w3k-ring { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 101; pointer-events: none; opacity: 0; border-radius: 50%;
-  border: 1px solid rgb(225 238 255 / .9); box-shadow: 0 0 26px 6px rgb(160 210 255 / .35), inset 0 0 44px 10px rgb(160 210 255 / .18); }
+/* 波の縁の光る輪。ぼかした影の要素を毎コマ大きくすると iOS で重いので、同じ見た目をキャンバスに描く（start() の paintRing） */
+.w3k-ring { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 101; pointer-events: none; visibility: hidden; display: block; }
 /* 写真だけは反転を打ち消して元の見た目に戻す */
 .p-inner { background: var(--frame), rgb(251 251 250 / .42); }
 html.glow .p-photo img { filter: invert(1) hue-rotate(180deg) grayscale(1) contrast(1.02); }
@@ -1509,7 +1505,7 @@ phase ...... hold</div>
 <div class="w3k-invert" aria-hidden="true"></div>
 <div class="w3k-uninvert" aria-hidden="true"></div>
 <div class="w3k-sheen" aria-hidden="true"></div>
-<div class="w3k-ring" aria-hidden="true"></div>
+<canvas class="w3k-ring" aria-hidden="true"></canvas>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -2094,13 +2090,43 @@ function start() {
   const root = document.documentElement;
   let glowState = 0, wave = null;
   // LIGHT → GLOW は反転の幕を円で広げ、GLOW → LIGHT は幕を置いたまま「元に戻す幕」を円で広げる（どちらも同じ円の切り抜きだけ）
+  // 波の縁の輪：もとの CSS（外 box-shadow 0 0 26px 6px ／内 inset 0 0 44px 10px ／1px の縁）を、ぼかし＝正規分布として描き直す
+  const ringCtx = ring.getContext("2d");
+  const phi = (x) => 1 / (1 + Math.exp(-1.702 * x));
+  const paintRing = (ctx, cx, cy, r) => {
+    const inner = Math.max(0, r - 60), outer = r + 40, peak = 1 - Math.exp(-Math.pow(Math.max(0, r - 10), 2) / 968);
+    const ds = [r - .01, r];
+    for (let i = 0; i <= 28; i++) ds.push(inner + ((outer - inner) * i) / 28);
+    ds.sort((a, b) => a - b);
+    const g = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer);
+    for (const d of ds) {
+      const a = d >= r ? .35 * phi((r + 6 - d) / 13) : .18 * (1 - (1 - phi((d - (r - 10)) / 22)) * peak);
+      g.addColorStop(Math.min(1, Math.max(0, (d - inner) / (outer - inner))), `rgba(160,210,255,${a.toFixed(3)})`);
+    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, outer, 0, Math.PI * 2);
+    if (inner > 0) { ctx.moveTo(cx + inner, cy); ctx.arc(cx, cy, inner, 0, Math.PI * 2, true); }
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(0, r - .5), 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(225,238,255,.9)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  };
+  const clearRing = () => { ringCtx.setTransform(1, 0, 0, 1, 0, 0); ringCtx.clearRect(0, 0, ring.width, ring.height); };
   const setWaveClip = (w) => {
-    const r = w.r, cx = w.cx, cy = w.cy, circle = `circle(${r}px at ${cx}px ${cy}px)`;
     const el = w.to ? veil : unveil;
-    el.style.webkitClipPath = el.style.clipPath = circle;
-    if (w.to) sheen.style.webkitClipPath = sheen.style.clipPath = circle;
-    else { sheen.style.setProperty("--r", `${Math.max(1, r)}px`); sheen.style.setProperty("--x", `${cx}px`); sheen.style.setProperty("--y", `${cy}px`); }
-    Object.assign(ring.style, { left: `${cx - r}px`, top: `${cy - r}px`, width: `${2 * r}px`, height: `${2 * r}px` });
+    el.style.webkitClipPath = el.style.clipPath = `circle(${w.r}px at ${w.cx}px ${w.cy}px)`;
+    // 光沢は切り抜かずに濃さだけ変える（白地に 7.5% の白なので見た目は同じで、描き直しが要らない）
+    const k = w.maxR ? w.r / w.maxR : 0;
+    sheen.style.opacity = w.to ? k : 1 - k;
+    const cw = ring.clientWidth || innerWidth, ch = ring.clientHeight || innerHeight, d = Math.min(devicePixelRatio || 1, 2);
+    const bw = Math.round(cw * d), bh = Math.round(ch * d);
+    if (ring.width !== bw || ring.height !== bh) { ring.width = bw; ring.height = bh; }
+    clearRing();
+    ringCtx.setTransform(bw / cw, 0, 0, bh / ch, 0, 0);
+    paintRing(ringCtx, w.cx, w.cy, w.r);
   };
   const finishWave = () => {
     if (!wave) return;
@@ -2111,9 +2137,10 @@ function start() {
     const v = glowState ? "visible" : "hidden";
     veil.style.visibility = sheen.style.visibility = v;
     unveil.style.visibility = "hidden";
-    sheen.classList.remove("hole");
-    for (const el of [veil, unveil, sheen]) el.style.webkitClipPath = el.style.clipPath = "";
-    ring.style.opacity = 0;
+    sheen.style.opacity = "";
+    for (const el of [veil, unveil]) el.style.webkitClipPath = el.style.clipPath = "";
+    ring.style.visibility = "hidden";
+    clearRing();
     root.classList.toggle("glow", !!glowState);
     wave = null;
   };
@@ -2134,11 +2161,10 @@ function start() {
     uniforms.uGlowIn.value = to;
     uniforms.uGlowOut.value = glowState;
     uniforms.uWaveO.value.set(cx, size()[1] - cy);
-    if (!to) sheen.classList.add("hole");
     setWaveClip(wave);
     if (to) veil.style.visibility = sheen.style.visibility = "visible";
     else unveil.style.visibility = "visible";
-    ring.style.opacity = 1;
+    ring.style.visibility = "visible";
   };
   const current = () => (wave ? wave.to : glowState);
   btn.addEventListener("click", () => { const r = btn.getBoundingClientRect(); setMode(!current(), r.left + r.width / 2, r.top + r.height / 2); });
