@@ -39,6 +39,14 @@
 
   body.insertBefore(el(nav + clock), body.firstChild);
 
+  /* ---------- 出ていくとき：白幕をふわっとかけてから移る（行き先では白から明ける／浮かび上がる） ---------- */
+  function leave(go) {
+    var w = document.querySelector('.warp');
+    if (!w || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) { go(); return; }
+    w.className = 'warp in';
+    setTimeout(go, 300);
+  }
+
   /* ---------- 戻る/進むボタン ---------- */
   (function () {
     var b = document.getElementById('histBack');
@@ -54,9 +62,9 @@
     }
     b.addEventListener('click', function () {
       try { sessionStorage.setItem('w3kBack', '1'); } catch (_) {}
-      history.back();
+      leave(function () { history.back(); });
     });
-    f.addEventListener('click', function () { history.forward(); });
+    f.addEventListener('click', function () { leave(function () { history.forward(); }); });
     update();
     window.addEventListener('pageshow', function (e) {
       update();
@@ -78,6 +86,20 @@
       /* 新しいタブ・別ウィンドウで開くときはこのページに留まるので立てない */
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       try { sessionStorage.setItem('w3kBack', '1'); } catch (_) {}
+    });
+  });
+
+  /* ---------- サイト内のページへのリンク（テーマの行・← THEMES・← HOME・ロゴ） ----------
+     ダウンロード（download 付き）・新しいタブ・外のサイト・同じページ内の移動はそのまま */
+  Array.prototype.forEach.call(document.querySelectorAll('a[href]'), function (a) {
+    var h = a.getAttribute('href');
+    if (!h || h.charAt(0) === '#' || a.hasAttribute('download') || a.target === '_blank') return;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(h) && h.indexOf(location.origin) !== 0) return;
+    a.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      var to = a.href; /* 手元で直接開いたときの書き換え（local-preview.js）を反映した行き先を、押した時点で読む */
+      leave(function () { location.href = to; });
     });
   });
 

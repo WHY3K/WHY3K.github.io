@@ -137,6 +137,8 @@ body {
   background: var(--paper);
   opacity: 0; visibility: hidden; pointer-events: none;
 }
+/* 出ていくとき：白幕をふわっとかけてから次のページへ（PLUGINS の戻るボタンと同じ速さ） */
+.warp.in { visibility: visible; opacity: 1; transition: opacity .28s ease; }
 .warp.out { visibility: visible; opacity: 0 !important; transition: opacity .34s ease; }
 html.backnav .warp { visibility: visible; opacity: 1; }
 
