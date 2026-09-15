@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915l'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915m'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -1029,7 +1029,7 @@ window.W3KLoad = (function () {
     let cv, ctx, W = 1, H = 1, DPR = 1, mobile = true, fig = null, P;
     let pTarget, lastTarget, pShown, creep, finishing, finishAt, readySent, pulse, angle, boost, last, born, theta;
     let style = { font: "wide" }, stopped = false;
-    let gauge, gctx, ghost, hctx, gl, move = 0, VH = 0, shown = false, shownAt = 0;
+    let gauge, gctx, ghost, hctx, gl, VH = 0, shown = false, shownAt = 0;
     const mkCanvas = (w, h) => { if (typeof OffscreenCanvas !== "undefined") return new OffscreenCanvas(w, h); const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
     // Worker の中でも字を使えるように、フォントを自分で読み込む
     function loadFonts(list) {
@@ -1040,7 +1040,7 @@ window.W3KLoad = (function () {
 
     function reset() {
       pTarget = 0; lastTarget = 0; pShown = 0; creep = 0; finishing = false; finishAt = 0; readySent = false; pulse = -1;
-      angle = 0; boost = 1.1; move = 0; last = now(); born = last; theta = new Float32Array(RINGS.length + 1);
+      angle = 0; boost = 1.1; last = now(); born = last; theta = new Float32Array(RINGS.length + 1);
       gl = { next: last + 900, until: 0, frame: 0, on: false, done100: false, jx: 0, skew: 0, r: [0, 0], rx: 0, g: [0, 0], gx: 0, scramble: false };
     }
     function build() {
@@ -1083,7 +1083,6 @@ window.W3KLoad = (function () {
       if (finishing && pShown > .9995) pShown = 1;
       // 輪全体は速めに回り、仕上げで本物と同じ速さまで落とす
       if (finishing) boost *= Math.exp(-dt * 2.4);
-      if (finishing) move = Math.min(1, move + dt / .9); // スマホ：画面の真ん中から図の位置へ移る
       angle += (BASE + boost) * dt;
       // 楕円ごとに勝手に回り、終盤で元の向きへ戻って止まる（奥行きにも傾いているので、同じ形になるのは360度ごと）
       const run = 1 - smooth(.72, .93, pShown), pull = finishing && pShown > .99 ? 10 : 6 * clamp01((pShown - .8) / .15);
@@ -1109,7 +1108,7 @@ window.W3KLoad = (function () {
         gl.g = band(); gl.gx = sign() * (2 + Math.random() * 2);
         gl.scramble = Math.random() < .35;
       }
-      let settled = pulse === 1 && boost < .03 && move === 1 && t - finishAt > 900;
+      let settled = pulse === 1 && boost < .03 && t - finishAt > 900;
       for (let k = 0; k <= AXIS && settled; k++) if (Math.abs(Math.round(theta[k] / TAU) * TAU - theta[k]) > .003) settled = false;
       if (finishing && settled && !readySent) { readySent = true; port.postMessage({ type: "ready", angle, at: t }); }
     }
@@ -1129,8 +1128,8 @@ window.W3KLoad = (function () {
       ctx.clearRect(0, 0, W, H);
       const fw = fig ? fig.width : Math.min(W * .92, 540), figX = fig ? fig.left + fig.width / 2 : W / 2;
       const figY = fig ? fig.top + fig.height / 2 : H * .38, midY = (VH || H) / 2;
-      // スマホは読み込み中は見えている画面の真ん中に置き、仕上げで図の位置へ移ってから本物の粒に引き継ぐ
-      const mv = mobile ? e3(move) : 1, fcx = W / 2 + (figX - W / 2) * mv, fcy = midY + (figY - midY) * mv;
+      // スマホは粒の輪もゲージも最後まで見えている画面の真ん中に置く（本物の粒は図の位置に浮かび上がって入れ替わる）
+      const fcx = mobile ? W / 2 : figX, fcy = mobile ? midY : figY;
       const wpp = VIS / H, pk = pulse >= 0 && pulse < 1 ? Math.sin(pulse * Math.PI) : 0;
       const sc = (.72 * fw * wpp) / 2.43, gx = (fcx - W / 2) * wpp, gy = -(fcy - H / 2) * wpp;
       const c = Math.cos(angle), s = Math.sin(angle), A = P.A, D = P.D, L = P.L;
@@ -1161,8 +1160,7 @@ window.W3KLoad = (function () {
       }
       // ゲージ：図面の目盛りのような細い線と、3桁の数字
       // ゲージ：輪の真ん中に丸いゲージ。墨の線が12時から時計回りに進み、ときどきロゴと同じグリッチが走る
-      // スマホはゲージだけ最後まで画面の真ん中に置く（輪は仕上げで図の位置へ移り、本物の粒に重ねて引き継ぐ）
-      const gcx = mobile ? W / 2 : fcx, gcy = mobile ? midY : fcy;
+            const gcx = fcx, gcy = fcy;
       const R = Math.round(Math.min(56, Math.max(34, fw * .12))), dev = bw / W, a0 = ctx.globalAlpha;
       // 数字が粒に埋もれないよう、中だけ紙の色でうっすら抜く（ここはグリッチさせない）
       const halo = ctx.createRadialGradient(gcx, gcy, 0, gcx, gcy, R * 1.05);
