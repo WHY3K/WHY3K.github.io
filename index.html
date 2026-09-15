@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915j'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915k'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -61,8 +61,11 @@ if (!document.documentElement.classList.contains('backnav')) document.documentEl
 <style>
   .w3k-cover, .w3k-loader { display: none; }
   html.w3k-wait .w3k-cover { display: block; position: fixed; left: 0; top: 0; right: 0; height: 100vh; height: 100lvh; z-index: 300; background: #fbfbfa; transition: opacity .7s ease; }
-  html.w3k-wait .w3k-loader { display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 301; pointer-events: none; transition: opacity .7s ease; }
-  html.w3k-reveal .w3k-cover, html.w3k-reveal .w3k-loader { opacity: 0; pointer-events: none; }
+  html.w3k-wait .w3k-loader { display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 301; pointer-events: none; opacity: 0; }
+  html.w3k-wait.w3k-show .w3k-loader { opacity: 1; transition: opacity .2s ease; }
+  html.w3k-wait.w3k-reveal .w3k-cover, html.w3k-wait.w3k-show.w3k-reveal .w3k-loader { opacity: 0; pointer-events: none; transition: opacity .7s ease; }
+  /* 待っている間は幕の裏のページを描かない（配置は残すので図の位置は測れる）。幕が開く瞬間に戻す */
+  html.w3k-wait:not(.w3k-reveal) body > :not(.w3k-cover):not(.w3k-loader):not(.w3k-particles) { visibility: hidden; }
 </style>
 <!-- 粒の three.js は自分のサイトに置いた圧縮版。HTML と同時に取りに行かせる -->
 <link rel="modulepreload" href="assets/vendor/three/three.core.min.js">
@@ -1026,7 +1029,7 @@ window.W3KLoad = (function () {
     let cv, ctx, W = 1, H = 1, DPR = 1, mobile = true, fig = null, P;
     let pTarget, lastTarget, pShown, creep, finishing, finishAt, readySent, pulse, angle, boost, last, born, theta;
     let style = { font: "wide" }, stopped = false;
-    let gauge, gctx, ghost, hctx, gl, move = 0, VH = 0;
+    let gauge, gctx, ghost, hctx, gl, move = 0, VH = 0, shown = false, shownAt = 0;
     const mkCanvas = (w, h) => { if (typeof OffscreenCanvas !== "undefined") return new OffscreenCanvas(w, h); const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
     // Worker の中でも字を使えるように、フォントを自分で読み込む
     function loadFonts(list) {
@@ -1073,7 +1076,9 @@ window.W3KLoad = (function () {
       // ゲージ：届いた分まで進み、止まっている間も少しずつ進む（ただし 96% で待つ）
       if (pTarget > lastTarget) { lastTarget = pTarget; creep = 0; }
       creep = Math.min(.05, creep + dt * .006);
-      const cap = finishing ? 1 : Math.min(.96, pTarget + creep);
+      // 届いたものが止まっていても、見せ始めてからの時間でゆっくり進む（2秒で約55%、その後は 92% に近づく）
+      const timed = shown ? .92 * (1 - Math.exp(-(t - shownAt) / 2200)) : 0;
+      const cap = finishing ? 1 : Math.min(.96, Math.max(pTarget, timed) + creep);
       pShown = Math.max(pShown, pShown + (cap - pShown) * (1 - Math.exp(-dt * (finishing ? 5 : 2.4))));
       if (finishing && pShown > .9995) pShown = 1;
       // 輪全体は速めに回り、仕上げで本物と同じ速さまで落とす
@@ -1134,7 +1139,7 @@ window.W3KLoad = (function () {
         const a = (k < AXIS ? (RINGS[k][2] * Math.PI) / 180 : 0) + (k <= AXIS ? theta[k] : 0);
         lc[k] = Math.cos(a); ls[k] = Math.sin(a);
       }
-      ctx.globalAlpha = clamp01((t - born) / 400);
+      ctx.globalAlpha = clamp01((t - born) / 200);
       for (let g = 0; g < P.groups.length; g++) {
         const list = P.groups[g];
         ctx.beginPath();
@@ -1228,8 +1233,7 @@ window.W3KLoad = (function () {
       last = t;
       if (!ctx) return;
       if (stopped) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); return; }
-      step(dt, t);
-      draw(t);
+      if (shown) { step(dt, t); draw(t); } // 合図が来るまでは準備だけして描かない
       raf(frame);
     }
 
@@ -1246,18 +1250,22 @@ window.W3KLoad = (function () {
       else if (m.type === "finish") { if (!finishing) { finishing = true; finishAt = now(); pTarget = 1; } }
       else if (m.type === "reset") reset();
       else if (m.type === "stop") stopped = true;
+      else if (m.type === "show" && !shown) { shown = true; shownAt = born = last = now(); gl.next = shownAt + 900; }
     };
   }
 
-  var SHOW_AFTER = 600;   // これより早く準備できたら待ち画面は出さない（2回目以降など）
+  var SHOW_AFTER = 300;   // これより早く準備できたら待ち画面は出さない（2回目以降など）。描画係はその前から裏で起こしておく
   var GIVE_UP = 12000;    // 何かが届かなくても、この時間で開く
   var BASE = .12;         // 本物の粒の輪の回転（毎秒 0.12）
   var need = { fonts: false, page: false, particles: false };
   var started = false, finishing = false, revealing = false, port = null, worker = null, cv = null, lastKey = '';
 
-  // ゲージの進み：届くものの重さ（KB）で割り振る。ページ本体は届いた時点で済み、最後に粒の組み立てを足す
-  var parts = { html: 20, 'cormorant.woff2': 35, 'three.core.min.js': 100, 'three.module.min.js': 86, 'ring_system.webp': 56, 'glass_knot.webp': 39,
-    'schematic.svg': 35, 'blade_cluster.webp': 30, 'artist.jpg': 30, 'glass_sphere.webp': 13, 'amber_beads.webp': 6, 'glass_debris.webp': 5, 'qr.svg': 3, particles: 40 };
+  // ゲージの進み：届くもの（約45%）と、粒の準備の3段階（約55%＝three.js の読み込み・形づくり・最初の描画）。
+  // 2回目以降は届くものが一瞬で済み、スマホでは粒の準備の方が長いので、準備の方に多く割り振る
+  var parts = { html: 10, 'cormorant.woff2': 12, 'three.core.min.js': 30, 'three.module.min.js': 26, 'ring_system.webp': 16, 'glass_knot.webp': 11,
+    'schematic.svg': 10, 'blade_cluster.webp': 9, 'artist.jpg': 9, 'glass_sphere.webp': 4, 'amber_beads.webp': 2, 'glass_debris.webp': 2, 'qr.svg': 1,
+    three: 60, shapes: 50, particles: 60 };
+  var STAGES = { three: true, shapes: true, particles: true };
   var got = { html: true }, total = 0;
   for (var key in parts) total += parts[key];
   function progress() { var s = 0; for (var n in got) s += parts[n] || 0; return Math.min(1, s / total); }
@@ -1307,13 +1315,13 @@ window.W3KLoad = (function () {
         Object.assign(init, sizeMsg());
         runHere(fresh);
         send({ type: 'progress', p: progress() });
+        if (started) send({ type: 'show' });
         if (finishing) send({ type: 'finish' });
       };
       port = worker;
       init.canvas = off;
       worker.postMessage(init, [off]);
     } catch (_) { runHere(cv); }
-    started = true;
     send({ type: 'progress', p: progress() });
     // 図の位置と画面の大きさが変わったら知らせる
     (function track() {
@@ -1324,9 +1332,15 @@ window.W3KLoad = (function () {
     })();
   }
 
+  function showLoader() {
+    if (revealing || api.done || !port) return;
+    started = true;
+    root.classList.add('w3k-show');
+    send({ type: 'show' });
+  }
   function finish() {
     api.done = true;
-    root.classList.remove('w3k-wait', 'w3k-reveal');
+    root.classList.remove('w3k-wait', 'w3k-reveal', 'w3k-show');
     if (worker) { worker.terminate(); worker = null; } else send({ type: 'stop' });
   }
   function reveal(info) {
@@ -1350,18 +1364,20 @@ window.W3KLoad = (function () {
     setTimeout(function () { reveal({ shown: false, intro: 0, angle: 0 }); }, 4000); // 合図が届かなかったとき
   }
   function pageDone() {
-    for (var n in parts) if (n !== 'particles') got[n] = true;
+    for (var n in parts) if (!STAGES[n]) got[n] = true;
     send({ type: 'progress', p: progress() });
     need.page = true; check();
   }
 
+  api.stage = function (name) { mark(name); };
   api.particles = function () { mark('particles'); need.particles = true; check(); };
   if (document.fonts && document.fonts.load) {
     document.fonts.load('600 16px Cormorant').then(function () { mark('cormorant.woff2'); need.fonts = true; check(); }, function () { need.fonts = true; check(); });
   } else need.fonts = true;
   if (document.readyState === 'complete') pageDone();
   else addEventListener('load', pageDone);
-  setTimeout(startLoader, Math.max(0, SHOW_AFTER - performance.now()));
+  setTimeout(startLoader, 0);
+  setTimeout(showLoader, Math.max(0, SHOW_AFTER - performance.now()));
   setTimeout(function () { need.fonts = need.page = need.particles = true; check(); }, Math.max(0, GIVE_UP - performance.now()));
   return api;
 })();
@@ -2231,6 +2247,9 @@ document.addEventListener('touchstart', function () {}, { passive: true });
 /* ===== 背景の粒（リメイク試作3）。既存の演出には触らず、図とアーティスト欄の位置を読んで重ねる ===== */
 // three.js は自分のサイトに置いた圧縮版（外部サイトへの接続が要らない）。手元で index.html を直接開いたとき（file://）はモジュールを読めないので CDN から
 const THREE = await import(location.protocol === "file:" ? "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.min.js" : "./assets/vendor/three/three.module.min.js");
+window.W3KLoad?.stage?.("three");
+// 重い下ごしらえの合間に処理を明け渡す（待ち画面のゲージと粒を描き進めさせる）
+const tick = () => new Promise((r) => setTimeout(r, 0));
 
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const MOBILE = matchMedia("(max-width: 999px), (hover: none) and (pointer: coarse)").matches;
@@ -2401,7 +2420,7 @@ const fragmentShader = `
   }
 `;
 
-function start() {
+async function start() {
   const canvas = document.querySelector(".w3k-particles");
   const fig = document.getElementById("fig");
   const photo = document.querySelector(".p-photo");
@@ -2435,7 +2454,12 @@ function start() {
     const gk = R();
     glowCol.set(gk < .5 ? [.86, .89, 1] : gk < .72 ? [.52, .82, 1] : gk < .92 ? iri[(R() * iri.length) | 0].map((v) => Math.min(1, v * 1.15)) : [.76, .66, 1], i * 3);
   }
-  const aB = pick(orbitShape()), aC = pick(plantShape());
+  await tick();
+  const aB = pick(orbitShape());
+  await tick();
+  const aC = pick(plantShape());
+  window.W3KLoad?.stage?.("shapes");
+  await tick();
   geo.setAttribute("position", new THREE.BufferAttribute(aB.slice(), 3));
   geo.setAttribute("aB", new THREE.BufferAttribute(aB, 3));
   geo.setAttribute("aC", new THREE.BufferAttribute(aC, 3));
@@ -2563,6 +2587,8 @@ function start() {
   const frame = (now) => {
     requestAnimationFrame(frame);
     if (document.hidden) return;
+    // 読み込み待ちの幕の裏では、1枚目を描いたら幕が開くまで描かない（待ち画面に処理を回す）
+    if (drawn && !revealed) return;
     const dt = Math.min(.1, (now - last) / 1000);
     last = now;
     const [W, H] = size(), wpp = vis / H;
@@ -2622,10 +2648,11 @@ function start() {
     renderer.render(scene, camera);
     if (!drawn) { drawn = true; window.W3KLoad?.particles(); }
   };
-  let drawn = false;
+  let drawn = false, revealed = !(window.W3KLoad && !window.W3KLoad.done);
   // 読み込み待ちの幕が開くとき：待ち画面の粒の輪から、集まり具合と回転の角度をそろえて引き継ぐ。待ち画面を出さなかったときは、見える瞬間から集まり始める
   const L = window.W3KLoad;
   if (L && !L.done) L.onReveal = (info) => {
+    revealed = true;
     const now = performance.now();
     if (info.shown) {
       introT0 = now - 200 - info.intro * 2600;
@@ -2636,7 +2663,7 @@ function start() {
   return true;
 }
 // 粒が出せない（WebGL なし等）ときも、待ちの幕は開ける
-if (!start()) window.W3KLoad?.particles();
+start().then((ok) => { if (!ok) window.W3KLoad?.particles(); }, () => window.W3KLoad?.particles());
 </script>
 </body>
 </html>
