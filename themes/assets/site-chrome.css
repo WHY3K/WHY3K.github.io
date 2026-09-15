@@ -101,6 +101,36 @@ body {
   .topnav .hist { position: absolute; top: 8px; right: 18px; }
 }
 
+/* ---- 入ってきたときの浮かび上がり（WHY3K PLUGINS と同じ動き） ----
+   ページの塊が下から少し浮き上がりながら、0.08 秒ずつずらして現れる。
+   アニメーションは始まる前だけ効かせ（backwards）、終わったら元の見た目に戻すので、ホバーの動きとぶつからない。 */
+@keyframes w3kRise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wrap > *, body > footer, .list > .item { animation: w3kRise .65s cubic-bezier(.2, .65, .3, 1) backwards; }
+  .wrap > *:nth-child(1) { animation-delay: 0.00s; }
+  .wrap > *:nth-child(2) { animation-delay: 0.08s; }
+  .wrap > *:nth-child(3) { animation-delay: 0.16s; }
+  .wrap > *:nth-child(4) { animation-delay: 0.24s; }
+  .wrap > *:nth-child(5) { animation-delay: 0.32s; }
+  .wrap > *:nth-child(6) { animation-delay: 0.40s; }
+  .wrap > *:nth-child(7) { animation-delay: 0.48s; }
+  .wrap > *:nth-child(8) { animation-delay: 0.56s; }
+  .wrap > *:nth-child(n + 9) { animation-delay: .64s; }
+  .list > .item:nth-child(1) { animation-delay: 0.24s; }
+  .list > .item:nth-child(2) { animation-delay: 0.32s; }
+  .list > .item:nth-child(3) { animation-delay: 0.40s; }
+  .list > .item:nth-child(4) { animation-delay: 0.48s; }
+  .list > .item:nth-child(5) { animation-delay: 0.56s; }
+  .list > .item:nth-child(6) { animation-delay: 0.64s; }
+  .list > .item:nth-child(7) { animation-delay: 0.72s; }
+  .list > .item:nth-child(8) { animation-delay: 0.80s; }
+  .list > .item:nth-child(n + 9) { animation-delay: .88s; }
+  body > footer { animation-delay: .5s; }
+}
+
 /* ---- 入場の白幕（トップから来たときに白から現れる） ---- */
 .warp {
   position: fixed; inset: 0; z-index: 99;
