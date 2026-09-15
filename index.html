@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915k'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915l'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -1161,12 +1161,14 @@ window.W3KLoad = (function () {
       }
       // ゲージ：図面の目盛りのような細い線と、3桁の数字
       // ゲージ：輪の真ん中に丸いゲージ。墨の線が12時から時計回りに進み、ときどきロゴと同じグリッチが走る
+      // スマホはゲージだけ最後まで画面の真ん中に置く（輪は仕上げで図の位置へ移り、本物の粒に重ねて引き継ぐ）
+      const gcx = mobile ? W / 2 : fcx, gcy = mobile ? midY : fcy;
       const R = Math.round(Math.min(56, Math.max(34, fw * .12))), dev = bw / W, a0 = ctx.globalAlpha;
       // 数字が粒に埋もれないよう、中だけ紙の色でうっすら抜く（ここはグリッチさせない）
-      const halo = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, R * 1.05);
+      const halo = ctx.createRadialGradient(gcx, gcy, 0, gcx, gcy, R * 1.05);
       halo.addColorStop(0, "rgba(251,251,250,.92)"); halo.addColorStop(.72, "rgba(251,251,250,.8)"); halo.addColorStop(1, "rgba(251,251,250,0)");
       ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(fcx, fcy, R * 1.05, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(gcx, gcy, R * 1.05, 0, TAU); ctx.fill();
 
       // ゲージは小さな下書き用キャンバスに描いてから貼る（グリッチで帯に切ってずらすため）
       const box = R * 2 + 64, px = Math.ceil(box * dev);
@@ -1206,11 +1208,11 @@ window.W3KLoad = (function () {
       write(lab, c0 - widthOf(lab, 1.8) / 2, baseY + 12, 1.8);
 
       // 貼る：ふだんはそのまま。グリッチ中はロゴと同じく「本体を横に揺らして傾ける＋赤と灰の残像を帯で切ってずらす」
-      const left = fcx - box / 2, topY = fcy - box / 2;
+      const left = gcx - box / 2, topY = gcy - box / 2;
       if (!gl.on) ctx.drawImage(gauge, left, topY, box, box);
       else {
         ctx.save();
-        ctx.translate(fcx, fcy); ctx.transform(1, 0, gl.skew, 1, 0, 0); ctx.translate(-fcx, -fcy);
+        ctx.translate(gcx, gcy); ctx.transform(1, 0, gl.skew, 1, 0, 0); ctx.translate(-gcx, -gcy);
         ctx.drawImage(gauge, left + gl.jx, topY, box, box);
         ctx.restore();
         const ghostBand = (color, b, dx, alpha) => {
