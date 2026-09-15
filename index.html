@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915g'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915h'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -815,7 +815,7 @@ if (!document.documentElement.classList.contains('backnav')) document.documentEl
       border: 1px solid var(--line);
     }
     .links::before {
-      content: "contents — 10 entries";
+      content: "contents — 11 entries"; /* 索引の行数を手で書いている。行を足したらここも数え直す */
       display: block;
       flex: 0 0 auto;              /* 見出しは縮めない */
       font-family: var(--mono);
@@ -1568,6 +1568,9 @@ phase ...... hold</div>
 
     <!-- TOOLS（紹介ページ稼働中・配布は準備中） -->
     <a class="link primary" href="/tools/"><span class="idx">10</span> ABLETON → FL <span class="lead"></span><span class="mk">→</span></a>
+
+    <!-- RoomTone（部屋の音を測る自作アプリ・Cloudflare Pages で公開中） -->
+    <a class="link primary" href="https://room-db-tk.pages.dev/"><span class="idx">11</span> RoomTone <span class="lead"></span><span class="mk">→</span></a>
   </nav>
 </main>
 
@@ -1869,7 +1872,8 @@ document.addEventListener('touchstart', function () {}, { passive: true });
       window.location.href = href;
     }, tGo);
   }
-  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"], a[href^="/themes/"], a[href^="/tools/"]').forEach(function (a) {
+  /* 出発の演出を付けるリンク。RoomTone（外のサイト）も索引の仲間なので同じ演出にそろえる */
+  document.querySelectorAll('a[href^="https://why3k.github.io/why3k-plugins"], a[href^="/themes/"], a[href^="/tools/"], a[href^="https://room-db-tk.pages.dev"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       if (reduce) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey) return;
