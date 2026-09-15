@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915m'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915n'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -63,9 +63,11 @@ if (!document.documentElement.classList.contains('backnav')) document.documentEl
   html.w3k-wait .w3k-cover { display: block; position: fixed; left: 0; top: 0; right: 0; height: 100vh; height: 100lvh; z-index: 300; background: #fbfbfa; transition: opacity .7s ease; }
   html.w3k-wait .w3k-loader { display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 301; pointer-events: none; opacity: 0; }
   html.w3k-wait.w3k-show .w3k-loader { opacity: 1; transition: opacity .2s ease; }
-  html.w3k-wait.w3k-reveal .w3k-cover, html.w3k-wait.w3k-show.w3k-reveal .w3k-loader { opacity: 0; pointer-events: none; transition: opacity .7s ease; }
-  /* 待っている間は幕の裏のページを描かない（配置は残すので図の位置は測れる）。幕が開く瞬間に戻す */
-  html.w3k-wait:not(.w3k-reveal) body > :not(.w3k-cover):not(.w3k-loader):not(.w3k-particles) { visibility: hidden; }
+  /* 100% のあと：待ち画面の輪とゲージを先に 0.6 秒で消し、紙の幕はあとから 1.2 秒かけて消す（ホームがふわっと浮かび上がる） */
+  html.w3k-wait.w3k-show.w3k-reveal .w3k-loader { opacity: 0; pointer-events: none; transition: opacity .6s ease; }
+  html.w3k-wait.w3k-reveal .w3k-cover { opacity: 0; pointer-events: none; transition: opacity 1.2s cubic-bezier(.3, .1, .3, 1) .25s; }
+  /* 待っている間は幕の裏のページを描かない（配置は残すので図の位置は測れる）。幕を開ける少し前に戻し、幕の裏で描き終えておく */
+  html.w3k-wait:not(.w3k-unhide) body > :not(.w3k-cover):not(.w3k-loader):not(.w3k-particles) { visibility: hidden; }
 </style>
 <!-- 粒の three.js は自分のサイトに置いた圧縮版。HTML と同時に取りに行かせる -->
 <link rel="modulepreload" href="assets/vendor/three/three.core.min.js">
@@ -1340,14 +1342,19 @@ window.W3KLoad = (function () {
   }
   function finish() {
     api.done = true;
-    root.classList.remove('w3k-wait', 'w3k-reveal', 'w3k-show');
+    root.classList.remove('w3k-wait', 'w3k-reveal', 'w3k-show', 'w3k-unhide');
     if (worker) { worker.terminate(); worker = null; } else send({ type: 'stop' });
   }
   function reveal(info) {
     if (revealing) return;
     revealing = true;
     try { if (api.onReveal) api.onReveal(info); } catch (_) {}
-    if (info.shown) { root.classList.add('w3k-reveal'); setTimeout(finish, 750); } else finish();
+    if (!info.shown) { finish(); return; }
+    // まず幕の裏でページを描かせる（一気に描き直す重さで幕の消え始めがカクつかないように）→ それから幕を開ける
+    root.classList.add('w3k-unhide');
+    requestAnimationFrame(function () {
+      setTimeout(function () { root.classList.add('w3k-reveal'); setTimeout(finish, 1600); }, 150);
+    });
   }
   function revealFromLoader(m) {
     // 輪の角度は Worker の時計の時刻つきで届くので、いまの時刻まで本物と同じ速さで進めて渡す
