@@ -24,7 +24,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915d'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915e'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -955,13 +955,25 @@ body.summon .sheet { opacity: 0 !important; transition: opacity .3s ease; }
 /* ===== 背景の粒：図の後ろの輪 → アーティスト欄で植物。LIGHT/GLOW で全体を反転 ===== */
 .w3k-particles { position: fixed; inset: 0; width: 100%; height: 100lvh; z-index: 0; pointer-events: none; display: block; }
 /* 光る世界：ページ全体を後ろから反転する幕。既存の色指定には触らずに暗い世界にできる */
-.w3k-invert {
+/* iOS Safari は反転の幕に切り抜きを「足す/外す」瞬間に反転が一瞬抜けてチラつく。切り抜きは常に付けておき、値だけ変える */
+.w3k-invert, .w3k-uninvert {
   position: fixed; inset: 0; z-index: 100; pointer-events: none; visibility: hidden;
   -webkit-backdrop-filter: invert(1) hue-rotate(180deg);
   backdrop-filter: invert(1) hue-rotate(180deg);
+  -webkit-clip-path: circle(150% at 50% 50%); clip-path: circle(150% at 50% 50%);
+}
+/* GLOW → LIGHT：幕に穴をあける（複雑な形の切り抜きは iOS で重くチラつく）代わりに、反転を元に戻す幕を円で広げる */
+.w3k-uninvert { -webkit-clip-path: circle(0px at 0 0); clip-path: circle(0px at 0 0); }
+/* 光る世界のうっすらした光沢。幕とは別の層にして、戻す幕に一緒に反転されないようにする */
+.w3k-sheen {
+  position: fixed; inset: 0; z-index: 100; pointer-events: none; visibility: hidden;
   background:
     radial-gradient(110% 90% at 42% 40%, rgb(255 255 255 / .075), rgb(255 255 255 / 0) 62%),
     linear-gradient(112deg, transparent 36%, rgb(255 255 255 / .05) 45%, rgb(255 255 255 / .015) 53%, transparent 62%);
+}
+.w3k-sheen.hole {
+  -webkit-mask-image: radial-gradient(circle var(--r, 1px) at var(--x, 0) var(--y, 0), transparent 99%, #000 100%);
+  mask-image: radial-gradient(circle var(--r, 1px) at var(--x, 0) var(--y, 0), transparent 99%, #000 100%);
 }
 .w3k-ring { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 101; pointer-events: none; opacity: 0; border-radius: 50%;
   border: 1px solid rgb(225 238 255 / .9); box-shadow: 0 0 26px 6px rgb(160 210 255 / .35), inset 0 0 44px 10px rgb(160 210 255 / .18); }
@@ -1495,6 +1507,8 @@ phase ...... hold</div>
 <!-- 光り方の切り替え（G キーでも可）と、そのための反転の幕・波の輪 -->
 <button class="w3k-mode" type="button" aria-label="光り方の切り替え（G キーでも切り替え）" aria-pressed="false"><span>light</span><span>glow</span></button>
 <div class="w3k-invert" aria-hidden="true"></div>
+<div class="w3k-uninvert" aria-hidden="true"></div>
+<div class="w3k-sheen" aria-hidden="true"></div>
 <div class="w3k-ring" aria-hidden="true"></div>
 
 <script>
@@ -2015,6 +2029,8 @@ function start() {
   const prof = document.querySelector(".profile");
   const btn = document.querySelector(".w3k-mode");
   const veil = document.querySelector(".w3k-invert");
+  const unveil = document.querySelector(".w3k-uninvert");
+  const sheen = document.querySelector(".w3k-sheen");
   const ring = document.querySelector(".w3k-ring");
   if (!canvas || !fig || !photo || !prof) return;
   let renderer;
@@ -2077,11 +2093,13 @@ function start() {
   /* LIGHT / GLOW：押した場所から円い波。円の内側からページ全体が反転し、粒は光る */
   const root = document.documentElement;
   let glowState = 0, wave = null;
+  // LIGHT → GLOW は反転の幕を円で広げ、GLOW → LIGHT は幕を置いたまま「元に戻す幕」を円で広げる（どちらも同じ円の切り抜きだけ）
   const setWaveClip = (w) => {
-    const W = innerWidth, H = innerHeight, r = w.r, cx = w.cx, cy = w.cy;
-    veil.style.clipPath = w.to
-      ? `circle(${r}px at ${cx}px ${cy}px)`
-      : `path(evenodd, "M0 0H${W}V${H}H0Z M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z")`;
+    const r = w.r, cx = w.cx, cy = w.cy, circle = `circle(${r}px at ${cx}px ${cy}px)`;
+    const el = w.to ? veil : unveil;
+    el.style.webkitClipPath = el.style.clipPath = circle;
+    if (w.to) sheen.style.webkitClipPath = sheen.style.clipPath = circle;
+    else { sheen.style.setProperty("--r", `${Math.max(1, r)}px`); sheen.style.setProperty("--x", `${cx}px`); sheen.style.setProperty("--y", `${cy}px`); }
     Object.assign(ring.style, { left: `${cx - r}px`, top: `${cy - r}px`, width: `${2 * r}px`, height: `${2 * r}px` });
   };
   const finishWave = () => {
@@ -2089,8 +2107,12 @@ function start() {
     glowState = wave.to;
     uniforms.uGlowIn.value = uniforms.uGlowOut.value = glowState;
     uniforms.uWaveOn.value = 0;
-    veil.style.clipPath = "";
-    veil.style.visibility = glowState ? "visible" : "hidden";
+    // 見た目が変わらない順に：幕を出し入れしてから、切り抜きを CSS の既定（全面／なし）に戻す
+    const v = glowState ? "visible" : "hidden";
+    veil.style.visibility = sheen.style.visibility = v;
+    unveil.style.visibility = "hidden";
+    sheen.classList.remove("hole");
+    for (const el of [veil, unveil, sheen]) el.style.webkitClipPath = el.style.clipPath = "";
     ring.style.opacity = 0;
     root.classList.toggle("glow", !!glowState);
     wave = null;
@@ -2103,7 +2125,7 @@ function start() {
     if (REDUCED) {
       glowState = to;
       uniforms.uGlowIn.value = uniforms.uGlowOut.value = to;
-      veil.style.visibility = to ? "visible" : "hidden";
+      veil.style.visibility = sheen.style.visibility = to ? "visible" : "hidden";
       root.classList.toggle("glow", !!to);
       return;
     }
@@ -2112,8 +2134,10 @@ function start() {
     uniforms.uGlowIn.value = to;
     uniforms.uGlowOut.value = glowState;
     uniforms.uWaveO.value.set(cx, size()[1] - cy);
+    if (!to) sheen.classList.add("hole");
     setWaveClip(wave);
-    veil.style.visibility = "visible";
+    if (to) veil.style.visibility = sheen.style.visibility = "visible";
+    else unveil.style.visibility = "visible";
     ring.style.opacity = 1;
   };
   const current = () => (wave ? wave.to : glowState);
@@ -2181,7 +2205,8 @@ function start() {
       uniforms.uWaveR.value = wave.r;
       uniforms.uWaveOn.value = Math.min(1, wt * 8) * (1 - clamp01((wt - .85) / .15));
       setWaveClip(wave);
-      if (!wave.flipped && wt >= .5) { wave.flipped = true; root.classList.toggle("glow", !!wave.to); }
+      // 写真の反転の打ち消しは、波が写真の真ん中に届いた瞬間に入れ替える（時間の半分で替えると、円の中の写真が一瞬ネガになる）
+      if (!wave.flipped && wave.r >= Math.hypot(pr.left + pr.width / 2 - wave.cx, pr.top + pr.height / 2 - wave.cy)) { wave.flipped = true; root.classList.toggle("glow", !!wave.to); }
       if (wt >= 1) finishWave();
     }
     renderer.render(scene, camera);
