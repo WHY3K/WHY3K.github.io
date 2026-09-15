@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915n'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260915o'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -1130,8 +1130,8 @@ window.W3KLoad = (function () {
       ctx.clearRect(0, 0, W, H);
       const fw = fig ? fig.width : Math.min(W * .92, 540), figX = fig ? fig.left + fig.width / 2 : W / 2;
       const figY = fig ? fig.top + fig.height / 2 : H * .38, midY = (VH || H) / 2;
-      // スマホは粒の輪もゲージも最後まで見えている画面の真ん中に置く（本物の粒は図の位置に浮かび上がって入れ替わる）
-      const fcx = mobile ? W / 2 : figX, fcy = mobile ? midY : figY;
+      // スマホもパソコンも、粒の輪とゲージは最後まで見えている画面の真ん中に置く（本物の粒は図の位置に浮かび上がって入れ替わる）
+      const fcx = W / 2, fcy = midY;
       const wpp = VIS / H, pk = pulse >= 0 && pulse < 1 ? Math.sin(pulse * Math.PI) : 0;
       const sc = (.72 * fw * wpp) / 2.43, gx = (fcx - W / 2) * wpp, gy = -(fcy - H / 2) * wpp;
       const c = Math.cos(angle), s = Math.sin(angle), A = P.A, D = P.D, L = P.L;
