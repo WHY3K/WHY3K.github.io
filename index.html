@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260916c'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260916d'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -838,10 +838,12 @@ if (!document.documentElement.classList.contains('backnav')) document.documentEl
     /* 高さは固定でなく、パネルの高さに合わせて各行が伸縮（項目が増えても全部が
        1画面に収まる／広い画面では下の max-height までで止まり従来の見た目を保つ） */
     /* 1行の下限。ふつうは 50px だが、画面の縦が低いと（1366×768 など）12行が入りきらず
-       最後の行が切れるので、入る高さまで自動で縮める。220px は見出し・余白・上下の余りぶん、
-       12 は索引の行数（行を足したらここも数え直す） */
-    .link { height: auto; flex: 1 1 0; min-height: min(50px, calc((100dvh - 220px) / 12)); max-height: 74px; font-size: 17.5px; }
-    .link.primary { height: auto; flex: 1 1 0; min-height: min(50px, calc((100dvh - 220px) / 12)); max-height: 74px; font-size: 19px; }
+       最後の行が切れるので、入る高さまで自動で縮める。
+       275px の内訳＝パネルの上端 96px ＋ 見出しと余白 59px ＋ 右下の LIGHT/GLOW ボタンの
+       ぶん 112px ＋ すき間 8px。12 は索引の行数（行を足したらここも数え直す）。
+       これで一番下の行がボタンと重ならない */
+    .link { height: auto; flex: 1 1 0; min-height: min(50px, calc((100dvh - 275px) / 12)); max-height: 74px; font-size: 17.5px; }
+    .link.primary { height: auto; flex: 1 1 0; min-height: min(50px, calc((100dvh - 275px) / 12)); max-height: 74px; font-size: 19px; }
 
     .ticker {
       display: block;
