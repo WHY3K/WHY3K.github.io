@@ -21,7 +21,7 @@
    version.txt（キャッシュしない小さなファイル）と見比べて、古ければ最新を取り直す。
    入場の白幕が出ている間に済むので画面のちらつきにはならない。 */
 (function () {
-  var V = '20260915o'; /* ← 中身を更新したら version.txt と一緒にここも変える */
+  var V = '20260916a'; /* ← 中身を更新したら version.txt と一緒にここも変える */
   /* 取り直した直後のURLは綺麗に戻す（表示だけ。取得済みの中身はそのまま） */
   if (/[?&]v=/.test(location.search)) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
@@ -66,8 +66,7 @@ if (!document.documentElement.classList.contains('backnav')) document.documentEl
   /* 100% のあと：待ち画面の輪とゲージを先に 0.6 秒で消し、紙の幕はあとから 1.2 秒かけて消す（ホームがふわっと浮かび上がる） */
   html.w3k-wait.w3k-show.w3k-reveal .w3k-loader { opacity: 0; pointer-events: none; transition: opacity .6s ease; }
   html.w3k-wait.w3k-reveal .w3k-cover { opacity: 0; pointer-events: none; transition: opacity 1.2s cubic-bezier(.3, .1, .3, 1) .25s; }
-  /* 待っている間は幕の裏のページを描かない（配置は残すので図の位置は測れる）。幕を開ける少し前に戻し、幕の裏で描き終えておく */
-  html.w3k-wait:not(.w3k-unhide) body > :not(.w3k-cover):not(.w3k-loader):not(.w3k-particles) { visibility: hidden; }
+  /* 待ちの間も幕の裏のページは非表示にしない：Safari は非表示の間に始まったCSSの回転（輪の線）を、表示に戻しても止まったまま描く（PCで開いた直後だけ回らなかった） */
 </style>
 <!-- 粒の three.js は自分のサイトに置いた圧縮版。HTML と同時に取りに行かせる -->
 <link rel="modulepreload" href="assets/vendor/three/three.core.min.js">
